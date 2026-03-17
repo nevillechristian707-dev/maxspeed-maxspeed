@@ -12,15 +12,13 @@ import { useMonthYear } from "@/context/month-year-context";
 
 export default function Dashboard() {
   const { selectedYear, selectedMonth, setSelectedYear, setSelectedMonth, dateParams } = useMonthYear();
-  const [period, setPeriod] = useState<"daily" | "monthly">("monthly");
-  
   const currentYear = new Date().getFullYear();
 
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: summary, isLoading: loadingSummary, isError: isErrorSummary, refetch: refetchSummary } = useGetDashboardSummary(dateParams);
-  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, refetch: refetchChart } = useGetDashboardChart({ period });
+  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, refetch: refetchChart } = useGetDashboardChart({});
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -56,11 +54,16 @@ export default function Dashboard() {
   }
 
   // Safe formatting for chart data
-  const formattedChartData = (chartData?.labels || []).map((label, i) => ({
-    name: label || "",
-    Penjualan: Number(chartData?.penjualan?.[i] || 0),
-    Laba: Number(chartData?.laba?.[i] || 0)
-  }));
+  const formattedChartData = (chartData?.labels || []).map((label, i) => {
+    const date = new Date(label);
+    const compactDate = !isNaN(date.getTime()) ? `${date.getDate()}/${date.getMonth() + 1}` : label;
+    return {
+      name: compactDate,
+      fullDate: formatDate(label),
+      Penjualan: Number(chartData?.penjualan?.[i] || 0),
+      Laba: Number(chartData?.laba?.[i] || 0)
+    };
+  });
 
   const StatCard = ({ title, value, icon: Icon, colorClass, subtitle }: any) => (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -182,38 +185,70 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
             <div>
-              <CardTitle className="text-lg">Grafik Penjualan & Laba</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Tren performa toko</p>
+              <CardTitle className="text-lg uppercase font-black tracking-tight">Grafik Harian: Penjualan & Laba</CardTitle>
+              <p className="text-[10px] text-muted-foreground mt-1 font-bold uppercase tracking-widest italic opacity-70">Mencakup semua transaksi (Lunas & Tempo)</p>
             </div>
-            <select 
-              value={period}
-              onChange={(e) => setPeriod(e.target.value as any)}
-              className="bg-secondary border border-border text-xs font-bold rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="daily">Harian</option>
-              <option value="monthly">Bulanan</option>
-            </select>
           </CardHeader>
           <CardContent className="flex-1 pt-6 min-h-[300px] sm:min-h-[400px]">
-            <div className="h-[300px] sm:h-[400px] w-full">
+            <div className="h-[300px] sm:h-[400px] w-full mt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={formattedChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis 
-                    stroke="rgba(255,255,255,0.5)" 
-                    fontSize={11} 
+                <LineChart data={formattedChartData} margin={{ top: 5, right: 10, bottom: 5, left: -15 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="rgba(255,255,255,0.4)" 
+                    fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
-                    tickFormatter={(val) => `Rp ${val / 1000000}M`}
+                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.5)' }}
+                  />
+                  <YAxis 
+                    stroke="rgba(255,255,255,0.4)" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.5)' }}
+                    tickFormatter={(val) => val >= 1000000 ? `${val / 1000000}M` : val >= 1000 ? `${val / 1000}K` : val}
                   />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                    formatter={(value: number) => [formatRupiah(value), ""]}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(5,5,5,0.95)', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 50px -10px rgba(0,0,0,0.8)',
+                      padding: '12px'
+                    }}
+                    labelStyle={{ color: 'hsl(var(--primary))', fontWeight: '900', fontSize: '11px', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                    labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
+                    formatter={(value: number, name: string) => [
+                      <span className="font-black text-white tabular-nums text-xs">{formatRupiah(value)}</span>, 
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-2">{name}</span>
+                    ]}
                   />
-                  <Legend iconType="circle" />
-                  <Line type="monotone" dataKey="Penjualan" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                  <Line type="monotone" dataKey="Laba" stroke="#10b981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                  <Legend 
+                    verticalAlign="top" 
+                    align="right" 
+                    iconType="circle" 
+                    wrapperStyle={{ paddingTop: '0px', paddingBottom: '30px', fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  />
+                  <Line 
+                    name="Penjualan"
+                    type="monotone" 
+                    dataKey="Penjualan" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={4} 
+                    dot={{ r: 3, strokeWidth: 2, fill: 'hsl(var(--background))' }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }} 
+                  />
+                  <Line 
+                    name="Laba"
+                    type="monotone" 
+                    dataKey="Laba" 
+                    stroke="#10b981" 
+                    strokeWidth={4} 
+                    dot={{ r: 3, strokeWidth: 2, fill: 'hsl(var(--background))' }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }} 
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>

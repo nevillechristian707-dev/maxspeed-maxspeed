@@ -42,7 +42,7 @@ router.get("/summary", async (req, res) => {
     const bRows = await db.select().from(biayaTable)
       .where(bConds.length ? and(...bConds) : undefined);
 
-    const totalBiaya = bRows.reduce((s, r) => s + n(r.nilai), 0);
+    const totalBiaya = bRows.reduce((s: number, r: any) => s + n(r.nilai), 0);
     const laba = n(metrics.totalPenjualan) - n(metrics.totalModal) - totalBiaya;
     const labaShared = laba * 0.1;
 
@@ -59,7 +59,7 @@ router.get("/summary", async (req, res) => {
       kreditTotal: n(metrics.kreditTotal),
       kreditBelumCair: n(metrics.kreditBelumCair),
       onlineShopBelumCair: n(metrics.onlineShopBelumCair),
-      biayaItems: bRows.map(r => ({
+      biayaItems: bRows.map((r: any) => ({
         id: r.id,
         tanggal: r.tanggal,
         keterangan: r.keterangan,
@@ -76,24 +76,20 @@ router.get("/chart", async (req, res) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
-    const { period } = req.query;
-    const isMonthly = period !== "daily";
-
-    const format = isMonthly ? "YYYY-MM" : "YYYY-MM-DD";
+    const format = "YYYY-MM-DD";
     const chartData = await db.select({
       label: sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`,
       penjualan: sql<string>`sum(${penjualanTable.total})`,
       modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
     })
     .from(penjualanTable)
-    .where(eq(penjualanTable.statusCair, 'cair'))
     .groupBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`)
     .orderBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`);
 
     return res.json({
-      labels: chartData.map(d => d.label),
-      penjualan: chartData.map(d => n(d.penjualan)),
-      laba: chartData.map(d => n(d.penjualan) - n(d.modal)),
+      labels: chartData.map((d: any) => d.label),
+      penjualan: chartData.map((d: any) => n(d.penjualan)),
+      laba: chartData.map((d: any) => n(d.penjualan) - n(d.modal)),
     });
   } catch (err) {
     console.error(err);
