@@ -74,10 +74,18 @@ export default function MasterBarang() {
   const deleteMutation = useDeleteMasterBarang();
 
   const { data: user } = useGetMe();
-  const canAdd = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Barang'] || []).includes('add');
-  const canEdit = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Barang'] || []).includes('edit');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Barang'] || []).includes('delete');
-  const canExport = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Barang'] || []).includes('export');
+  const checkPermission = (menu: string, action: string) => {
+    const role = String(user?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions[menu] || permissions[menu.toLowerCase()] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('Master Barang', 'add');
+  const canEdit = checkPermission('Master Barang', 'edit');
+  const canDelete = checkPermission('Master Barang', 'delete');
+  const canExport = checkPermission('Master Barang', 'export');
 
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);

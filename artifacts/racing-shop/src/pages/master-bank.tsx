@@ -21,7 +21,7 @@ export default function MasterBank() {
   const deleteMutation = useDeleteMasterBank();
 
   const checkPermission = (menu: string, action: string) => {
-    const role = user?.role?.toLowerCase() || '';
+    const role = String(user?.role || '').toLowerCase();
     if (role.includes('admin') || role.includes('superadmin')) return true;
     const permissions = (user as any)?.permissions || {};
     const perms = permissions[menu] || permissions[menu.toLowerCase()] || [];

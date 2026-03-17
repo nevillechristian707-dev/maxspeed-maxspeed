@@ -15,8 +15,16 @@ export default function MasterOnlineShop() {
   const [form, setForm] = useState({ namaOnlineShop: "" });
 
   const { data: user } = useGetMe();
-  const canAdd = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Online Shop'] || []).includes('add');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Online Shop'] || []).includes('delete');
+  const checkPermission = (action: string) => {
+    const role = String(user?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Master Online Shop'] || permissions['master online shop'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('add');
+  const canDelete = checkPermission('delete');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -98,6 +98,19 @@ export default function Penjualan() {
   const updateMutation = useUpdatePenjualan();
   const deleteMutation = useDeletePenjualan();
 
+  const checkPermission = (action: string) => {
+    const role = String(user?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Penjualan'] || permissions['penjualan'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('add');
+  const canEdit = checkPermission('edit');
+  const canDelete = checkPermission('delete');
+  const canExport = checkPermission('export');
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -279,13 +292,14 @@ export default function Penjualan() {
 
       <div className="space-y-6">
         {/* Form Card (Full Width) */}
-        {(((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Penjualan'] || []).includes(editingId ? 'edit' : 'add')) && (
+        {(editingId ? canEdit : canAdd) && (
+
         <Card id="form-transaksi" className="border-primary/20 shadow-lg shadow-primary/5">
           <CardHeader className="border-b border-border/50 bg-secondary/30 py-3 flex flex-row items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <Plus className="w-5 h-5 text-primary" /> {editingId ? "Revisi Transaksi" : "Transaksi Baru"}
             </CardTitle>
-            {editingId && (
+            {canEdit && editingId && (
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -507,7 +521,8 @@ export default function Penjualan() {
                   <option value="pending" className="bg-card text-foreground">BELUM CAIR</option>
                 </select>
               </div>
-              {(((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Penjualan'] || []).includes('export')) && (
+              {canExport && (
+
                 <div className="flex gap-2">
                   <Button onClick={exportExcel} variant="outline" size="sm" className="bg-emerald-600/5 text-emerald-600 border-emerald-600/20 hover:bg-emerald-600 hover:text-white transition-all font-bold">
                     <Download className="w-4 h-4 mr-2" /> Excel
@@ -569,7 +584,8 @@ export default function Penjualan() {
                     </td>
                     <td className="px-5 py-3 text-center">
                       <div className="flex items-center justify-center gap-2 transition-opacity">
-                        {(((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Penjualan'] || []).includes('edit')) && (
+                        {canEdit && (
+
                           <button 
                             onClick={() => handleEdit(item)} 
                             className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/20 shadow-sm"
@@ -578,7 +594,8 @@ export default function Penjualan() {
                             <Pencil className="w-4 h-4" />
                           </button>
                         )}
-                        {(((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Penjualan'] || []).includes('delete')) && (
+                        {canDelete && (
+
                           <button 
                             onClick={() => setDeleteConfirmId(item.id)} 
                             className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20 shadow-sm"

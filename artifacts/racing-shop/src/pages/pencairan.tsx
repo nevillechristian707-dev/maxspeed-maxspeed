@@ -142,8 +142,16 @@ export default function Pencairan() {
   };
 
   const { data: user } = useGetMe();
-  const canEdit = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Pencairan'] || []).includes('edit');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Pencairan'] || []).includes('delete');
+  const checkPermission = (action: string) => {
+    const role = String(user?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Pencairan'] || permissions['pencairan'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canEdit = checkPermission('edit');
+  const canDelete = checkPermission('delete');
 
   const onlineShopPending = useMemo(() => {
     const items = data?.filter(x => x.status === 'pending' && x.paymentMethod === 'online_shop') || [];
@@ -203,14 +211,23 @@ export default function Pencairan() {
 
   return (
     <Layout>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Wallet className="text-primary" /> Pencairan Dana
-          </h1>
-          <p className="text-muted-foreground mt-1">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
+              <Wallet className="text-primary" /> Pencairan Dana
+            </h1>
+            <p className="text-muted-foreground mt-1">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
+          </div>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Cari transaksi atau platform..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-10 bg-secondary/10 border-none ring-1 ring-border"
+            />
+          </div>
         </div>
-      </div>
 
       <div className="grid grid-cols-1 gap-8">
         {/* Online Shop Section */}

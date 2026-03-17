@@ -52,6 +52,19 @@ export default function UserManagement() {
   const updateRole = useUpdateRole();
   const deleteRole = useDeleteRole();
 
+  // Permissions
+  const checkPermission = (action: string) => {
+    const role = String(me?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (me as any)?.permissions || {};
+    const perms = permissions['Manajemen Pengguna'] || permissions['manajemen pengguna'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('add');
+  const canEdit = checkPermission('edit');
+  const canDelete = checkPermission('delete');
+
   // User Form State
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [userForm, setUserForm] = useState({ username: "", password: "", name: "", role: "" });
@@ -241,6 +254,7 @@ export default function UserManagement() {
         {/* Form Panel */}
         <div className="lg:col-span-1">
           {activeTab === "users" ? (
+            (editingUserId ? canEdit : canAdd) && (
             <Card className="border-primary/20 shadow-lg shadow-primary/5 sticky top-24">
               <CardHeader className="bg-secondary/30 border-b border-border/50">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -283,7 +297,9 @@ export default function UserManagement() {
                 </Button>
               </CardContent>
             </Card>
+            )
           ) : (
+            (editingRoleId ? canEdit : canAdd) && (
             <Card className="border-primary/20 shadow-lg shadow-primary/5 sticky top-24">
               <CardHeader className="bg-secondary/30 border-b border-border/50">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -300,7 +316,7 @@ export default function UserManagement() {
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Role</label>
                   <input value={roleForm.name} onChange={e => setRoleForm({...roleForm, name: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none font-bold" placeholder="Kasir" />
                 </div>
-                               <div className="space-y-3">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Hak Akses / Permissions</label>
                     <div className="flex gap-2">
@@ -345,6 +361,7 @@ export default function UserManagement() {
                 </Button>
               </CardContent>
             </Card>
+            )
           )}
         </div>
 
@@ -393,9 +410,13 @@ export default function UserManagement() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-2">
-                              <button onClick={() => handleEditUser(user)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
+                              {canEdit && (
+                                <button onClick={() => handleEditUser(user)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
+                              )}
                               {me?.id !== user.id ? (
-                                <button onClick={() => handleDeleteUser(user.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-rose-500/20 active:scale-90"><Trash2 className="w-4 h-4" /></button>
+                                canDelete && (
+                                  <button onClick={() => handleDeleteUser(user.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-rose-500/20 active:scale-90"><Trash2 className="w-4 h-4" /></button>
+                                )
                               ) : (
                                 <button disabled title="You cannot delete yourself" className="p-2 text-muted-foreground/30 cursor-not-allowed rounded-xl border border-border/20"><Trash2 className="w-4 h-4 opacity-50" /></button>
                               )}
@@ -460,10 +481,16 @@ export default function UserManagement() {
                           </td>
                           <td className="px-4 py-5">
                             <div className="flex items-center justify-center gap-2">
-                              <button onClick={() => handleCopyRole(role)} title="Copy Template" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all border border-emerald-500/20 active:scale-90"><Copy className="w-4 h-4" /></button>
-                              <button onClick={() => handleEditRole(role)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
+                              {canAdd && (
+                                <button onClick={() => handleCopyRole(role)} title="Copy Template" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all border border-emerald-500/20 active:scale-90"><Copy className="w-4 h-4" /></button>
+                              )}
+                              {canEdit && (
+                                <button onClick={() => handleEditRole(role)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
+                              )}
                                {(role.name.toLowerCase() !== "admin" && role.name.toLowerCase() !== "superadmin") && (
-                                 <button onClick={() => handleDeleteRole(role.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-rose-500/20 active:scale-90"><Trash2 className="w-4 h-4" /></button>
+                                 canDelete && (
+                                   <button onClick={() => handleDeleteRole(role.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all border border-rose-500/20 active:scale-90"><Trash2 className="w-4 h-4" /></button>
+                                 )
                                )}
                             </div>
                           </td>

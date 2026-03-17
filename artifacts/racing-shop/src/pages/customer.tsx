@@ -14,7 +14,7 @@ export default function Customer() {
 
   const { data: user } = useGetMe();
   const checkPermission = (action: string) => {
-    const role = user?.role?.toLowerCase() || '';
+    const role = String(user?.role || '').toLowerCase();
     if (role.includes('admin') || role.includes('superadmin')) return true;
     const permissions = (user as any)?.permissions || {};
     const perms = permissions['Customer'] || permissions['customer'] || [];

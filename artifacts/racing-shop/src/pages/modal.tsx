@@ -18,8 +18,14 @@ export default function Modal() {
 
   const { data, isLoading } = useListModal({ startDate, endDate });
   const { data: user } = useGetMe();
-  const canPrint = ((user as any)?.role === 'admin' || (user as any)?.role === 'Admin' || (user as any)?.role === 'superadmin') || 
-                   ((user as any)?.permissions?.['Modal'] || []).includes('export');
+  const canPrint = (() => {
+    const role = String(user?.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Modal'] || permissions['modal'] || [];
+    return perms.some((p: string) => p.toLowerCase() === 'export');
+  })();
+
 
   return (
     <Layout>
