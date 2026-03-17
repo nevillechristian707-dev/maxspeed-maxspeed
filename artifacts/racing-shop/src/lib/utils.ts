@@ -20,9 +20,9 @@ export function formatDate(dateStr: string | null | undefined): string {
   const date = new Date(dateStr);
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
-    month: "2-digit",
+    month: "long",
     year: "numeric",
-  }).format(date).replace(/\//g, "-");
+  }).format(date);
 }
 
 export function generateKodeTransaksi(): string {

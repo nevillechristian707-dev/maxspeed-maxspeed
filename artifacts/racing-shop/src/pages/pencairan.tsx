@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useListPencairan, useMarkSettled, useListMasterBank, useListTransaksiBank, useDeletePenjualan, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
+import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, cn, getIndonesianPeriodLabel } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard } from "lucide-react";
@@ -509,6 +510,14 @@ export default function Pencairan() {
               </Select>
             </div>
             
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">Tanggal Cair</Label>
+              <DatePicker 
+                date={selectedDate ? new Date(selectedDate) : undefined}
+                onChange={(date) => setSelectedDate(date ? date.toISOString().split('T')[0] : "")}
+              />
+            </div>
+
             {selectedBankInfo && (
               <div className="p-3 bg-secondary/30 rounded-lg border border-border/50 text-xs">
                 <div className="flex justify-between mb-1">

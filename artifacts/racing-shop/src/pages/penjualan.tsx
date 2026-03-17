@@ -12,6 +12,7 @@ import {
   useGetMe
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
+import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, generateKodeTransaksi, cn, getIndonesianPeriodLabel } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -327,7 +328,16 @@ export default function Penjualan() {
                 <div className="space-y-4">
                   <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Tanggal</label>
-                    <input type="date" {...form.register("tanggal")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm" />
+                    <Controller
+                      name="tanggal"
+                      control={form.control}
+                      render={({ field }) => (
+                        <DatePicker 
+                          date={field.value ? new Date(field.value) : undefined}
+                          onChange={(date) => field.onChange(date ? date.toISOString().split('T')[0] : "")}
+                        />
+                      )}
+                    />
                   </div>
                   <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">No Faktur</label>

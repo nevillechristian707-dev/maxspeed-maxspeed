@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useListBiaya, useCreateBiaya, useDeleteBiaya, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
+import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Receipt, Plus, Trash2 } from "lucide-react";
@@ -87,12 +88,9 @@ export default function Biaya() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs text-muted-foreground">Tanggal</label>
-                <input 
-                  type="date" 
-                  required
-                  value={form.tanggal}
-                  onChange={e => setForm({...form, tanggal: e.target.value})}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" 
+                <DatePicker 
+                  date={form.tanggal ? new Date(form.tanggal) : undefined}
+                  onChange={(date) => setForm({...form, tanggal: date ? date.toISOString().split('T')[0] : ""})}
                 />
               </div>
               <div className="space-y-1.5">
