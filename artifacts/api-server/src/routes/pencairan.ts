@@ -44,20 +44,19 @@ router.get("/", async (req, res) => {
         ));
     }
 
-    const rows = await db.select().from(penjualanTable)
-      .where(and(...conditions));
+    const rows = await db.select({
+        ...penjualanTable,
+        totalPaid: sql<string>`coalesce(sum(${transaksiBank.nilai}), 0)`
+      })
+      .from(penjualanTable)
+      .leftJoin(transaksiBank, eq(penjualanTable.id, transaksiBank.penjualanId))
+      .where(and(...conditions))
+      .groupBy(penjualanTable.id);
     
-    // For each row, get the total paid from transaksi_bank
-    const results = [];
-    for (const row of rows) {
-        const txs = await db.select({ total: sql<string>`sum(nilai)` })
-          .from(transaksiBank)
-          .where(eq(transaksiBank.penjualanId, row.id));
-        
-        const totalPaid = parseFloat(txs[0]?.total || "0");
+    const results = rows.map((row: any) => {
+        const totalPaid = parseFloat(row.totalPaid);
         const totalAmount = row.paymentMethod === "online_shop" ? toNumber(row.nilaiOnlineShop) : toNumber(row.nilaiKredit);
-        
-        results.push({
+        return {
             id: row.id,
             tanggal: row.tanggal,
             kodeTransaksi: row.kodeTransaksi,
@@ -68,11 +67,11 @@ router.get("/", async (req, res) => {
             namaCustomer: row.namaCustomer,
             totalAmount: totalAmount,
             totalPaid: totalPaid,
-            nilai: totalAmount - totalPaid, // Remaining balance for UI
+            nilai: totalAmount - totalPaid,
             status: row.statusCair ?? "pending",
             tanggalCair: row.tanggalCair,
-        });
-    }
+        };
+    });
       
     return res.json(results);
   } catch (err) {

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { getDb, penjualanTable, biayaTable } from "../../../../lib/db/src/index";
-import { gte, lte, and, sql, desc } from "drizzle-orm";
+import { gte, lte, and, sql, eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -9,8 +9,8 @@ function n(val: unknown): number {
 }
 
 router.get("/summary", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { startDate, endDate } = req.query;
     const pConds: any[] = [];
@@ -24,42 +24,41 @@ router.get("/summary", async (req, res) => {
       bConds.push(lte(biayaTable.tanggal, String(endDate)));
     }
 
-    const pRows = await db.select().from(penjualanTable)
-      .where(pConds.length ? and(...pConds) : undefined);
+    // Single aggregate query for sales metrics
+    const pStats = await db.select({
+      totalPenjualan: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.total} else '0' end)`,
+      totalModal: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.hargaBeli} * ${penjualanTable.qty} else 0 end)`,
+      totalTransaksi: sql<string>`count(case when ${penjualanTable.statusCair} = 'cair' then 1 else null end)`,
+      cashTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'cash' then ${penjualanTable.total} else '0' end)`,
+      bankTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'bank' then ${penjualanTable.total} else '0' end)`,
+      onlineShopTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' then ${penjualanTable.total} else '0' end)`,
+      onlineShopBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then ${penjualanTable.total} else '0' end)`,
+      kreditTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' then ${penjualanTable.total} else '0' end)`,
+      kreditBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then ${penjualanTable.total} else '0' end)`,
+    }).from(penjualanTable).where(pConds.length ? and(...pConds) : undefined);
+
+    const metrics = pStats[0];
+
     const bRows = await db.select().from(biayaTable)
       .where(bConds.length ? and(...bConds) : undefined);
 
-    let totalPenjualan = 0, totalModal = 0, cashTotal = 0, bankTotal = 0, onlineShopTotal = 0, kreditTotal = 0;
-    let kreditBelumCair = 0, onlineShopBelumCair = 0;
-    let totalTransaksiSettled = 0;
-
-    for (const row of pRows) {
-      if (row.statusCair === "cair") {
-        totalPenjualan += n(row.total);
-        totalModal += n(row.hargaBeli) * n(row.qty);
-        totalTransaksiSettled++;
-      }
-      
-      if (row.paymentMethod === "cash") cashTotal += n(row.total);
-      if (row.paymentMethod === "bank") bankTotal += n(row.total);
-      if (row.paymentMethod === "online_shop") {
-        onlineShopTotal += n(row.total);
-        if (row.statusCair === "pending") onlineShopBelumCair += n(row.total);
-      }
-      if (row.paymentMethod === "kredit") {
-        kreditTotal += n(row.total);
-        if (row.statusCair === "pending") kreditBelumCair += n(row.total);
-      }
-    }
-
     const totalBiaya = bRows.reduce((s, r) => s + n(r.nilai), 0);
-    const laba = totalPenjualan - totalModal - totalBiaya;
+    const laba = n(metrics.totalPenjualan) - n(metrics.totalModal) - totalBiaya;
     const labaShared = laba * 0.1;
 
     return res.json({
-      totalPenjualan, totalModal, totalBiaya, laba, labaShared,
-      totalTransaksi: totalTransaksiSettled, cashTotal, bankTotal, onlineShopTotal, kreditTotal,
-      kreditBelumCair, onlineShopBelumCair,
+      totalPenjualan: n(metrics.totalPenjualan),
+      totalModal: n(metrics.totalModal),
+      totalBiaya,
+      laba,
+      labaShared,
+      totalTransaksi: parseInt(metrics.totalTransaksi || "0"),
+      cashTotal: n(metrics.cashTotal),
+      bankTotal: n(metrics.bankTotal),
+      onlineShopTotal: n(metrics.onlineShopTotal),
+      kreditTotal: n(metrics.kreditTotal),
+      kreditBelumCair: n(metrics.kreditBelumCair),
+      onlineShopBelumCair: n(metrics.onlineShopBelumCair),
       biayaItems: bRows.map(r => ({
         id: r.id,
         tanggal: r.tanggal,
@@ -74,32 +73,27 @@ router.get("/summary", async (req, res) => {
 });
 
 router.get("/chart", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { period } = req.query;
     const isMonthly = period !== "daily";
 
-    const rows = await db.select().from(penjualanTable).orderBy(penjualanTable.tanggal);
-    const map = new Map<string, { penjualan: number; modal: number }>();
+    const format = isMonthly ? "YYYY-MM" : "YYYY-MM-DD";
+    const chartData = await db.select({
+      label: sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`,
+      penjualan: sql<string>`sum(${penjualanTable.total})`,
+      modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
+    })
+    .from(penjualanTable)
+    .where(eq(penjualanTable.statusCair, 'cair'))
+    .groupBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`)
+    .orderBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`);
 
-    for (const row of rows) {
-      if (row.statusCair !== "cair") continue;
-      
-      const key = isMonthly
-        ? row.tanggal.substring(0, 7)
-        : row.tanggal.substring(0, 10);
-      const existing = map.get(key) ?? { penjualan: 0, modal: 0 };
-      existing.penjualan += n(row.total);
-      existing.modal += n(row.hargaBeli) * n(row.qty);
-      map.set(key, existing);
-    }
-
-    const sorted = Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
     return res.json({
-      labels: sorted.map(([k]) => k),
-      penjualan: sorted.map(([, v]) => v.penjualan),
-      laba: sorted.map(([, v]) => v.penjualan - v.modal),
+      labels: chartData.map(d => d.label),
+      penjualan: chartData.map(d => n(d.penjualan)),
+      laba: chartData.map(d => n(d.penjualan) - n(d.modal)),
     });
   } catch (err) {
     console.error(err);

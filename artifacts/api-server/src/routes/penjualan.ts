@@ -44,22 +44,17 @@ router.get("/", async (req, res) => {
        // but for now let's keep the main logic
     }
 
-    const rows = await db.select().from(penjualanTable)
+    const rows = await db.select({
+        ...penjualanTable,
+        totalPaid: sql<string>`coalesce(sum(${transaksiBank.nilai}), 0)`
+      })
+      .from(penjualanTable)
+      .leftJoin(transaksiBank, eq(penjualanTable.id, transaksiBank.penjualanId))
       .where(conditions.length ? and(...conditions) : undefined)
+      .groupBy(penjualanTable.id)
       .orderBy(desc(penjualanTable.tanggal), desc(penjualanTable.nomor));
     
-    const results = [];
-    for (const row of rows) {
-        // Find total paid in transaksi_bank
-        const txs = await db.select({ total: sql<string>`sum(nilai)` })
-          .from(transaksiBank)
-          .where(eq(transaksiBank.penjualanId, row.id));
-        
-        const totalPaid = parseFloat(txs[0]?.total || "0");
-        results.push(toDto({ ...row, totalPaid }));
-    }
-
-    return res.json(results);
+    return res.json(rows.map((row: any) => toDto({ ...row, totalPaid: parseFloat(row.totalPaid) })));
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });

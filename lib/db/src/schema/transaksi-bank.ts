@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, date, numeric, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, date, numeric, integer, index } from "drizzle-orm/pg-core";
 
 export const transaksiBank = pgTable("transaksi_bank", {
   id: serial("id").primaryKey(),
@@ -9,4 +9,8 @@ export const transaksiBank = pgTable("transaksi_bank", {
   namaBank: varchar("nama_bank", { length: 100 }).notNull(),
   rekeningBank: varchar("rekening_bank", { length: 100 }).notNull(),
   penjualanId: integer("penjualan_id").notNull(),
+}, (table) => {
+  return [
+    index("idx_transaksi_bank_penjualan_id").on(table.penjualanId),
+  ];
 });
