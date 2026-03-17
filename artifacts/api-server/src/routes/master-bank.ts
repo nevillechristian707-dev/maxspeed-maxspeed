@@ -6,9 +6,12 @@ const router: IRouter = Router();
 
 router.get("/", async (_req, res) => {
   try {
+    const db = getDb();
+    if (!db) return res.status(500).json({ error: "Database not initialized" });
     const rows = await db.select().from(masterBankTable).orderBy(masterBankTable.namaBank);
-    return res.json(rows.map(r => ({ id: r.id, namaBank: r.namaBank, nomorRekening: r.nomorRekening, keterangan: r.keterangan })));
+    return res.json(rows.map((r: any) => ({ id: r.id, namaBank: r.namaBank, nomorRekening: r.nomorRekening, keterangan: r.keterangan })));
   } catch (err) {
+    console.error("GET Master Bank Error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
