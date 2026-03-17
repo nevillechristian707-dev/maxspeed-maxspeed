@@ -19,8 +19,9 @@ import Laporan from "./pages/laporan";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
-      staleTime: 30_000,
+      retry: 2,
+      staleTime: 60_000, // 1 minute
+      refetchOnWindowFocus: false,
     },
   },
 });

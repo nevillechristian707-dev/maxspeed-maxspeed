@@ -85,42 +85,84 @@ export default function Modal() {
             <span className="text-[10px] bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{data?.items.length || 0} DATA</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
-              <tr>
-                <th className="px-6 py-4 font-black tracking-widest">Tgl</th>
-                <th className="px-4 py-4 font-black tracking-widest">TRX</th>
-                <th className="px-4 py-4 font-black tracking-widest">Barang</th>
-                <th className="px-4 py-4 text-center font-black tracking-widest">Qty</th>
-                <th className="px-4 py-4 text-right font-black tracking-widest">H. Beli</th>
-                <th className="px-4 py-4 text-right font-black tracking-widest text-orange-500">Tot Modal</th>
-                <th className="px-4 py-4 text-right font-black tracking-widest">H. Jual</th>
-                <th className="px-4 py-4 text-right font-black tracking-widest text-blue-500">Tot Jual</th>
-                <th className="px-4 py-4 text-right font-black tracking-widest text-emerald-500">Laba</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/10">
-              {isLoading ? (
-                 <tr><td colSpan={9} className="text-center py-20 text-muted-foreground italic font-medium">Memuat data analisa...</td></tr>
-              ) : data?.items.map(item => {
-                const laba = item.total - item.totalModal;
-                return (
-                  <tr key={item.id} className="hover:bg-primary/[0.03] transition-colors group/row">
-                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{formatDate(item.tanggal)}</td>
-                    <td className="px-4 py-4 font-mono text-[10px] text-primary font-black tracking-tighter">{item.kodeTransaksi}</td>
-                    <td className="px-4 py-4 font-bold text-foreground group-hover/row:text-primary transition-colors">{item.namaBarang}</td>
-                    <td className="px-4 py-4 text-center font-black tabular-nums">{item.qty}</td>
-                    <td className="px-4 py-4 text-right text-muted-foreground font-medium tabular-nums">{formatRupiah(item.hargaBeli)}</td>
-                    <td className="px-4 py-4 text-right font-black text-orange-500/80 tabular-nums">{formatRupiah(item.totalModal)}</td>
-                    <td className="px-4 py-4 text-right text-muted-foreground font-medium tabular-nums">{formatRupiah(item.harga)}</td>
-                    <td className="px-4 py-4 text-right font-black text-blue-500/80 tabular-nums">{formatRupiah(item.total)}</td>
-                    <td className="px-4 py-4 text-right font-black text-emerald-500 tabular-nums">{formatRupiah(laba)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <CardContent className="p-0">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                <tr>
+                  <th className="px-6 py-4 font-black tracking-widest uppercase">Tgl</th>
+                  <th className="px-4 py-4 font-black tracking-widest uppercase">TRX</th>
+                  <th className="px-4 py-4 font-black tracking-widest uppercase">Barang</th>
+                  <th className="px-4 py-4 text-center font-black tracking-widest uppercase">Qty</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-orange-500 uppercase">Tot Modal</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-blue-500 uppercase">Tot Jual</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-emerald-500 uppercase">Laba</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/10">
+                {isLoading ? (
+                  <tr><td colSpan={7} className="text-center py-20 text-muted-foreground italic font-medium">Memuat data analisa...</td></tr>
+                ) : data?.items.length === 0 ? (
+                  <tr><td colSpan={7} className="text-center py-20 text-muted-foreground italic font-medium uppercase font-black tracking-tighter opacity-30">Belum ada data pada periode ini.</td></tr>
+                ) : data?.items.map(item => {
+                  const laba = item.total - item.totalModal;
+                  return (
+                    <tr key={item.id} className="hover:bg-primary/[0.03] transition-colors group/row">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-4 font-mono text-[10px] text-primary font-black tracking-tighter">{item.kodeTransaksi}</td>
+                      <td className="px-4 py-4 font-bold text-foreground group-hover/row:text-primary transition-colors">{item.namaBarang}</td>
+                      <td className="px-4 py-4 text-center font-black tabular-nums">{item.qty}</td>
+                      <td className="px-4 py-4 text-right font-black text-orange-500/80 tabular-nums">{formatRupiah(item.totalModal)}</td>
+                      <td className="px-4 py-4 text-right font-black text-blue-500/80 tabular-nums">{formatRupiah(item.total)}</td>
+                      <td className="px-4 py-4 text-right font-black text-emerald-500 tabular-nums">{formatRupiah(laba)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card List */}
+          <div className="md:hidden divide-y divide-border/20 p-2">
+            {isLoading ? (
+               <div className="text-center py-20 text-muted-foreground animate-pulse font-black uppercase tracking-widest text-xs">Sedang Menganalisa...</div>
+            ) : data?.items.length === 0 ? (
+               <div className="text-center py-10 text-muted-foreground italic font-black uppercase tracking-widest text-xs opacity-50">Tidak ada rincian data.</div>
+            ) : data?.items.map(item => {
+              const laba = item.total - item.totalModal;
+              return (
+                <div key={item.id} className="p-4 bg-card/60 my-2 rounded-2xl border border-border/20 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-0.5">
+                       <div className="text-[10px] font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
+                       <div className="text-[9px] font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
+                    </div>
+                    <div className="text-right">
+                       <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Profit</div>
+                       <div className="text-xs font-black text-emerald-500 whitespace-nowrap">{formatRupiah(laba)}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="px-3 py-2 bg-secondary/30 rounded-lg border border-border/10">
+                     <div className="text-xs font-black text-foreground line-clamp-2 leading-tight">{item.namaBarang}</div>
+                     <div className="text-[9px] font-black text-primary/80 mt-1 uppercase tracking-widest">{item.qty} Unit</div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                     <div className="bg-orange-500/5 p-2 rounded-xl border border-orange-500/10">
+                        <div className="text-[8px] font-black text-orange-400 uppercase tracking-widest">Modal Pokok</div>
+                        <div className="text-xs font-black text-orange-500">{formatRupiah(item.totalModal)}</div>
+                     </div>
+                     <div className="bg-blue-500/5 p-2 rounded-xl border border-blue-500/10">
+                        <div className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Penjualan</div>
+                        <div className="text-xs font-black text-blue-500">{formatRupiah(item.total)}</div>
+                     </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
     </Layout>
