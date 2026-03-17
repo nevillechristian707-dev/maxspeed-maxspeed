@@ -1,7 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import { build as esbuild } from "esbuild";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp, mkdir } from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,6 +75,18 @@ async function buildAll() {
     external: [...externals, ...builtins],
     logLevel: "info",
   });
+
+  console.log("copying frontend files...");
+  const frontendSource = path.resolve(__dirname, "..", "racing-shop", "dist", "public");
+  const frontendDest = path.resolve(distDir, "public");
+  
+  try {
+    await mkdir(frontendDest, { recursive: true });
+    await cp(frontendSource, frontendDest, { recursive: true });
+    console.log("frontend files copied successfully.");
+  } catch (err) {
+    console.warn("Note: Frontend files not found at expected path. Skipping copy.", err);
+  }
 }
 
 buildAll().catch((err) => {

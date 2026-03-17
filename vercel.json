@@ -7,9 +7,12 @@
       "source": "/api/:path*",
       "destination": "https://maxspeed-maxspeed-production.up.railway.app/api/:path*"
     },
+    { "handle": "filesystem" },
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
