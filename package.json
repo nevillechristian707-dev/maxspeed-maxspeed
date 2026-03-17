@@ -5,9 +5,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/andikubusho/maxspeed.git"
+    "url": "https://github.com/nevillechristian707-dev/maxspeed-maxspeed.git"
   },
-  "homepage": "https://github.com/andikubusho/maxspeed",
+  "homepage": "https://github.com/nevillechristian707-dev/maxspeed-maxspeed",
   "scripts": {
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "dev": "pnpm -r --filter \"@workspace/api-server\" --filter \"@workspace/racing-shop\" dev",

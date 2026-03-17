@@ -26,8 +26,13 @@ app.get("/api/debug-db", (req, res) => {
   });
 });
 
+// Parse CORS_ORIGIN - supports comma-separated values e.g. "https://app.vercel.app,http://localhost:3000"
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim())
+  : true; // Allow all origins in development
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || true,
+  origin: corsOrigin,
   credentials: true,
 }));
 app.use(express.json({ limit: "500mb" }));

@@ -1,4 +1,4 @@
-const BACKEND = "https://maxspeed-api.fly.dev";
+const BACKEND = process.env.BACKEND_URL || "https://your-railway-app.railway.app";
 
 export const onRequest: PagesFunction = async (context) => {
   const url = new URL(context.request.url);
