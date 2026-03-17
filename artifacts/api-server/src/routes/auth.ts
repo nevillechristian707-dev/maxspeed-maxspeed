@@ -52,16 +52,33 @@ router.get("/me", async (req, res) => {
     if (!db) {
       return res.status(500).json({ error: "Internal Server Error", message: "Database not ready." });
     }
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, userId));
-    const user = users[0];
+
+    // Import rolesTable dynamically or add it to imports at the top
+    const { rolesTable } = await import("../../../../lib/db/src/index");
+
+    const userWithPermissions = await db.select({
+      id: usersTable.id,
+      username: usersTable.username,
+      name: usersTable.name,
+      role: usersTable.role,
+      permissions: rolesTable.permissions,
+    })
+    .from(usersTable)
+    .leftJoin(rolesTable, eq(usersTable.role, rolesTable.name))
+    .where(eq(usersTable.id, userId))
+    .limit(1);
+
+    const user = userWithPermissions[0];
     if (!user) {
       return res.status(401).json({ error: "Unauthorized", message: "User not found" });
     }
-    return res.json({ id: user.id, username: user.username, name: user.name, role: user.role });
+    
+    return res.json(user);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error", message: "Failed to get user" });
   }
 });
+
 
 export default router;
