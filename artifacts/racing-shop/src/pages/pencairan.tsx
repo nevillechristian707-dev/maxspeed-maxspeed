@@ -227,6 +227,12 @@ export default function Pencairan() {
       }));
   }, [bankTransactions]);
 
+  const currentInstallments = useMemo(() => {
+    if (!itemToSettle || !bankTransactions) return [];
+    return bankTransactions.filter(tx => tx.penjualanId === itemToSettle)
+      .sort((a, b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime());
+  }, [itemToSettle, bankTransactions]);
+
   return (
     <Layout>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -639,6 +645,27 @@ export default function Pencairan() {
                 onChange={(date) => setSelectedDate(formatDateToYYYYMMDD(date))}
               />
             </div>
+
+            {currentInstallments.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Riwayat Pembayaran Sebelumnya</Label>
+                <div className="max-h-[120px] overflow-y-auto space-y-1.5 p-2 bg-secondary/10 rounded-xl border border-border/10">
+                  {currentInstallments.map((tx: any, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center text-[10px] bg-card/60 p-2 rounded-lg border border-border/5">
+                      <div className="flex flex-col">
+                        <span className="font-black text-foreground">{formatDate(tx.tanggalCair)}</span>
+                        <span className="text-[8px] text-muted-foreground uppercase">{tx.namaBank}</span>
+                      </div>
+                      <span className="font-black text-emerald-500 tabular-nums">{formatRupiah(tx.nilai)}</span>
+                    </div>
+                  ))}
+                  <div className="pt-1.5 mt-1 border-t border-border/20 flex justify-between items-center px-1">
+                    <span className="text-[9px] font-black text-muted-foreground uppercase">Total Terbayar</span>
+                    <span className="text-[11px] font-black text-emerald-600">{formatRupiah(currentInstallments.reduce((s: number, c: any) => s + Number(c.nilai), 0))}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {!isBulkSettle && (
               <div className="space-y-2">
