@@ -106,8 +106,9 @@ app.use("/api", router);
 app.use(router);
 
 const frontendPath = process.env.NODE_ENV === "production"
-  ? path.resolve(__dirname, "../public")
+  ? path.join(__dirname, "public")
   : path.resolve(__dirname, "../../racing-shop/dist/public");
+
 app.use(express.static(frontendPath));
 
 // Fallback for SPA

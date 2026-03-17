@@ -306,13 +306,11 @@ export async function customFetch<T = unknown>(
   }
 
   const url = resolveUrl(input);
-  const finalUrl = (url.startsWith("/api") && !url.startsWith("http"))
-    ? `https://maxspeed-maxspeed-production.up.railway.app${url}`
-    : url;
 
-  const requestInfo = { method, url: finalUrl };
+  const requestInfo = { method, url };
 
-  const response = await fetch(finalUrl, { ...init, method, headers, credentials: "include" });
+  const response = await fetch(input, { ...init, method, headers, credentials: "include" });
+
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
