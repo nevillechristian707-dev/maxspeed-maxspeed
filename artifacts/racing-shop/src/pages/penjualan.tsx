@@ -283,10 +283,10 @@ export default function Penjualan() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <ShoppingCart className="text-primary" /> Input Penjualan
+          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2 md:gap-3">
+            <ShoppingCart className="text-primary w-6 h-6 md:w-8 md:h-8" /> Input Penjualan
           </h1>
-          <p className="text-muted-foreground mt-1">Catat transaksi penjualan baru dengan cepat.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Catat transaksi penjualan baru dengan cepat.</p>
         </div>
       </div>
 
@@ -320,7 +320,7 @@ export default function Penjualan() {
               </Button>
             )}
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="p-4 md:p-6">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Basic Group */}
@@ -501,7 +501,7 @@ export default function Penjualan() {
 
         {/* List Card (Full Width) */}
         <Card className="border-border/50 shadow-xl shadow-muted/5 overflow-hidden">
-          <CardHeader className="border-b border-border/50 flex flex-row items-center justify-between py-4 bg-muted/20">
+          <CardHeader className="border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between py-4 bg-muted/20 gap-4">
             <div>
               <CardTitle className="text-lg flex items-center gap-2 uppercase tracking-tight font-black">
                 <FileBarChart className="w-5 h-5 text-muted-foreground" /> Daftar Penjualan
@@ -534,7 +534,7 @@ export default function Penjualan() {
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
+          <CardContent className="p-0 table-container mobile-scroll-hint">
             <table className="w-full text-xs text-left border-collapse">
               <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                 <tr>

@@ -1,0 +1,5 @@
+Tanggal,No Faktur,Kode Barang,Harga Jual,Qty,Metode Pembayaran,Nama Bank,Online Shop,Customer
+2026-03-17,INV-001,BD-001,150000,1,cash,,,
+2026-03-17,INV-002,BD-002,200000,2,bank,BCA,,
+2026-03-17,,BD-003,75000,1,online_shop,,SHOPEE,
+2026-03-17,INV-004,BD-001,150000,1,kredit,,,PELANGGAN UMUM

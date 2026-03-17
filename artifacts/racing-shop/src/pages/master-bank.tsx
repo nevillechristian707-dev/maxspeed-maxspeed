@@ -83,10 +83,10 @@ export default function MasterBank() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold flex items-center gap-3">
-            <Landmark className="text-primary"/> Master Bank
+          <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-2 md:gap-3">
+            <Landmark className="text-primary w-6 h-6 md:w-8 md:h-8"/> Master Bank
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Kelola data perbankan dan lihat riwayat dana masuk.</p>
+          <p className="text-muted-foreground mt-1 text-xs md:text-sm">Kelola data perbankan dan lihat riwayat dana masuk.</p>
         </div>
         
         <div className="relative w-full md:w-64">
@@ -179,7 +179,7 @@ export default function MasterBank() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-grow">
+            <CardContent className="p-0 table-container mobile-scroll-hint flex-grow">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
                   <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/20 border-b border-border/30">

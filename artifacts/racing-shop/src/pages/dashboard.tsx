@@ -75,8 +75,8 @@ export default function Dashboard() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-4xl font-display font-bold text-foreground tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Ringkasan performa finansial Max Speed.</p>
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Ringkasan performa finansial Max Speed.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 bg-secondary/30 p-2 rounded-2xl border border-border/50">
@@ -179,7 +179,7 @@ export default function Dashboard() {
             <CardTitle className="text-lg">Metode Pembayaran</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">Distribusi nilai transaksi</p>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="p-4 md:p-6 space-y-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="flex items-center gap-2 font-medium"><DollarSign className="w-4 h-4 text-emerald-500"/> Cash</span>

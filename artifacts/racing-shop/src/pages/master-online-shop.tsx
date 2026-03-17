@@ -35,7 +35,11 @@ export default function MasterOnlineShop() {
 
   return (
     <Layout>
-      <div className="mb-8"><h1 className="text-3xl font-display font-bold flex items-center gap-3"><Store className="text-primary"/> Master Online Shop</h1></div>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-2 md:gap-3">
+          <Store className="text-primary w-6 h-6 md:w-8 md:h-8"/> Master Online Shop
+        </h1>
+      </div>
       <div className="grid md:grid-cols-3 gap-6">
         {canAdd && (
         <Card className="h-fit"><CardHeader><CardTitle>Add OS</CardTitle></CardHeader>
