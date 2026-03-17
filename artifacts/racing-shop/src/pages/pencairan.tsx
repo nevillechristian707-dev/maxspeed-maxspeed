@@ -542,6 +542,7 @@ export default function Pencairan() {
                     type="number"
                     value={nilaiPembayaran}
                     onChange={e => setNilaiPembayaran(e.target.value)}
+                    onFocus={() => { if (nilaiPembayaran === "0") setNilaiPembayaran(""); }}
                     className="pl-10 font-bold text-emerald-600"
                   />
                 </div>

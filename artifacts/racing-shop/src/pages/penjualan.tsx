@@ -415,7 +415,13 @@ export default function Penjualan() {
                     </div>
                     <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
                       <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Qty</label>
-                      <input type="number" min="1" {...form.register("qty")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm font-bold" />
+                      <input 
+                        type="number" 
+                        min="1" 
+                        {...form.register("qty")} 
+                        onFocus={(e) => { if (form.getValues("qty") === 0) form.setValue("qty", "" as any); }}
+                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm font-bold" 
+                      />
                     </div>
                   </div>
                   
@@ -435,7 +441,12 @@ export default function Penjualan() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
                       <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Harga Satuan (Rp)</label>
-                      <input type="number" {...form.register("harga")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm font-bold text-primary" />
+                      <input 
+                        type="number" 
+                        {...form.register("harga")} 
+                        onFocus={(e) => { if (form.getValues("harga") === 0) form.setValue("harga", "" as any); }}
+                        className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm font-bold text-primary" 
+                      />
                     </div>
                     <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 flex flex-col justify-center">
                       <span className="text-[9px] font-black uppercase text-primary/60 tracking-widest leading-tight">Total Penjualan</span>

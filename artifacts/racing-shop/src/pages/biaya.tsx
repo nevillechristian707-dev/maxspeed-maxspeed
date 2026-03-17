@@ -112,6 +112,7 @@ export default function Biaya() {
                   min="0"
                   value={form.nilai}
                   onChange={e => setForm({...form, nilai: e.target.value})}
+                  onFocus={() => { if (form.nilai === "0") setForm({...form, nilai: ""}); }}
                   className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" 
                 />
               </div>
