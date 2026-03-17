@@ -101,27 +101,38 @@ if (process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
-// Mount router both with and without /api prefix to handle Vercel rewrite variability
+// Mount API router strictly under /api prefix
 app.use("/api", router);
-app.use(router);
 
+// Static files (frontend asset)
 const frontendPath = process.env.NODE_ENV === "production"
   ? path.join(__dirname, "public")
   : path.resolve(__dirname, "../../racing-shop/dist/public");
 
 app.use(express.static(frontendPath));
 
-// Fallback for SPA
+// Fallback for SPA (Handle direct navigation & refresh)
 app.use((req, res, next) => {
-  // Only serve index.html for GET requests that don't match /api and don't look like file requests (contain a dot)
-  const isApi = req.path.startsWith("/api");
-  const isFile = req.path.includes(".");
+  // Never serve index.html for API requests
+  if (req.path.startsWith("/api")) {
+    return next();
+  }
   
-  if (req.method === "GET" && !isApi && !isFile) {
+  // Skip file requests (css, js, png, etc) that should have been handled by express.static
+  if (req.path.includes(".")) {
+    return next();
+  }
+  
+  // For all other GET requests, serve index.html to allow client-side routing
+  if (req.method === "GET") {
     return res.sendFile(path.join(frontendPath, "index.html"), (err) => {
-      if (err) next();
+      if (err) {
+        console.error("SPA Fallback Error:", err);
+        next();
+      }
     });
   }
+  
   next();
 });
 

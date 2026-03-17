@@ -11,11 +11,23 @@ import * as XLSX from "xlsx";
 const TEMPLATE_COLUMNS = ["Kode Barang", "Nama Barang", "Brand", "Supplier", "Harga Beli", "Harga Jual"];
 const COL_MAP: Record<string, string> = {
   "kode barang": "kodeBarang",
+  "kode": "kodeBarang",
+  "sku": "kodeBarang",
   "nama barang": "namaBarang",
+  "nama": "namaBarang",
+  "item name": "namaBarang",
   "brand": "brand",
+  "merk": "brand",
   "supplier": "supplier",
+  "vendor": "supplier",
   "harga beli": "hargaBeli",
+  "h beli": "hargaBeli",
+  "hbeli": "hargaBeli",
+  "buy price": "hargaBeli",
   "harga jual": "hargaJual",
+  "h jual": "hargaJual",
+  "hjual": "hargaJual",
+  "sell price": "hargaJual",
 };
 
 function parseNumeric(val: any): number {
@@ -49,20 +61,45 @@ function parseNumeric(val: any): number {
 function parseRowsToItems(rows: any[][]): any[] {
   if (!rows.length) return [];
   const header = rows[0].map((h: any) => String(h ?? "").toLowerCase().trim());
+  
+  // Find which column index maps to which key
+  const mapping: Record<string, number> = {};
+  header.forEach((h, i) => {
+    const key = COL_MAP[h];
+    if (key) mapping[key] = i;
+  });
+
+  // If no columns mapped, try to guess by order if it looks like our standard format
+  const keys = Object.values(mapping);
+  if (keys.length < 2) {
+    // If we only found 0 or 1 mapping, maybe it's the standard order without headers or with unknown headers
+    return rows.map(r => ({
+      kodeBarang: String(r[0] ?? "").trim(),
+      namaBarang: String(r[1] ?? "").trim(),
+      brand: String(r[2] ?? "").trim(),
+      supplier: String(r[3] ?? "-").trim(),
+      hargaBeli: parseNumeric(r[4]),
+      hargaJual: parseNumeric(r[5]),
+    })).filter(item => item.kodeBarang && item.namaBarang);
+  }
+
   return rows.slice(1).filter(r => r.some(v => v !== undefined && v !== null && v !== "")).map(r => {
     const obj: any = {};
-    header.forEach((h, i) => {
-      const key = COL_MAP[h];
-      if (key) {
-        if (key === "hargaBeli" || key === "hargaJual") {
-          obj[key] = parseNumeric(r[i]);
-        } else {
-          obj[key] = r[i] ?? "";
-        }
+    Object.keys(mapping).forEach(key => {
+      const idx = mapping[key];
+      const val = r[idx];
+      if (key === "hargaBeli" || key === "hargaJual") {
+        obj[key] = parseNumeric(val);
+      } else {
+        obj[key] = String(val ?? "").trim();
       }
     });
+    // Fill defaults
+    if (!obj.supplier) obj.supplier = "-";
+    if (obj.hargaBeli === undefined) obj.hargaBeli = 0;
+    if (obj.hargaJual === undefined) obj.hargaJual = 0;
     return obj;
-  });
+  }).filter(item => item.kodeBarang && item.namaBarang);
 }
 
 export default function MasterBarang() {
@@ -183,19 +220,20 @@ export default function MasterBarang() {
   const parsePaste = () => {
     const lines = pasteText.trim().split("\n").filter(l => l.trim());
     if (!lines.length) { toast({ title: "Data kosong", variant: "destructive" }); return; }
-    const rows: any[][] = lines.map(l => l.split("\t").map(c => c.trim()));
-    // detect if first row is header
-    const firstLower = rows[0].map(c => c.toLowerCase());
-    const hasHeader = firstLower.some(c => Object.keys(COL_MAP).includes(c));
-    const items = hasHeader ? parseRowsToItems(rows) : rows.map(r => ({
-      kodeBarang: r[0] ?? "",
-      namaBarang: r[1] ?? "",
-      brand: r[2] ?? "",
-      supplier: r[3] ?? "-",
-      hargaBeli: parseNumeric(r[4]),
-      hargaJual: parseNumeric(r[5]),
-    }));
-    if (!items.length) { toast({ title: "Tidak ada data valid", variant: "destructive" }); return; }
+    
+    // Split by tab or semicolon (common in different locales)
+    const rows: any[][] = lines.map(l => {
+      if (l.includes("\t")) return l.split("\t").map(c => c.trim());
+      if (l.includes(";")) return l.split(";").map(c => c.trim());
+      return [l.trim()]; // fallback
+    });
+
+    const items = parseRowsToItems(rows);
+    
+    if (!items.length) { 
+      toast({ title: "Tidak ada data valid", description: "Pastikan format kolom sesuai: Kode, Nama, Brand, Supplier, Harga Beli, Harga Jual", variant: "destructive" }); 
+      return; 
+    }
     setPreviewItems(items);
     setImportResult(null);
   };

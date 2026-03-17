@@ -17,33 +17,40 @@ function toDto(r: any) {
 }
 
 router.get("/", async (_req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const rows = await db.select().from(masterBarangTable).orderBy(masterBarangTable.namaBarang);
     return res.json(rows.map(toDto));
   } catch (err) {
+    console.error("Error fetching master barang:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.post("/", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual } = req.body;
     const inserted = await db.insert(masterBarangTable).values({
-      kodeBarang, namaBarang, brand, supplier: supplier || "-",
-      hargaBeli: String(hargaBeli), hargaJual: String(hargaJual),
+      kodeBarang, 
+      namaBarang, 
+      brand, 
+      supplier: supplier || "-",
+      hargaBeli: String(hargaBeli), 
+      hargaJual: String(hargaJual),
     }).returning();
     return res.status(201).json(toDto(inserted[0]));
   } catch (err) {
-    console.error(err);
+    console.error("Error creating master barang:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.post("/bulk", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const items: any[] = req.body.items;
     if (!Array.isArray(items) || items.length === 0) {
@@ -57,6 +64,8 @@ router.post("/bulk", async (req, res) => {
       const s = String(val).trim();
       if (!s) return "0";
       
+      if (/^-?\d+(\.\d+)?$/.test(s)) return s;
+
       const lastDot = s.lastIndexOf('.');
       const lastComma = s.lastIndexOf(',');
       const lastIdx = Math.max(lastDot, lastComma);
@@ -68,82 +77,89 @@ router.post("/bulk", async (req, res) => {
       
       const suffix = s.substring(lastIdx + 1);
       if (suffix.length === 3) {
-        // Likely thousand separator, remove all non-digits
         const clean = s.replace(/[^\d-]/g, '');
         return clean || "0";
       } else {
-        // Likely decimal separator
         const integerPart = s.substring(0, lastIdx).replace(/[^\d-]/g, '');
         const decimalPart = suffix.replace(/[^\d]/g, '');
         return `${integerPart || '0'}.${decimalPart}`;
       }
     };
 
-    for (const item of items) {
-      const { kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual } = item;
-      
-      if (!kodeBarang || !namaBarang) {
-        results.errors.push(`Row skipped: missing kodeBarang or namaBarang (${JSON.stringify(item)})`);
-        continue;
-      }
-
-      const hBeli = parseNumeric(hargaBeli);
-      const hJual = parseNumeric(hargaJual);
-
-      try {
-        const existing = await db.select().from(masterBarangTable)
-          .where(eq(masterBarangTable.kodeBarang, String(kodeBarang).trim()));
+    await db.transaction(async (tx: any) => {
+      for (const item of items) {
+        const { kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual } = item;
         
-        const payload = {
-          namaBarang: String(namaBarang).trim(),
-          brand: String(brand || "-").trim(),
-          supplier: String(supplier || "-").trim(),
-          hargaBeli: hBeli,
-          hargaJual: hJual,
-        };
-
-        if (existing.length > 0) {
-          await db.update(masterBarangTable).set(payload)
-            .where(eq(masterBarangTable.kodeBarang, String(kodeBarang).trim()));
-          results.updated++;
-        } else {
-          await db.insert(masterBarangTable).values({
-            kodeBarang: String(kodeBarang).trim(),
-            ...payload
-          });
-          results.inserted++;
+        if (!kodeBarang || !namaBarang) {
+          results.errors.push(`Baris dilewati: Kode atau Nama kosong`);
+          continue;
         }
-      } catch (e: any) {
-        console.error(`Error importing row ${kodeBarang}:`, e);
-        results.errors.push(`${kodeBarang}: ${e.message}`);
+
+        const hBeli = parseNumeric(hargaBeli);
+        const hJual = parseNumeric(hargaJual);
+        const kBarang = String(kodeBarang).trim();
+
+        try {
+          const existing = await tx.select().from(masterBarangTable)
+            .where(eq(masterBarangTable.kodeBarang, kBarang));
+          
+          const payload = {
+            namaBarang: String(namaBarang).trim(),
+            brand: String(brand || "-").trim(),
+            supplier: String(supplier || "-").trim(),
+            hargaBeli: hBeli,
+            hargaJual: hJual,
+          };
+
+          if (existing.length > 0) {
+            await tx.update(masterBarangTable).set(payload)
+              .where(eq(masterBarangTable.kodeBarang, kBarang));
+            results.updated++;
+          } else {
+            await tx.insert(masterBarangTable).values({
+              kodeBarang: kBarang,
+              ...payload
+            });
+            results.inserted++;
+          }
+        } catch (e: any) {
+          console.error(`Error importing row ${kBarang}:`, e);
+          results.errors.push(`${kBarang}: ${e.message}`);
+        }
       }
-    }
+    });
 
     return res.json({ success: true, ...results });
   } catch (err) {
-    console.error(err);
+    console.error("Bulk import error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.put("/:id", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual } = req.body;
     const updated = await db.update(masterBarangTable).set({
-      kodeBarang, namaBarang, brand, supplier: supplier || "-",
-      hargaBeli: String(hargaBeli), hargaJual: String(hargaJual),
+      kodeBarang, 
+      namaBarang, 
+      brand, 
+      supplier: supplier || "-",
+      hargaBeli: String(hargaBeli), 
+      hargaJual: String(hargaJual),
     }).where(eq(masterBarangTable.id, parseInt(req.params.id))).returning();
     if (!updated.length) return res.status(404).json({ error: "Not found" });
     return res.json(toDto(updated[0]));
   } catch (err) {
-    console.error(err);
+    console.error("Error updating master barang:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.delete("/all", async (_req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     await db.delete(masterBarangTable);
     return res.json({ success: true, message: "Semua data barang telah dihapus" });
@@ -154,12 +170,13 @@ router.delete("/all", async (_req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-    const db = getDb();
-    if (!db) return res.status(500).json({ error: "Database not initialized" });
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     await db.delete(masterBarangTable).where(eq(masterBarangTable.id, parseInt(req.params.id)));
     return res.json({ success: true, message: "Deleted" });
   } catch (err) {
+    console.error("Error deleting master barang:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
