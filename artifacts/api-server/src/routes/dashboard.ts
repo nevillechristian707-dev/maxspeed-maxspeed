@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { getDb, penjualanTable, biayaTable } from "../../../../lib/db/src/index";
+import { getDb, penjualanTable, biayaTable, transaksiBank } from "../../../../lib/db/src/index";
 import { gte, lte, and, sql, eq } from "drizzle-orm";
 
 const router: IRouter = Router();
@@ -26,16 +26,17 @@ router.get("/summary", async (req, res) => {
 
     // Single aggregate query for sales metrics
     const pStats = await db.select({
-      totalPenjualan: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.total} else '0' end)`,
-      totalModal: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.hargaBeli} * ${penjualanTable.qty} else 0 end)`,
-      totalTransaksi: sql<string>`count(case when ${penjualanTable.statusCair} = 'cair' then 1 else null end)`,
+      totalPenjualan: sql<string>`sum(${penjualanTable.total})`,
+      totalModal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
+      totalTransaksi: sql<string>`count(${penjualanTable.id})`,
       cashTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'cash' then ${penjualanTable.total} else '0' end)`,
       bankTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'bank' then ${penjualanTable.total} else '0' end)`,
       onlineShopTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' then ${penjualanTable.total} else '0' end)`,
-      onlineShopBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then ${penjualanTable.total} else '0' end)`,
+      onlineShopBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then (${penjualanTable.total} - coalesce((select sum(${transaksiBank.nilai}) from ${transaksiBank} where ${transaksiBank.penjualanId} = ${penjualanTable.id}), 0)) else '0' end)`,
       kreditTotal: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' then ${penjualanTable.total} else '0' end)`,
-      kreditBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then ${penjualanTable.total} else '0' end)`,
-    }).from(penjualanTable).where(pConds.length ? and(...pConds) : undefined);
+      kreditBelumCair: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' and (${penjualanTable.statusCair} = 'pending' or ${penjualanTable.statusCair} = 'partial') then (${penjualanTable.total} - coalesce((select sum(${transaksiBank.nilai}) from ${transaksiBank} where ${transaksiBank.penjualanId} = ${penjualanTable.id}), 0)) else '0' end)`,
+    }).from(penjualanTable)
+    .where(pConds.length ? and(...pConds) : undefined);
 
     const metrics = pStats[0];
 

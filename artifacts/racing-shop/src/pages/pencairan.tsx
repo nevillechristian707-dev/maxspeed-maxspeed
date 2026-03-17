@@ -307,7 +307,12 @@ export default function Pencairan() {
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
-                        {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                        {item.status === 'partial' && (
+                          <div className="flex flex-col items-end mt-1">
+                            <span className="text-[9px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20">Cicilan</span>
+                            <span className="text-[8px] text-muted-foreground mt-0.5 italic">Sisa dari {formatRupiah((item as any).totalAmount)}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
@@ -427,7 +432,12 @@ export default function Pencairan() {
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
-                        {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                        {item.status === 'partial' && (
+                          <div className="flex flex-col items-end mt-1">
+                            <span className="text-[9px] bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-blue-500/20">Cicilan</span>
+                            <span className="text-[8px] text-muted-foreground mt-0.5 italic">Sisa dari {formatRupiah((item as any).totalAmount)}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
@@ -636,11 +646,38 @@ export default function Pencairan() {
               </div>
             )}
 
-            <div className="mt-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-              <p className="text-xs text-center font-bold text-emerald-600">
-                Total Dana Cair: {isBulkSettle ? formatRupiah(totalMarked) : formatRupiah(parseFloat(nilaiPembayaran) || 0)}
-              </p>
-            </div>
+            {itemToSettle && (
+              <div className="mt-2 p-3 bg-card rounded-2xl border border-border/50 shadow-inner">
+                <div className="flex justify-between items-center mb-2">
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Total Tagihan Saat Ini</span>
+                   <span className="text-sm font-black text-foreground">{formatRupiah(data?.find(x => x.id === itemToSettle)?.nilai)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Sisa Setelah Bayar</span>
+                   <span className={cn(
+                     "text-sm font-black tabular-nums",
+                     (data?.find(x => x.id === itemToSettle)?.nilai || 0) - (parseFloat(nilaiPembayaran) || 0) > 0 
+                       ? "text-orange-500" 
+                       : "text-emerald-500"
+                   )}>
+                     {formatRupiah(Math.max(0, (data?.find(x => x.id === itemToSettle)?.nilai || 0) - (parseFloat(nilaiPembayaran) || 0)))}
+                   </span>
+                </div>
+                {(data?.find(x => x.id === itemToSettle)?.nilai || 0) - (parseFloat(nilaiPembayaran) || 0) > 0 && (
+                  <div className="mt-2 text-center">
+                    <span className="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Akan dicatat sebagai Cicilan</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isBulkSettle && (
+              <div className="mt-2 p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                <p className="text-xs text-center font-bold text-emerald-600">
+                  Total Dana Cair (Bulk): {formatRupiah(totalMarked)}
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsBankModalOpen(false)}>Batal</Button>
