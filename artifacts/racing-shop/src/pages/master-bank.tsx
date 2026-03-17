@@ -55,10 +55,13 @@ export default function MasterBank() {
   };
 
   const bankStats = useMemo(() => {
-    if (!banks || !transactions) return [];
+    if (!banks) return [];
     
     return banks.map(bank => {
-      const bankTxs = transactions.filter(tx => tx.namaBank === bank.namaBank && tx.rekeningBank === bank.nomorRekening);
+      // Handle case where transactions might be loading or null
+      const bankTxs = (transactions || []).filter(tx => 
+        tx.namaBank === bank.namaBank && tx.rekeningBank === bank.nomorRekening
+      );
       const totalNilai = bankTxs.reduce((sum, tx) => sum + Number(tx.nilai), 0);
       return {
         ...bank,
@@ -69,10 +72,12 @@ export default function MasterBank() {
     });
   }, [banks, transactions]);
 
-  const filteredBanks = bankStats.filter(b => 
-    b.namaBank.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    b.nomorRekening.includes(searchTerm)
-  );
+  const filteredBanks = useMemo(() => {
+    return bankStats.filter(b => 
+      b.namaBank.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      b.nomorRekening.includes(searchTerm)
+    );
+  }, [bankStats, searchTerm]);
 
   return (
     <Layout>
