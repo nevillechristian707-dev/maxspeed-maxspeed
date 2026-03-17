@@ -37,7 +37,16 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destruction error:", err);
+    }
+    res.clearCookie("maxspeed.sid", {
+      path: "/",
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+    });
     return res.json({ success: true, message: "Logged out" });
   });
 });
