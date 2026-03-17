@@ -16,12 +16,21 @@ export default function MasterBank() {
   const { toast } = useToast();
   const { data: banks, isLoading: loadingBanks } = useListMasterBank();
   const { data: transactions, isLoading: loadingTx } = useListTransaksiBank(dateParams);
+  const { data: user } = useGetMe();
   const createMutation = useCreateMasterBank();
   const deleteMutation = useDeleteMasterBank();
 
-  const { data: user } = useGetMe();
-  const canAdd = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Bank'] || []).includes('add');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Master Bank'] || []).includes('delete');
+  const checkPermission = (menu: string, action: string) => {
+    const role = user?.role?.toLowerCase() || '';
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions[menu] || permissions[menu.toLowerCase()] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('Master Bank', 'add');
+  const canDelete = checkPermission('Master Bank', 'delete');
+
 
   const [form, setForm] = useState({ namaBank: "", nomorRekening: "", keterangan: "" });
   const [searchTerm, setSearchTerm] = useState("");

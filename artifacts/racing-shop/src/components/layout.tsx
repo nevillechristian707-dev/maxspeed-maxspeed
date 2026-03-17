@@ -78,8 +78,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
   // Filter sidebar items based on permissions
   const visibleSidebarItems = SIDEBAR_ITEMS.filter(item => {
-    const role = user.role?.toLowerCase();
-    if (role === "admin" || role === "superadmin") return true;
+    const role = user.role?.toLowerCase() || '';
+    if (role.includes("admin") || role.includes("superadmin")) return true;
 
     if (item.label === "Manajemen Pengguna") return false;
     

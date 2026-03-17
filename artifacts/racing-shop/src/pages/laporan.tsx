@@ -21,8 +21,13 @@ export default function Laporan() {
   const { data: allSales, isLoading: loadingSales } = useListPenjualan(dateParams);
   const { data: user } = useGetMe();
 
-  const canExport = ((user as any)?.role === 'admin' || (user as any)?.role === 'Admin' || (user as any)?.role === 'superadmin') || 
-                   ((user as any)?.permissions?.['Laporan'] || []).includes('export');
+  const canExport = (() => {
+    const role = user?.role?.toLowerCase() || '';
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Laporan'] || permissions['laporan'] || [];
+    return perms.some((p: string) => p.toLowerCase() === 'export');
+  })();
 
   const salesByCategory = useMemo(() => {
     if (!allSales) return { cash: [], bank: [], online_shop: [], kredit: [] };

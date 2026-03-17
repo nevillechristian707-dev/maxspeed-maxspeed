@@ -13,8 +13,16 @@ export default function Customer() {
   const [form, setForm] = useState({ namaCustomer: "" });
 
   const { data: user } = useGetMe();
-  const canAdd = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Customer'] || []).includes('add');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Customer'] || []).includes('delete');
+  const checkPermission = (action: string) => {
+    const role = user?.role?.toLowerCase() || '';
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Customer'] || permissions['customer'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('add');
+  const canDelete = checkPermission('delete');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

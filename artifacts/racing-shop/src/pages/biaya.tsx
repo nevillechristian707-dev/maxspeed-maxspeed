@@ -19,8 +19,16 @@ export default function Biaya() {
   const deleteMutation = useDeleteBiaya();
   
   const { data: user } = useGetMe();
-  const canAdd = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Biaya'] || []).includes('add');
-  const canDelete = ((user as any)?.role === 'Admin' || (user as any)?.role === 'admin') || ((user as any)?.permissions?.['Biaya'] || []).includes('delete');
+  const checkPermission = (action: string) => {
+    const role = user?.role?.toLowerCase() || '';
+    if (role.includes('admin') || role.includes('superadmin')) return true;
+    const permissions = (user as any)?.permissions || {};
+    const perms = permissions['Biaya'] || permissions['biaya'] || [];
+    return perms.some((p: string) => p.toLowerCase() === action.toLowerCase());
+  };
+
+  const canAdd = checkPermission('add');
+  const canDelete = checkPermission('delete');
 
   const [form, setForm] = useState({
     tanggal: new Date().toISOString().split('T')[0],
