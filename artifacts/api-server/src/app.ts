@@ -26,18 +26,23 @@ app.get("/api/debug-db", (req, res) => {
   });
 });
 
-// Parse CORS_ORIGIN - supports comma-separated values e.g. "https://app.vercel.app,http://localhost:3000"
-const corsOrigin = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim())
-  : true; // Allow all origins in development
+// Parse CORS_ORIGIN
+const corsOrigin = [
+  "https://maxspeed-maxspeed-api-server.vercel.app",
+  "https://maxspeed-maxspeed.vercel.app",
+  "http://localhost:3000"
+];
 
 app.use(cors({
   origin: corsOrigin,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 }));
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 app.use(cookieParser());
+
 
 const sessionConfig: any = {
   secret: process.env.SESSION_SECRET ?? "maxspeed-racing-shop-secret-2024",
