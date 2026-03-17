@@ -53,8 +53,9 @@ router.get("/me", async (req, res) => {
       return res.status(500).json({ error: "Internal Server Error", message: "Database not ready." });
     }
 
-    // Import rolesTable dynamically or add it to imports at the top
+    // Import rolesTable and sql manually
     const { rolesTable } = await import("../../../../lib/db/src/index");
+    const { sql } = await import("drizzle-orm");
 
     const userWithPermissions = await db.select({
       id: usersTable.id,
@@ -64,9 +65,10 @@ router.get("/me", async (req, res) => {
       permissions: rolesTable.permissions,
     })
     .from(usersTable)
-    .leftJoin(rolesTable, eq(usersTable.role, rolesTable.name))
+    .leftJoin(rolesTable, sql`LOWER(${usersTable.role}) = LOWER(${rolesTable.name})`)
     .where(eq(usersTable.id, userId))
     .limit(1);
+
 
     const user = userWithPermissions[0];
     if (!user) {
