@@ -63,8 +63,16 @@ export function Layout({ children }: { children: ReactNode }) {
 
   if (!user) return null;
 
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
+  const handleLogout = () => {
+    // 1. Clear local session storage for x-session-id
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("maxspeed_session_id");
+    }
+
+    // 2. Trigger server logout (background)
+    logoutMutation.mutate();
+
+    // 3. Redirect immediately
     setLocation("/login");
   };
 
