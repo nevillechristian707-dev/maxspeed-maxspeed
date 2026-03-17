@@ -85,13 +85,20 @@ export default function Pencairan() {
   const [selectedBankId, setSelectedBankId] = useState<string>("");
   const [itemToSettle, setItemToSettle] = useState<number | null>(null);
   const [isBulkSettle, setIsBulkSettle] = useState(false);
+  const [nilaiPembayaran, setNilaiPembayaran] = useState<string>("");
 
   const selectedBankInfo = useMemo(() => {
     return banks?.find(b => b.id.toString() === selectedBankId);
   }, [banks, selectedBankId]);
 
-  const handleOpenBankModal = (id: number | null, isBulk: boolean = false) => {
-    setItemToSettle(id);
+  const handleOpenBankModal = (item: any | null, isBulk: boolean = false) => {
+    if (isBulk) {
+      setItemToSettle(null);
+      setNilaiPembayaran(""); // Nilai taken from selection sum
+    } else {
+      setItemToSettle(item.id);
+      setNilaiPembayaran(item.nilai.toString());
+    }
     setIsBulkSettle(isBulk);
     setIsBankModalOpen(true);
   };
@@ -106,7 +113,8 @@ export default function Pencairan() {
       const settleData = {
         tanggalCair: selectedDate,
         namaBank: selectedBankInfo.namaBank,
-        rekeningBank: selectedBankInfo.nomorRekening
+        rekeningBank: selectedBankInfo.nomorRekening,
+        nilai: parseFloat(nilaiPembayaran) || 0
       };
 
       if (isBulkSettle) {
@@ -155,7 +163,7 @@ export default function Pencairan() {
   const canDelete = checkPermission('delete');
 
   const onlineShopPending = useMemo(() => {
-    const items = data?.filter(x => x.status === 'pending' && x.paymentMethod === 'online_shop') || [];
+    const items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
     if (!searchQuery) return items;
     const query = searchQuery.toLowerCase();
     return items.filter(item => 
@@ -168,7 +176,7 @@ export default function Pencairan() {
   }, [data, searchQuery]);
 
   const kreditPending = useMemo(() => {
-    const items = data?.filter(x => x.status === 'pending' && x.paymentMethod === 'kredit') || [];
+    const items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
     if (!searchQuery) return items;
     const query = searchQuery.toLowerCase();
     return items.filter(item => 
@@ -295,10 +303,13 @@ export default function Pencairan() {
                       <span className="font-black text-purple-400 text-[10px] uppercase block mb-1">{item.namaOnlineShop}</span>
                       <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-black text-emerald-500 whitespace-nowrap">{formatRupiah(item.nilai)}</td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
+                      {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {canEdit && <button onClick={() => handleOpenBankModal(item.id)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
+                        {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
                         {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang">
                           <XCircle className="w-3.5 h-3.5" />
                         </button>}
@@ -375,10 +386,13 @@ export default function Pencairan() {
                       <span className="font-black text-orange-400 text-[10px] uppercase block mb-1">{item.namaCustomer}</span>
                       <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-black text-orange-500 whitespace-nowrap">{formatRupiah(item.nilai)}</td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
+                      {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        {canEdit && <button onClick={() => handleOpenBankModal(item.id)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
+                        {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
                         {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang">
                           <XCircle className="w-3.5 h-3.5" />
                         </button>}
@@ -518,6 +532,22 @@ export default function Pencairan() {
               />
             </div>
 
+            {!isBulkSettle && (
+              <div className="space-y-2">
+                <Label htmlFor="nilai" className="text-xs font-bold uppercase text-muted-foreground">Nilai Pembayaran / Cicilan</Label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">Rp</div>
+                  <Input 
+                    id="nilai"
+                    type="number"
+                    value={nilaiPembayaran}
+                    onChange={e => setNilaiPembayaran(e.target.value)}
+                    className="pl-10 font-bold text-emerald-600"
+                  />
+                </div>
+              </div>
+            )}
+
             {selectedBankInfo && (
               <div className="p-3 bg-secondary/30 rounded-lg border border-border/50 text-xs">
                 <div className="flex justify-between mb-1">
@@ -533,7 +563,7 @@ export default function Pencairan() {
 
             <div className="mt-2 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
               <p className="text-xs text-center font-bold text-emerald-600">
-                Total Dana Cair: {isBulkSettle ? formatRupiah(totalMarked) : formatRupiah(data?.find((x: any) => x.id === itemToSettle)?.nilai || 0)}
+                Total Dana Cair: {isBulkSettle ? formatRupiah(totalMarked) : formatRupiah(parseFloat(nilaiPembayaran) || 0)}
               </p>
             </div>
           </div>

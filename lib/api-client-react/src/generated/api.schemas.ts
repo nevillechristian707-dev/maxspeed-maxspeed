@@ -113,6 +113,7 @@ export type PenjualanStatusCair =
 
 export const PenjualanStatusCair = {
   pending: "pending",
+  partial: "partial",
   cair: "cair",
 } as const;
 
@@ -140,6 +141,7 @@ export interface Penjualan {
   hargaBeli?: number | null;
   noFaktur?: string | null;
   totalModal?: number | null;
+  totalPaid: number;
 }
 
 export type CreatePenjualanRequestPaymentMethod =
@@ -173,6 +175,7 @@ export type PencairanItemStatus =
 
 export const PencairanItemStatus = {
   pending: "pending",
+  partial: "partial",
   cair: "cair",
 } as const;
 
@@ -186,6 +189,7 @@ export interface PencairanItem {
   namaOnlineShop?: string | null;
   namaCustomer?: string | null;
   nilai: number;
+  totalPaid: number;
   status: PencairanItemStatus;
   tanggalCair?: string | null;
 }
@@ -194,6 +198,7 @@ export interface MarkSettledRequest {
   tanggalCair: string;
   namaBank: string;
   rekeningBank: string;
+  nilai: number;
 }
 
 export interface TransaksiBank {

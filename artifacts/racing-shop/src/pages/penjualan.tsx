@@ -590,6 +590,12 @@ export default function Penjualan() {
                         {item.paymentMethod.replace('_', ' ')}
                       </span>
                       {item.statusCair === 'pending' && <div className="text-[9px] text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
+                      {item.statusCair === 'partial' && (
+                        <div className="mt-1">
+                          <div className="text-[9px] text-orange-500 font-black uppercase">Cicilan</div>
+                          <div className="text-[8px] text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
+                        </div>
+                      )}
                       {item.statusCair === 'cair' && <div className="text-[9px] text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
                     </td>
                     <td className="px-5 py-3 text-center">

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { getDb, penjualanTable, masterBarangTable } from "../../../../lib/db/src/index";
-import { eq, gte, lte, and, sql, desc } from "drizzle-orm";
+import { getDb, penjualanTable, masterBarangTable, transaksiBank } from "../../../../lib/db/src/index";
+import { eq, gte, lte, and, or, sql, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -13,14 +13,53 @@ router.get("/", async (req, res) => {
     if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { startDate, endDate, paymentMethod } = req.query;
-    const conditions = [];
-    if (startDate) conditions.push(gte(penjualanTable.tanggal, String(startDate)));
-    if (endDate) conditions.push(lte(penjualanTable.tanggal, String(endDate)));
-    if (paymentMethod) conditions.push(eq(penjualanTable.paymentMethod, String(paymentMethod)));
+    
+    let conditions = [];
+    if (startDate && endDate) {
+      // Logic for persistence: 
+      // Show if (sold in this period) OR (sold before and still unpaid/partially paid) OR (settled in this period)
+      conditions.push(or(
+        and(gte(penjualanTable.tanggal, String(startDate)), lte(penjualanTable.tanggal, String(endDate))),
+        and(
+          lte(penjualanTable.tanggal, String(endDate)),
+          or(
+            eq(penjualanTable.statusCair, "pending"),
+            eq(penjualanTable.statusCair, "partial"),
+            and(
+              eq(penjualanTable.statusCair, "cair"),
+              gte(penjualanTable.tanggalCair, String(startDate)),
+              lte(penjualanTable.tanggalCair, String(endDate))
+            )
+          ),
+          or(
+            eq(penjualanTable.paymentMethod, "online_shop"),
+            eq(penjualanTable.paymentMethod, "kredit")
+          )
+        )
+      ));
+    }
+
+    if (paymentMethod) {
+       // if paymentMethod is provided explicitly, we could further filter
+       // but for now let's keep the main logic
+    }
+
     const rows = await db.select().from(penjualanTable)
       .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(penjualanTable.tanggal), desc(penjualanTable.nomor));
-    return res.json(rows.map(toDto));
+    
+    const results = [];
+    for (const row of rows) {
+        // Find total paid in transaksi_bank
+        const txs = await db.select({ total: sql<string>`sum(nilai)` })
+          .from(transaksiBank)
+          .where(eq(transaksiBank.penjualanId, row.id));
+        
+        const totalPaid = parseFloat(txs[0]?.total || "0");
+        results.push(toDto({ ...row, totalPaid }));
+    }
+
+    return res.json(results);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -174,6 +213,7 @@ function toDto(row: any) {
     nilaiKredit: row.nilaiKredit != null ? toNumber(row.nilaiKredit) : null,
     statusCair: row.statusCair,
     tanggalCair: row.tanggalCair,
+    totalPaid: row.totalPaid || (row.statusCair === 'cair' ? toNumber(row.total) : 0),
     hargaBeli: row.hargaBeli != null ? toNumber(row.hargaBeli) : null,
     totalModal: row.totalModal != null ? toNumber(row.totalModal) : null,
   };
