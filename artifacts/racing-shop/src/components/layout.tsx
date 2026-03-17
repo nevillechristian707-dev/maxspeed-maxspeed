@@ -70,7 +70,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
   // Filter sidebar items based on permissions
   const visibleSidebarItems = SIDEBAR_ITEMS.filter(item => {
-    if (user.role === "Admin" || user.role === "admin") return true; // Admin sees all
+    if (user.role === "Admin" || user.role === "admin" || user.role === "superadmin") return true; // Admin sees all
+
     if (item.label === "Manajemen Pengguna") return false; // Only Admin can manage users
     
     // Check if the user has "view" permission for this menu
