@@ -297,9 +297,15 @@ export async function customFetch<T = unknown>(
     headers.set("accept", DEFAULT_JSON_ACCEPT);
   }
 
-  const requestInfo = { method, url: resolveUrl(input) };
+  const url = resolveUrl(input);
+  const finalUrl = (url.startsWith("/api") && !url.startsWith("http"))
+    ? `https://maxspeed-maxspeed-production.up.railway.app${url}`
+    : url;
 
-  const response = await fetch(input, { ...init, method, headers, credentials: "include" });
+  const requestInfo = { method, url: finalUrl };
+
+  const response = await fetch(finalUrl, { ...init, method, headers, credentials: "include" });
+
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
