@@ -628,48 +628,70 @@ export default function Penjualan() {
             </div>
 
             {/* Mobile View */}
-            <div className="md:hidden divide-y divide-border/40 p-1">
+            <div className="md:hidden space-y-3 p-2">
               {isLoading ? (
-                <div className="text-center py-20 text-muted-foreground animate-pulse">Memuat data...</div>
+                <div className="text-center py-20">
+                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" />
+                   <p className="text-muted-foreground animate-pulse font-bold text-xs uppercase tracking-widest">Memuat Transaksi...</p>
+                </div>
               ) : filteredListData?.length === 0 ? (
-                <div className="text-center py-10 text-muted-foreground font-bold">Tidak ada data.</div>
+                <div className="text-center py-10 text-muted-foreground font-black uppercase text-xs tracking-tighter opacity-50 border-2 border-dashed border-border/20 rounded-2xl">
+                  Belum ada data.
+                </div>
               ) : filteredListData?.map((item) => (
-                <div key={item.id} className="p-4 space-y-3 bg-card/50 my-2 rounded-xl border border-border/20">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-[10px] font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
-                      <div className="text-xs font-black text-foreground mt-0.5">{item.noFaktur || '-'}</div>
-                      <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                <div key={item.id} className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
+                      <div className="text-sm font-black text-foreground tracking-tight">{item.noFaktur || '-'}</div>
+                      <div className="text-[9px] font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5">
+                    <div className="flex flex-col items-end gap-2">
                       <span className={cn(
-                        "px-2 py-0.5 text-[9px] font-black uppercase rounded tracking-tighter",
-                        item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600' : 
-                          item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600' : 
-                          item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600' : 
-                          'bg-orange-500/10 text-orange-600'
+                        "px-2.5 py-1 text-[9px] font-black uppercase rounded-lg tracking-wider border",
+                        item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                          item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+                          item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
+                          'bg-orange-500/10 text-orange-500 border-orange-500/20'
                       )}>
                         {item.paymentMethod.replace('_', ' ')}
                       </span>
-                      {item.statusCair === 'pending' && <span className="text-[8px] bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Belum Cair</span>}
-                      {item.statusCair === 'partial' && <span className="text-[8px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Cicilan</span>}
-                      {item.statusCair === 'cair' && <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Selesai</span>}
+                      {item.statusCair === 'pending' && <span className="text-[8px] bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-rose-500/20">Pending</span>}
+                      {item.statusCair === 'partial' && <span className="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Cicilan</span>}
+                      {item.statusCair === 'cair' && <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-emerald-500/20">Selesai</span>}
                     </div>
                   </div>
                   
-                  <div className="pb-1 border-b border-border/10">
-                    <div className="text-xs font-bold text-foreground line-clamp-1">{item.namaBarang}</div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-[9px] font-black text-primary uppercase tracking-tighter">{item.brand} • <span className="text-muted-foreground">{item.kodeBarang}</span></span>
-                      <span className="text-[10px] font-bold text-foreground">{item.qty} x {formatRupiah(item.harga)}</span>
+                  <div className="py-3 px-4 bg-secondary/30 rounded-xl border border-border/10 mb-4">
+                    <div className="text-xs font-black text-foreground mb-1">{item.namaBarang}</div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
+                      <span className="text-xs font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-[8px]">PKT/PCS</span></span>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-1">
-                    <div className="text-sm font-black text-emerald-500">{formatRupiah(item.total)}</div>
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-0.5">
+                      <div className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Total Transaksi</div>
+                      <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
+                    </div>
                     <div className="flex gap-2">
-                       {canEdit && <button onClick={() => handleEdit(item)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg border border-blue-500/20"><Pencil className="w-4 h-4" /></button>}
-                       {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><Trash2 className="w-4 h-4" /></button>}
+                       {canEdit && (
+                         <button 
+                           onClick={() => handleEdit(item)} 
+                           className="p-2.5 text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl border border-blue-500/20 transition-colors shadow-sm active:scale-90"
+                         >
+                           <Pencil className="w-4 h-4" />
+                         </button>
+                       )}
+                       {canDelete && (
+                         <button 
+                           onClick={() => setDeleteConfirmId(item.id)} 
+                           className="p-2.5 text-rose-400 hover:text-rose-300 bg-rose-500/5 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition-colors shadow-sm active:scale-90"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </button>
+                       )}
                     </div>
                   </div>
                 </div>

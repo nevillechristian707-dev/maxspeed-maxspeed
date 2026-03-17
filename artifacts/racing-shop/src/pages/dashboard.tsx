@@ -47,26 +47,26 @@ export default function Dashboard() {
 
   if (!summary || !chartData) return <Layout><div className="flex items-center justify-center h-64 italic text-muted-foreground animate-pulse">Menunggu data dashboard...</div></Layout>;
 
-  // Format chart data
-  const formattedChartData = chartData?.labels?.map((label, i) => ({
-    name: label,
-    Penjualan: chartData.penjualan[i] || 0,
-    Laba: chartData.laba[i] || 0
-  })) || [];
+  // Safe formatting for chart data
+  const formattedChartData = (chartData?.labels || []).map((label, i) => ({
+    name: label || "",
+    Penjualan: Number(chartData?.penjualan?.[i] || 0),
+    Laba: Number(chartData?.laba?.[i] || 0)
+  }));
 
   const StatCard = ({ title, value, icon: Icon, colorClass, subtitle }: any) => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="overflow-hidden relative group border-border/40 hover:border-primary/50 transition-colors h-full">
         <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${colorClass} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform`} />
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</CardTitle>
+          <CardTitle className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
           <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass} bg-opacity-20`}>
             <Icon className="w-4 h-4 text-white" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-lg sm:text-xl lg:text-2xl font-display font-black tracking-tight">{value}</div>
-          {subtitle && <p className="text-xs text-muted-foreground mt-1 font-medium">{subtitle}</p>}
+          <div className="text-xl sm:text-2xl font-display font-black tracking-tight">{value}</div>
+          {subtitle && <p className="text-[9px] text-muted-foreground mt-1 font-bold uppercase tracking-tight">{subtitle}</p>}
         </CardContent>
       </Card>
     </motion.div>
@@ -168,27 +168,29 @@ export default function Dashboard() {
               <option value="monthly">Bulanan</option>
             </select>
           </CardHeader>
-          <CardContent className="flex-1 pt-6 min-h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis 
-                  stroke="rgba(255,255,255,0.5)" 
-                  fontSize={11} 
-                  tickLine={false} 
-                  axisLine={false}
-                  tickFormatter={(val) => `Rp ${val / 1000000}M`}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                  formatter={(value: number) => [formatRupiah(value), ""]}
-                />
-                <Legend iconType="circle" />
-                <Line type="monotone" dataKey="Penjualan" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                <Line type="monotone" dataKey="Laba" stroke="#10b981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
+          <CardContent className="flex-1 pt-6 min-h-[300px] sm:min-h-[400px]">
+            <div className="h-[300px] sm:h-[400px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={formattedChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis 
+                    stroke="rgba(255,255,255,0.5)" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tickFormatter={(val) => `Rp ${val / 1000000}M`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                    formatter={(value: number) => [formatRupiah(value), ""]}
+                  />
+                  <Legend iconType="circle" />
+                  <Line type="monotone" dataKey="Penjualan" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="Laba" stroke="#10b981" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
