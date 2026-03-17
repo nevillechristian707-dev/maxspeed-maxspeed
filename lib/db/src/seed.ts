@@ -1,4 +1,6 @@
+import "dotenv/config";
 import { db, usersTable, penjualanTable, masterBarangTable, masterOnlineShopTable, customerTable } from "./index";
+
 import { eq } from "drizzle-orm";
 
 async function seedSamples(): Promise<void> {
@@ -218,16 +220,23 @@ async function seed(): Promise<void> {
   const existingAdmin = await db.select().from(usersTable).where(eq(usersTable.username, "admin"));
 
   if (existingAdmin.length === 0) {
-    console.log("Creating admin user...");
+    console.log("Creating admin user with role superadmin...");
     await db.insert(usersTable).values({
       username: "admin",
       password: "admin123",
       name: "Administrator",
-      role: "admin",
+      role: "superadmin",
     });
     console.log("Admin user created.");
   } else {
-    console.log("Admin user already exists.");
+    console.log("Admin user already exists. Updating role to superadmin and resetting password...");
+    await db.update(usersTable)
+      .set({ 
+        role: "superadmin",
+        password: "admin123" 
+      })
+      .where(eq(usersTable.username, "admin"));
+    console.log("Admin status/password updated.");
   }
 
   await seedSamples();
