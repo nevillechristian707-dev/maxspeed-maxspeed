@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://RAILWAY_BACKEND_URL/api/:path*"
+      "destination": "https://maxspeed-maxspeed-production.up.railway.app/api/:path*"
     },
     {
       "source": "/:path*",
