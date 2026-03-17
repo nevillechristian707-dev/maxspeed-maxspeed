@@ -469,51 +469,87 @@ export default function Laporan() {
                     <span className="ml-auto text-[10px] bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{cat.data.length} TRX</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-[12px] text-left border-collapse">
-                    <thead className="bg-secondary/40 text-muted-foreground uppercase text-[9px] tracking-widest font-black border-b border-border/50">
-                      <tr>
-                        <th className="px-6 py-4">Tanggal</th>
-                        <th className="px-4 py-4">No. Faktur</th>
-                        <th className="px-4 py-4">Nama Produk</th>
-                        <th className="px-4 py-4 text-center">Qty</th>
-                        <th className="px-4 py-4 text-right">Modal Pokok</th>
-                        <th className="px-4 py-4 text-right">Harga Jual</th>
-                        <th className="px-4 py-4 text-right">Margin/Laba</th>
-                        <th className="px-6 py-4 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/10">
-                      {cat.data.map((s: any) => {
-                        const m = (s.hargaBeli || 0) * (s.qty || 0);
-                        const j = s.total || 0;
-                        const l = j - m;
-                        return (
-                          <tr key={s.id} className="hover:bg-primary/[0.03] transition-colors group/row">
-                            <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{s.tanggal}</td>
-                            <td className="px-4 py-4 font-black text-foreground tracking-tighter">{s.noFaktur || '-'}</td>
-                            <td className="px-4 py-4 min-w-[200px]">
-                              <div className="font-bold text-foreground leading-snug group-hover/row:text-primary transition-colors">{s.namaBarang}</div>
-                              <div className="text-[9px] text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
-                            </td>
-                            <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{s.qty}</td>
-                            <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(m)}</td>
-                            <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(j)}</td>
-                            <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                              <span className="flex items-center justify-end gap-1">
-                                {l >= 0 ? '+' : ''}{formatRupiah(l)}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                <CardContent className="p-0">
+                  {/* Desktop View */}
+                  <div className="hidden md:block overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-[12px] text-left border-collapse">
+                      <thead className="bg-secondary/40 text-muted-foreground uppercase text-[9px] tracking-widest font-black border-b border-border/50">
+                        <tr>
+                          <th className="px-6 py-4">Tanggal</th>
+                          <th className="px-4 py-4">No. Faktur</th>
+                          <th className="px-4 py-4">Nama Produk</th>
+                          <th className="px-4 py-4 text-center">Qty</th>
+                          <th className="px-4 py-4 text-right">Modal Pokok</th>
+                          <th className="px-4 py-4 text-right">Harga Jual</th>
+                          <th className="px-4 py-4 text-right">Margin/Laba</th>
+                          <th className="px-6 py-4 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/10">
+                        {cat.data.map((s: any) => {
+                          const m = (s.hargaBeli || 0) * (s.qty || 0);
+                          const j = s.total || 0;
+                          const l = j - m;
+                          return (
+                            <tr key={s.id} className="hover:bg-primary/[0.03] transition-colors group/row">
+                              <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{s.tanggal}</td>
+                              <td className="px-4 py-4 font-black text-foreground tracking-tighter">{s.noFaktur || '-'}</td>
+                              <td className="px-4 py-4 min-w-[200px]">
+                                <div className="font-bold text-foreground leading-snug group-hover/row:text-primary transition-colors">{s.namaBarang}</div>
+                                <div className="text-[9px] text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
+                              </td>
+                              <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{s.qty}</td>
+                              <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(m)}</td>
+                              <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(j)}</td>
+                              <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                <span className="flex items-center justify-end gap-1">
+                                  {l >= 0 ? '+' : ''}{formatRupiah(l)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                                  {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile View */}
+                  <div className="md:hidden divide-y divide-border/20 p-2">
+                    {cat.data.map((s: any) => {
+                      const m = (s.hargaBeli || 0) * (s.qty || 0);
+                      const j = s.total || 0;
+                      const l = j - m;
+                      return (
+                        <div key={s.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-3">
+                          <div className="flex justify-between items-start">
+                             <div>
+                               <div className="text-[10px] font-black text-primary uppercase tracking-widest">{s.tanggal}</div>
+                               <div className="text-xs font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
+                             </div>
+                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
                                 {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                             </span>
+                          </div>
+                          <div className="text-xs font-bold text-foreground border-l-2 border-primary/30 pl-2 line-clamp-2">{s.namaBarang}</div>
+                          <div className="flex justify-between items-end pt-1">
+                             <div className="space-y-1">
+                               <div className="text-[9px] text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
+                               <div className="text-[9px] text-muted-foreground italic">Modal: {formatRupiah(m)}</div>
+                             </div>
+                             <div className="text-right">
+                               <div className="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">Profit</div>
+                               <div className={`text-sm font-black ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{l >= 0 ? '+' : ''}{formatRupiah(l)}</div>
+                             </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             ))}

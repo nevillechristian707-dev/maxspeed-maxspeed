@@ -523,50 +523,67 @@ export default function MasterBarang() {
             <input type="text" placeholder="Cari barang..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 pr-4 py-1.5 bg-secondary border border-border rounded-full text-sm outline-none focus:border-primary w-64" />
           </div>
         </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
-              <tr>
-                <th className="px-4 py-3">Kode</th>
-                <th className="px-4 py-3">Nama Barang</th>
-                <th className="px-4 py-3">Brand</th>
-                <th className="px-4 py-3">Supplier</th>
-                <th className="px-4 py-3 text-right">Harga Beli</th>
-                <th className="px-4 py-3 text-right">Harga Jual</th>
-                <th className="px-4 py-3 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={7} className="text-center py-10 text-muted-foreground">Memuat...</td></tr>
-              ) : !filteredData?.length ? (
-                <tr><td colSpan={7} className="text-center py-10 text-muted-foreground">Belum ada data barang</td></tr>
-              ) : filteredData.map(item => (
-                <tr key={item.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{item.kodeBarang}</td>
-                  <td className="px-4 py-3 font-medium">{item.namaBarang}</td>
-                  <td className="px-4 py-3"><span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.brand}</span></td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">{item.supplier}</td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">{formatRupiah(item.hargaBeli)}</td>
-                  <td className="px-4 py-3 text-right font-bold text-emerald-400">{formatRupiah(item.hargaJual)}</td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex justify-center gap-2">
-                      {canEdit && (
-                        <button onClick={() => handleEdit(item)} className="p-1.5 rounded text-muted-foreground hover:text-blue-400 hover:bg-blue-400/10 transition-colors" title="Edit">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                      )}
-                      {canDelete && (
-                        <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Hapus">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        <CardContent className="p-0">
+          {/* Desktop View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
+                <tr>
+                  <th className="px-4 py-3 font-black tracking-widest uppercase">Kode</th>
+                  <th className="px-4 py-3 font-black tracking-widest uppercase">Nama Barang</th>
+                  <th className="px-4 py-3 font-black tracking-widest uppercase">Brand</th>
+                  <th className="px-4 py-3 font-black tracking-widest uppercase text-right">Harga Jual</th>
+                  <th className="px-4 py-3 text-center font-black tracking-widest uppercase">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr><td colSpan={5} className="text-center py-10 text-muted-foreground italic">Memuat...</td></tr>
+                ) : !filteredData?.length ? (
+                  <tr><td colSpan={5} className="text-center py-10 text-muted-foreground font-black uppercase">Belum ada data barang</td></tr>
+                ) : filteredData.map(item => (
+                  <tr key={item.id} className="border-b border-border/50 hover:bg-primary/[0.02] transition-colors group">
+                    <td className="px-4 py-3 font-mono text-[10px] text-muted-foreground">{item.kodeBarang}</td>
+                    <td className="px-4 py-3 font-black text-foreground">{item.namaBarang}</td>
+                    <td className="px-4 py-3"><span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-wider">{item.brand}</span></td>
+                    <td className="px-4 py-3 text-right font-black text-emerald-500">{formatRupiah(item.hargaJual)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {canEdit && <button onClick={() => handleEdit(item)} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-blue-500/20"><Edit2 className="w-4 h-4"/></button>}
+                        {canDelete && <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 border border-rose-500/20"><Trash2 className="w-4 h-4"/></button>}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile View */}
+          <div className="md:hidden divide-y divide-border/20 p-2">
+            {isLoading ? (
+              <div className="p-10 text-center text-muted-foreground animate-pulse italic">Memuat...</div>
+            ) : !filteredData?.length ? (
+              <div className="p-10 text-center text-muted-foreground">Tidak ada data.</div>
+            ) : filteredData.map(item => (
+              <div key={item.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-[9px] font-mono text-muted-foreground uppercase">{item.kodeBarang}</div>
+                    <div className="text-xs font-black text-foreground mt-0.5">{item.namaBarang}</div>
+                  </div>
+                  <span className="text-[8px] bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-widest">{item.brand}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1">
+                  <div className="text-sm font-black text-emerald-500">{formatRupiah(item.hargaJual)}</div>
+                  <div className="flex gap-2">
+                    {canEdit && <button onClick={() => handleEdit(item)} className="p-2 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-blue-500/10"><Edit2 className="w-4 h-4"/></button>}
+                    {canDelete && <button onClick={() => handleDelete(item.id)} className="p-2 rounded-lg text-rose-500 hover:bg-rose-500/10 border border-rose-500/10"><Trash2 className="w-4 h-4"/></button>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </Layout>

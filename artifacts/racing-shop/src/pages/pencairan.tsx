@@ -260,65 +260,102 @@ export default function Pencairan() {
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
-                <tr>
-                  <th className="px-4 py-2.5 w-10">
-                    <Checkbox 
-                      checked={onlineShopPending.length > 0 && onlineShopPending.every(i => markedIds.has(i.id))}
-                      onCheckedChange={(checked) => {
-                        const newMarked = new Set(markedIds);
-                        onlineShopPending.forEach(i => checked ? newMarked.add(i.id) : newMarked.delete(i.id));
-                        setMarkedIds(newMarked);
-                      }}
-                    />
-                  </th>
-                  <th className="px-4 py-2.5 font-bold">Tgl TRX</th>
-                  <th className="px-4 py-2.5 font-bold">Faktur / TRX</th>
-                  <th className="px-4 py-2.5 font-bold">Platform / Produk</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Nilai</th>
-                  <th className="px-4 py-2.5 text-center font-bold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
-                ) : onlineShopPending.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang online shop.</td></tr>
-                ) : onlineShopPending.map(item => (
-                  <tr key={item.id} className={cn(
-                    "border-b border-border/20 transition-colors group",
-                    markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
-                  )}>
-                    <td className="px-4 py-3">
-                      <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs">{formatDate(item.tanggal)}</td>
-                    <td className="px-4 py-3">
-                      <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
-                      <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-black text-purple-400 text-[10px] uppercase block mb-1">{item.namaOnlineShop}</span>
-                      <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
-                      {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
-                        {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang">
-                          <XCircle className="w-3.5 h-3.5" />
-                        </button>}
-                      </div>
-                    </td>
+          <CardContent className="p-0">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                  <tr>
+                    <th className="px-4 py-2.5 w-10">
+                      <Checkbox 
+                        checked={onlineShopPending.length > 0 && onlineShopPending.every(i => markedIds.has(i.id))}
+                        onCheckedChange={(checked) => {
+                          const newMarked = new Set(markedIds);
+                          onlineShopPending.forEach(i => checked ? newMarked.add(i.id) : newMarked.delete(i.id));
+                          setMarkedIds(newMarked);
+                        }}
+                      />
+                    </th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Platform / Produk</th>
+                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">Nilai</th>
+                    <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
+                  ) : onlineShopPending.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang online shop.</td></tr>
+                  ) : onlineShopPending.map(item => (
+                    <tr key={item.id} className={cn(
+                      "border-b border-border/20 transition-colors group",
+                      markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
+                    )}>
+                      <td className="px-4 py-3">
+                        <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-black text-purple-400 text-[10px] uppercase block mb-1">{item.namaOnlineShop}</span>
+                        <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
+                        {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2 transition-opacity">
+                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Cairkan</button>}
+                          {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang"><XCircle className="w-3.5 h-3.5"/></button>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-border/20 p-2">
+              {isLoading ? (
+                <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
+              ) : onlineShopPending.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground">Tidak ada data.</div>
+              ) : onlineShopPending.map(item => (
+                <div key={item.id} className={cn("p-4 mb-3 rounded-xl border transition-all space-y-3", markedIds.has(item.id) ? "bg-primary/10 border-primary/40" : "bg-card/60 border-border/40")}>
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-3 items-start">
+                      <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
+                      <div>
+                        <div className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{item.namaOnlineShop}</div>
+                        <div className="text-xs font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <div className="text-[9px] font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-purple-500/30 line-clamp-2">{item.namaBarang}</div>
+                  <div className="flex justify-between items-center pt-1">
+                    <div>
+                      <div className="text-sm font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
+                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter">Cicilan</div>}
+                    </div>
+                    <div className="flex gap-2">
+                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
+                      {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><XCircle className="w-4 h-4"/></button>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -343,65 +380,102 @@ export default function Pencairan() {
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
-                <tr>
-                  <th className="px-4 py-2.5 w-10">
-                    <Checkbox 
-                      checked={kreditPending.length > 0 && kreditPending.every(i => markedIds.has(i.id))}
-                      onCheckedChange={(checked) => {
-                        const newMarked = new Set(markedIds);
-                        kreditPending.forEach(i => checked ? newMarked.add(i.id) : newMarked.delete(i.id));
-                        setMarkedIds(newMarked);
-                      }}
-                    />
-                  </th>
-                  <th className="px-4 py-2.5 font-bold">Tgl TRX</th>
-                  <th className="px-4 py-2.5 font-bold">Faktur / TRX</th>
-                  <th className="px-4 py-2.5 font-bold">Customer / Produk</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Nilai</th>
-                  <th className="px-4 py-2.5 text-center font-bold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
-                ) : kreditPending.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang kredit.</td></tr>
-                ) : kreditPending.map(item => (
-                  <tr key={item.id} className={cn(
-                    "border-b border-border/20 transition-colors group",
-                    markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
-                  )}>
-                    <td className="px-4 py-3">
-                      <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs">{formatDate(item.tanggal)}</td>
-                    <td className="px-4 py-3">
-                      <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
-                      <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="font-black text-orange-400 text-[10px] uppercase block mb-1">{item.namaCustomer}</span>
-                      <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
-                      {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
-                        {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang">
-                          <XCircle className="w-3.5 h-3.5" />
-                        </button>}
-                      </div>
-                    </td>
+          <CardContent className="p-0">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                  <tr>
+                    <th className="px-4 py-2.5 w-10">
+                      <Checkbox 
+                        checked={kreditPending.length > 0 && kreditPending.every(i => markedIds.has(i.id))}
+                        onCheckedChange={(checked) => {
+                          const newMarked = new Set(markedIds);
+                          kreditPending.forEach(i => checked ? newMarked.add(i.id) : newMarked.delete(i.id));
+                          setMarkedIds(newMarked);
+                        }}
+                      />
+                    </th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
+                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Customer / Produk</th>
+                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">Nilai</th>
+                    <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
+                  ) : kreditPending.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang kredit.</td></tr>
+                  ) : kreditPending.map(item => (
+                    <tr key={item.id} className={cn(
+                      "border-b border-border/20 transition-colors group",
+                      markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
+                    )}>
+                      <td className="px-4 py-3">
+                        <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-black text-orange-400 text-[10px] uppercase block mb-1">{item.namaCustomer}</span>
+                        <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
+                        {item.status === 'partial' && <div className="text-[10px] text-muted-foreground">Sisa dari {formatRupiah(item.totalPaid + item.nilai)}</div>}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2 transition-opacity">
+                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
+                          {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus"><XCircle className="w-3.5 h-3.5"/></button>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-border/20 p-2">
+              {isLoading ? (
+                <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
+              ) : kreditPending.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground">Tidak ada piutang kredit.</div>
+              ) : kreditPending.map(item => (
+                <div key={item.id} className={cn("p-4 mb-3 rounded-xl border transition-all space-y-3", markedIds.has(item.id) ? "bg-primary/10 border-primary/40" : "bg-card/60 border-border/40")}>
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-3 items-start">
+                      <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
+                      <div>
+                        <div className="text-[10px] font-black text-orange-500 uppercase tracking-widest">{item.namaCustomer}</div>
+                        <div className="text-xs font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <div className="text-[9px] font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-orange-500/30 line-clamp-2">{item.namaBarang}</div>
+                  <div className="flex justify-between items-center pt-1">
+                    <div>
+                      <div className="text-sm font-black text-orange-500">{formatRupiah(item.nilai)}</div>
+                      {item.status === 'partial' && <div className="text-[8px] text-primary font-bold uppercase tracking-tighter">Cicilan</div>}
+                    </div>
+                    <div className="flex gap-2">
+                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Lunasi</button>}
+                      {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><XCircle className="w-4 h-4"/></button>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 

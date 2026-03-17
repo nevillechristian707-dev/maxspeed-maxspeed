@@ -179,15 +179,16 @@ export default function MasterBank() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 table-container mobile-scroll-hint flex-grow">
-              <div className="overflow-x-auto">
+            <CardContent className="p-0">
+              {/* Desktop View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
                   <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/20 border-b border-border/30">
                     <tr>
-                      <th className="px-6 py-3 font-bold">Tanggal Cair</th>
-                      <th className="px-4 py-3 font-bold">Bank</th>
-                      <th className="px-4 py-3 font-bold">Faktur / Sumber</th>
-                      <th className="px-4 py-3 text-right font-bold">Nilai</th>
+                      <th className="px-6 py-4 font-bold tracking-widest uppercase">Tanggal Cair</th>
+                      <th className="px-4 py-4 font-bold tracking-widest uppercase">Bank</th>
+                      <th className="px-4 py-4 font-bold tracking-widest uppercase">Faktur / Sumber</th>
+                      <th className="px-4 py-4 text-right font-bold tracking-widest uppercase">Nilai</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
@@ -196,17 +197,17 @@ export default function MasterBank() {
                     ) : transactions?.length === 0 ? (
                       <tr><td colSpan={4} className="text-center py-12 text-muted-foreground italic">Belum ada transaksi di periode ini.</td></tr>
                     ) : (transactions || []).sort((a,b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime()).map((tx, idx) => (
-                      <tr key={idx} className="hover:bg-secondary/10 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-xs">{formatDate(tx.tanggalCair)}</div>
+                      <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-bold text-xs text-muted-foreground">{formatDate(tx.tanggalCair)}</div>
                         </td>
                         <td className="px-4 py-4">
                           <div className="text-xs font-black text-primary">{tx.namaBank}</div>
-                          <div className="text-[9px] font-mono text-muted-foreground">{tx.rekeningBank}</div>
+                          <div className="text-[9px] font-mono text-muted-foreground tracking-tighter">{tx.rekeningBank}</div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="text-xs font-bold text-foreground">{tx.noFaktur || "N/A"}</div>
-                          <div className="text-[9px] uppercase font-bold text-muted-foreground/60">{tx.sumber}</div>
+                          <div className="text-xs font-black text-foreground">{tx.noFaktur || "-"}</div>
+                          <div className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest">{tx.sumber}</div>
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="text-sm font-black text-emerald-500">{formatRupiah(Number(tx.nilai))}</div>
@@ -215,6 +216,29 @@ export default function MasterBank() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card List */}
+              <div className="md:hidden divide-y divide-border/20 p-2">
+                {loadingTx ? (
+                  <div className="p-10 text-center text-muted-foreground animate-pulse italic">Memuat data...</div>
+                ) : transactions?.length === 0 ? (
+                  <div className="p-10 text-center text-muted-foreground font-bold">Tidak ada riwayat.</div>
+                ) : (transactions || []).sort((a,b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime()).map((tx, idx) => (
+                  <div key={idx} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div className="text-[10px] font-black text-primary uppercase tracking-widest">{formatDate(tx.tanggalCair)}</div>
+                      <div className="text-[10px] font-black text-foreground uppercase bg-secondary/50 px-2 py-0.5 rounded tracking-tighter">{tx.namaBank}</div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-xs font-bold text-foreground">{tx.noFaktur || "-"}</div>
+                        <div className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter">{tx.sumber}</div>
+                      </div>
+                      <div className="text-sm font-black text-emerald-500">{formatRupiah(Number(tx.nilai))}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

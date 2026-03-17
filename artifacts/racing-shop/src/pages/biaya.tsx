@@ -136,37 +136,62 @@ export default function Biaya() {
               <span className="font-bold text-destructive text-lg">{formatRupiah(totalBiaya)}</span>
             </div>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
-                <tr>
-                  <th className="px-4 py-3">Tanggal</th>
-                  <th className="px-4 py-3">Keterangan</th>
-                  <th className="px-4 py-3 text-right">Nilai</th>
-                  <th className="px-4 py-3 text-center">Act</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                   <tr><td colSpan={4} className="text-center py-8">Loading...</td></tr>
-                ) : data?.length === 0 ? (
-                  <tr><td colSpan={4} className="text-center py-8 text-muted-foreground">Tidak ada pencatatan biaya pada periode ini.</td></tr>
-                ) : data?.map(item => (
-                  <tr key={item.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">{formatDate(item.tanggal)}</td>
-                    <td className="px-4 py-3 font-medium">{item.keterangan}</td>
-                    <td className="px-4 py-3 text-right font-bold text-destructive">{formatRupiah(item.nilai)}</td>
-                    <td className="px-4 py-3 text-center">
-                      {canDelete && (
-                        <button onClick={() => handleDelete(item.id)} className="p-2 text-muted-foreground hover:text-destructive transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </td>
+          <CardContent className="p-0">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
+                  <tr>
+                    <th className="px-6 py-4">Tanggal</th>
+                    <th className="px-4 py-4">Keterangan</th>
+                    <th className="px-4 py-4 text-right">Nilai</th>
+                    <th className="px-4 py-4 text-center">Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {isLoading ? (
+                     <tr><td colSpan={4} className="text-center py-8">Loading...</td></tr>
+                  ) : data?.length === 0 ? (
+                    <tr><td colSpan={4} className="text-center py-8 text-muted-foreground italic">Tidak ada pencatatan biaya pada periode ini.</td></tr>
+                  ) : data?.map(item => (
+                    <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors border-b border-border/10">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-4 font-bold text-foreground">{item.keterangan}</td>
+                      <td className="px-4 py-4 text-right font-black text-rose-500">{formatRupiah(item.nilai)}</td>
+                      <td className="px-4 py-4 text-center">
+                        {canDelete && (
+                          <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List */}
+            <div className="md:hidden divide-y divide-border/20 p-2">
+              {isLoading ? (
+                 <div className="text-center py-10 text-muted-foreground italic">Memuat data...</div>
+              ) : data?.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground font-bold">Tidak ada data biaya.</div>
+              ) : data?.map(item => (
+                <div key={item.id} className="p-4 space-y-2 bg-card/60 my-2 rounded-xl border border-border/20">
+                  <div className="flex justify-between items-start">
+                    <div className="text-[10px] font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
+                    {canDelete && (
+                      <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-500 bg-rose-500/5 rounded-lg border border-rose-500/20">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-sm font-bold text-foreground">{item.keterangan}</div>
+                  <div className="text-lg font-black text-rose-500">{formatRupiah(item.nilai)}</div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

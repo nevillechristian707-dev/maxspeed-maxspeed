@@ -14,8 +14,8 @@ export default function Dashboard() {
   
   const currentYear = new Date().getFullYear();
 
-  const { data: summary, isLoading: loadingSummary } = useGetDashboardSummary(dateParams);
-  const { data: chartData, isLoading: loadingChart } = useGetDashboardChart({ period });
+  const { data: summary, isLoading: loadingSummary, isError: isErrorSummary } = useGetDashboardSummary(dateParams);
+  const { data: chartData, isLoading: loadingChart, isError: isErrorChart } = useGetDashboardChart({ period });
 
   if (loadingSummary || loadingChart) {
     return (
@@ -27,14 +27,32 @@ export default function Dashboard() {
     );
   }
 
-  if (!summary || !chartData) return <Layout><div>Error loading data</div></Layout>;
+  if (isErrorSummary || isErrorChart) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center h-64 gap-4 px-4 text-center">
+          <p className="text-rose-500 font-bold uppercase tracking-widest text-xs animate-pulse leading-relaxed">
+            Gagal memuat data dari server.<br/>Pastikan koneksi internet Anda stabil.
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 rounded-xl bg-secondary border border-border text-xs font-black uppercase hover:bg-secondary/80 transition-all shadow-lg active:scale-95"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!summary || !chartData) return <Layout><div className="flex items-center justify-center h-64 italic text-muted-foreground animate-pulse">Menunggu data dashboard...</div></Layout>;
 
   // Format chart data
-  const formattedChartData = chartData.labels.map((label, i) => ({
+  const formattedChartData = chartData?.labels?.map((label, i) => ({
     name: label,
-    Penjualan: chartData.penjualan[i],
-    Laba: chartData.laba[i]
-  }));
+    Penjualan: chartData.penjualan[i] || 0,
+    Laba: chartData.laba[i] || 0
+  })) || [];
 
   const StatCard = ({ title, value, icon: Icon, colorClass, subtitle }: any) => (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

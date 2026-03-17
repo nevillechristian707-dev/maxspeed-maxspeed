@@ -556,43 +556,94 @@ export default function Penjualan() {
             </div>
           </CardHeader>
           <CardContent className="p-0 table-container mobile-scroll-hint">
-            <table className="w-full text-xs text-left border-collapse">
-              <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
-                <tr>
-                  <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
-                  <th className="px-4 py-4 font-black tracking-widest text-primary">Kode</th>
-                  <th className="px-4 py-4 font-black tracking-widest">Faktur / Ref</th>
-                  <th className="px-4 py-4 font-black tracking-widest">Produk & Brand</th>
-                  <th className="px-4 py-4 text-right font-black tracking-widest">Harga</th>
-                  <th className="px-4 py-4 text-center font-black tracking-widest">Qty</th>
-                  <th className="px-4 py-4 text-right font-black tracking-widest">Total</th>
-                  <th className="px-4 py-4 font-black tracking-widest">Pemabayaran</th>
-                  <th className="px-6 py-4 text-center font-black tracking-widest">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {isLoading ? (
-                  <tr><td colSpan={9} className="text-center py-20 text-muted-foreground italic font-medium">Memuat data transaksi...</td></tr>
-                ) : filteredListData?.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-20 text-muted-foreground font-bold italic">Tidak ada transaksi dengan status ini.</td></tr>
-                ) : filteredListData?.map((item) => (
-                  <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors group/row">
-                    <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
-                    <td className="px-3 py-4 font-black text-primary tracking-tighter text-[10px]">{item.kodeBarang}</td>
-                    <td className="px-4 py-4">
-                      <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
-                      <div className="font-mono text-[9px] text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="font-bold text-foreground truncate max-w-[200px]">{item.namaBarang}</div>
-                      <div className="text-[9px] text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
-                    </td>
-                    <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
-                    <td className="px-4 py-4 text-center font-black">{item.qty}</td>
-                    <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
-                    <td className="px-4 py-4">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                  <tr>
+                    <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
+                    <th className="px-4 py-4 font-black tracking-widest text-primary">Kode</th>
+                    <th className="px-4 py-4 font-black tracking-widest">Faktur / Ref</th>
+                    <th className="px-4 py-4 font-black tracking-widest">Produk & Brand</th>
+                    <th className="px-4 py-4 text-right font-black tracking-widest">Harga</th>
+                    <th className="px-4 py-4 text-center font-black tracking-widest">Qty</th>
+                    <th className="px-4 py-4 text-right font-black tracking-widest">Total</th>
+                    <th className="px-4 py-4 font-black tracking-widest">Pembayaran</th>
+                    <th className="px-6 py-4 text-center font-black tracking-widest">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/20">
+                  {isLoading ? (
+                    <tr><td colSpan={9} className="text-center py-20 text-muted-foreground italic font-medium">Memuat data transaksi...</td></tr>
+                  ) : filteredListData?.length === 0 ? (
+                    <tr><td colSpan={9} className="text-center py-20 text-muted-foreground font-bold italic">Tidak ada transaksi dengan status ini.</td></tr>
+                  ) : filteredListData?.map((item) => (
+                    <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors group/row">
+                      <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-3 py-4 font-black text-primary tracking-tighter text-[10px]">{item.kodeBarang}</td>
+                      <td className="px-4 py-4">
+                        <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-[9px] text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-foreground truncate max-w-[200px]">{item.namaBarang}</div>
+                        <div className="text-[9px] text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
+                      </td>
+                      <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
+                      <td className="px-4 py-4 text-center font-black">{item.qty}</td>
+                      <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
+                      <td className="px-4 py-4">
+                        <span className={cn(
+                          "inline-flex px-2 py-0.5 text-[9px] font-black uppercase rounded tracking-tighter",
+                          item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600' : 
+                            item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600' : 
+                            item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600' : 
+                            'bg-orange-500/10 text-orange-600'
+                        )}>
+                          {item.paymentMethod.replace('_', ' ')}
+                        </span>
+                        {item.statusCair === 'pending' && <div className="text-[9px] text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
+                        {item.statusCair === 'partial' && (
+                          <div className="mt-1">
+                            <div className="text-[9px] text-orange-500 font-black uppercase">Cicilan</div>
+                            <div className="text-[8px] text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
+                          </div>
+                        )}
+                        {item.statusCair === 'cair' && <div className="text-[9px] text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
+                      </td>
+                      <td className="px-5 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {canEdit && (
+                            <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/20 shadow-sm"><Pencil className="w-3.5 h-3.5" /></button>
+                          )}
+                          {canDelete && (
+                            <button onClick={() => setDeleteConfirmId(item.id)} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20 shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-border/40 p-1">
+              {isLoading ? (
+                <div className="text-center py-20 text-muted-foreground animate-pulse">Memuat data...</div>
+              ) : filteredListData?.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground font-bold">Tidak ada data.</div>
+              ) : filteredListData?.map((item) => (
+                <div key={item.id} className="p-4 space-y-3 bg-card/50 my-2 rounded-xl border border-border/20">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="text-[10px] font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
+                      <div className="text-xs font-black text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                      <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
                       <span className={cn(
-                        "inline-flex px-2 py-0.5 text-[9px] font-black uppercase rounded tracking-tighter",
+                        "px-2 py-0.5 text-[9px] font-black uppercase rounded tracking-tighter",
                         item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600' : 
                           item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600' : 
                           item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600' : 
@@ -600,43 +651,30 @@ export default function Penjualan() {
                       )}>
                         {item.paymentMethod.replace('_', ' ')}
                       </span>
-                      {item.statusCair === 'pending' && <div className="text-[9px] text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
-                      {item.statusCair === 'partial' && (
-                        <div className="mt-1">
-                          <div className="text-[9px] text-orange-500 font-black uppercase">Cicilan</div>
-                          <div className="text-[8px] text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
-                        </div>
-                      )}
-                      {item.statusCair === 'cair' && <div className="text-[9px] text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
-                    </td>
-                    <td className="px-5 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2 transition-opacity">
-                        {canEdit && (
+                      {item.statusCair === 'pending' && <span className="text-[8px] bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Belum Cair</span>}
+                      {item.statusCair === 'partial' && <span className="text-[8px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Cicilan</span>}
+                      {item.statusCair === 'cair' && <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Selesai</span>}
+                    </div>
+                  </div>
+                  
+                  <div className="pb-1 border-b border-border/10">
+                    <div className="text-xs font-bold text-foreground line-clamp-1">{item.namaBarang}</div>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-tighter">{item.brand} • <span className="text-muted-foreground">{item.kodeBarang}</span></span>
+                      <span className="text-[10px] font-bold text-foreground">{item.qty} x {formatRupiah(item.harga)}</span>
+                    </div>
+                  </div>
 
-                          <button 
-                            onClick={() => handleEdit(item)} 
-                            className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/20 shadow-sm"
-                            title="Edit Transaksi"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        )}
-                        {canDelete && (
-
-                          <button 
-                            onClick={() => setDeleteConfirmId(item.id)} 
-                            className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20 shadow-sm"
-                            title="Hapus Transaksi"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  <div className="flex justify-between items-center pt-1">
+                    <div className="text-sm font-black text-emerald-500">{formatRupiah(item.total)}</div>
+                    <div className="flex gap-2">
+                       {canEdit && <button onClick={() => handleEdit(item)} className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg border border-blue-500/20"><Pencil className="w-4 h-4" /></button>}
+                       {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><Trash2 className="w-4 h-4" /></button>}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
