@@ -41,3 +41,11 @@ export function getIndonesianPeriodLabel(month: number | "all", year: number): s
   if (month === "all") return `Seluruh Tahun ${year}`;
   return `${monthNames[Number(month) - 1]} ${year}`;
 }
+
+export function formatDateToYYYYMMDD(date: Date | undefined | null): string {
+  if (!date) return "";
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}

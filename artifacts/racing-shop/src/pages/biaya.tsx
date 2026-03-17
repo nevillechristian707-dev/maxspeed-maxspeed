@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useListBiaya, useCreateBiaya, useDeleteBiaya, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
-import { formatRupiah, formatDate } from "@/lib/utils";
+import { formatRupiah, formatDate, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Receipt, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +32,7 @@ export default function Biaya() {
   const canDelete = checkPermission('delete');
 
   const [form, setForm] = useState({
-    tanggal: new Date().toISOString().split('T')[0],
+    tanggal: formatDateToYYYYMMDD(new Date()),
     keterangan: "",
     nilai: ""
   });
@@ -90,7 +90,7 @@ export default function Biaya() {
                 <label className="text-xs text-muted-foreground">Tanggal</label>
                 <DatePicker 
                   date={form.tanggal ? new Date(form.tanggal) : undefined}
-                  onChange={(date) => setForm({...form, tanggal: date ? date.toISOString().split('T')[0] : ""})}
+                  onChange={(date) => setForm({...form, tanggal: formatDateToYYYYMMDD(date)})}
                 />
               </div>
               <div className="space-y-1.5">

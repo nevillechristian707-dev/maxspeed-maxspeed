@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useListModal, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
-import { formatRupiah, formatDate } from "@/lib/utils";
+import { formatRupiah, formatDate, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Printer, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ export default function Modal() {
 
   const [y, m] = filterMonth.split('-');
   const startDate = `${y}-${m}-01`;
-  const endDate = new Date(Number(y), Number(m), 0).toISOString().split('T')[0];
+  const endDate = formatDateToYYYYMMDD(new Date(Number(y), Number(m), 0));
 
   const { data, isLoading } = useListModal({ startDate, endDate });
   const { data: user } = useGetMe();

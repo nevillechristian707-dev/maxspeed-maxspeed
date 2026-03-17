@@ -13,7 +13,7 @@ import {
 } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
-import { formatRupiah, formatDate, generateKodeTransaksi, cn, getIndonesianPeriodLabel } from "@/lib/utils";
+import { formatRupiah, formatDate, generateKodeTransaksi, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -115,7 +115,7 @@ export default function Penjualan() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      tanggal: new Date().toISOString().split('T')[0],
+      tanggal: formatDateToYYYYMMDD(new Date()),
       kodeBarang: "",
       harga: 0,
       qty: 1,
@@ -307,7 +307,7 @@ export default function Penjualan() {
                 onClick={() => {
                   setEditingId(null);
                   form.reset({
-                    tanggal: new Date().toISOString().split('T')[0],
+                    tanggal: formatDateToYYYYMMDD(new Date()),
                     kodeBarang: "",
                     harga: 0,
                     qty: 1,
@@ -334,7 +334,7 @@ export default function Penjualan() {
                       render={({ field }) => (
                         <DatePicker 
                           date={field.value ? new Date(field.value) : undefined}
-                          onChange={(date) => field.onChange(date ? date.toISOString().split('T')[0] : "")}
+                          onChange={(date) => field.onChange(formatDateToYYYYMMDD(date))}
                         />
                       )}
                     />

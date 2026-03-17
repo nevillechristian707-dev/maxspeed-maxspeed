@@ -13,7 +13,7 @@ import {
 import { useListPencairan, useMarkSettled, useListMasterBank, useListTransaksiBank, useDeletePenjualan, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
-import { formatRupiah, formatDate, cn, getIndonesianPeriodLabel } from "@/lib/utils";
+import { formatRupiah, formatDate, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -75,7 +75,7 @@ export default function Pencairan() {
 
   const periodLabel = getIndonesianPeriodLabel(selectedMonth, selectedYear);
 
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(formatDateToYYYYMMDD(new Date()));
   const [searchQuery, setSearchQuery] = useState("");
   const [markedIds, setMarkedIds] = useState<Set<number>>(new Set());
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -528,7 +528,7 @@ export default function Pencairan() {
               <Label className="text-xs font-bold uppercase text-muted-foreground">Tanggal Cair</Label>
               <DatePicker 
                 date={selectedDate ? new Date(selectedDate) : undefined}
-                onChange={(date) => setSelectedDate(date ? date.toISOString().split('T')[0] : "")}
+                onChange={(date) => setSelectedDate(formatDateToYYYYMMDD(date))}
               />
             </div>
 
