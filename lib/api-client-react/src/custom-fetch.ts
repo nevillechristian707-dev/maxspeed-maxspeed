@@ -285,6 +285,14 @@ export async function customFetch<T = unknown>(
 
   const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
 
+  // Add x-session-id header from localStorage if available
+  if (typeof localStorage !== "undefined") {
+    const sessionId = localStorage.getItem("maxspeed_session_id");
+    if (sessionId) {
+      headers.set("x-session-id", sessionId);
+    }
+  }
+
   if (
     typeof init.body === "string" &&
     !headers.has("content-type") &&
@@ -306,11 +314,20 @@ export async function customFetch<T = unknown>(
 
   const response = await fetch(finalUrl, { ...init, method, headers, credentials: "include" });
 
-
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
     throw new ApiError(response, errorData, requestInfo);
   }
 
-  return (await parseSuccessBody(response, responseType, requestInfo)) as T;
+  const data = await parseSuccessBody(response, responseType, requestInfo);
+
+  // If this was a successful login, store the sessionId
+  if (url.includes("/api/auth/login") && data && typeof data === "object" && (data as any).sessionId) {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("maxspeed_session_id", (data as any).sessionId);
+    }
+  }
+
+  return data as T;
+
 }

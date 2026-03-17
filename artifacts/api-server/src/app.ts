@@ -43,6 +43,17 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 app.use(cookieParser());
 
+// Middleware Bypass Cookie (Untuk Vercel <-> Railway)
+app.use((req, res, next) => {
+  const sessionId = req.headers['x-session-id'] as string;
+  if (sessionId && !req.headers.cookie) {
+    // Inject cookie secara manual dari header jika browser memblokir cookie asli
+    req.headers.cookie = `maxspeed.sid=s%3A${encodeURIComponent(sessionId)}`;
+  }
+  next();
+});
+
+
 
 const sessionConfig: any = {
   secret: process.env.SESSION_SECRET ?? "maxspeed-racing-shop-secret-2024",
