@@ -63,20 +63,17 @@ export function Layout({ children }: { children: ReactNode }) {
 
   if (!user) return null;
 
-  const handleLogout = async () => {
-    try {
-      // 1. Trigger server logout and wait for it
-      await logoutMutation.mutateAsync();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      // 2. Clear local session storage for x-session-id
-      if (typeof localStorage !== "undefined") {
-        localStorage.removeItem("maxspeed_session_id");
-      }
-      // 3. Redirect immediately to login
-      setLocation("/login");
+  const handleLogout = () => {
+    // 1. Clear local session storage immediately for instant UI response
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("maxspeed_session_id");
     }
+
+    // 2. Clear user state and redirect immediately
+    setLocation("/login");
+
+    // 3. Trigger server logout in the background (no await)
+    logoutMutation.mutate();
   };
 
   // Filter sidebar items based on permissions
