@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { useGetMe, useLogout } from "@workspace/api-client-react";
 import { 
@@ -36,6 +37,7 @@ const SIDEBAR_ITEMS = [
 
 export function Layout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const { data: user, isLoading, isError } = useGetMe({ 
     query: { retry: false } as any
   });
@@ -63,17 +65,24 @@ export function Layout({ children }: { children: ReactNode }) {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    // 1. Clear local session storage immediately for instant UI response
-    if (typeof localStorage !== "undefined") {
-      localStorage.removeItem("maxspeed_session_id");
+  const handleLogout = async () => {
+    try {
+      // 1. Trigger server logout and wait for it
+      await logoutMutation.mutateAsync();
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      // 2. Clear local session storage
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("maxspeed_session_id");
+      }
+
+      // 3. Clear query cache
+      queryClient.clear();
+
+      // 4. Redirect to login
+      setLocation("/login");
     }
-
-    // 2. Clear user state and redirect immediately
-    setLocation("/login");
-
-    // 3. Trigger server logout in the background (no await)
-    logoutMutation.mutate();
   };
 
   // Filter sidebar items based on permissions
