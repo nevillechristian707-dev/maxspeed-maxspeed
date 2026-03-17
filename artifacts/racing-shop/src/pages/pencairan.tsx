@@ -15,7 +15,7 @@ import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard } from "lucide-react";
+import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -197,25 +197,34 @@ export default function Pencairan() {
 
   const bankSummaries = useMemo(() => {
     if (!bankTransactions) return [];
-    const summaries: Record<string, { bank: string; account: string; total: number; count: number; items: any[] }> = {};
+    
+    // Group by Date first
+    const dailyGroups: Record<string, { date: string; banks: Record<string, any>; total: number }> = {};
     
     bankTransactions.forEach(tx => {
-      const key = `${tx.namaBank}-${tx.rekeningBank}`;
-      if (!summaries[key]) {
-        summaries[key] = { bank: tx.namaBank, account: tx.rekeningBank, total: 0, count: 0, items: [] };
+      const dateKey = tx.tanggalCair || "Unknown";
+      if (!dailyGroups[dateKey]) {
+        dailyGroups[dateKey] = { date: dateKey, banks: {}, total: 0 };
       }
-      summaries[key].total += Number(tx.nilai);
-      summaries[key].count += 1;
-      summaries[key].items.push(tx);
+      
+      const bankKey = `${tx.namaBank}-${tx.rekeningBank}`;
+      if (!dailyGroups[dateKey].banks[bankKey]) {
+        dailyGroups[dateKey].banks[bankKey] = { bank: tx.namaBank, account: tx.rekeningBank, total: 0, count: 0, items: [] };
+      }
+      
+      const amount = Number(tx.nilai);
+      dailyGroups[dateKey].banks[bankKey].total += amount;
+      dailyGroups[dateKey].banks[bankKey].count += 1;
+      dailyGroups[dateKey].banks[bankKey].items.push(tx);
+      dailyGroups[dateKey].total += amount;
     });
 
-    // Sort banks by total value descending, and items within each bank by date descending
-    return Object.values(summaries)
-      .map(s => ({
-        ...s,
-        items: s.items.sort((a, b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime())
-      }))
-      .sort((a, b) => b.total - a.total);
+    return Object.values(dailyGroups)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .map(day => ({
+        ...day,
+        banks: Object.values(day.banks).sort((a: any, b: any) => b.total - a.total)
+      }));
   }, [bankTransactions]);
 
   return (
@@ -508,71 +517,86 @@ export default function Pencairan() {
               <div className="p-12 text-center text-muted-foreground italic font-medium">Belum ada data pencairan periode ini.</div>
             ) : (
               <div className="divide-y divide-border/30">
-                {bankSummaries.map((bankGroup, i) => (
-                  <div key={i} className="overflow-hidden">
-                    {/* Bank Header Section */}
-                    <div className="bg-emerald-500/5 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-card rounded-xl border border-emerald-500/20 shadow-sm transition-transform group-hover:scale-105">
-                          <Landmark className="w-5 h-5 text-emerald-500" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
-                          <p className="text-[10px] font-mono text-muted-foreground leading-none">{bankGroup.account}</p>
-                        </div>
-                      </div>
-                      <div className="text-left sm:text-right">
-                        <div className="text-xl font-black text-emerald-600">{formatRupiah(bankGroup.total)}</div>
-                        <div className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-[0.1em]">{bankGroup.count} Transaksi Masuk</div>
-                      </div>
+                {bankSummaries.map((dayGroup, i) => (
+                  <div key={i} className="border-b last:border-0 border-border/20">
+                    {/* Date Header */}
+                    <div className="bg-secondary/20 px-6 py-2.5 border-y border-border/20 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
+                       <div className="flex items-center gap-2">
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{formatDate(dayGroup.date)}</span>
+                       </div>
+                       <div className="text-[10px] font-black text-muted-foreground uppercase">
+                          Total Cair: <span className="text-emerald-500 font-black">{formatRupiah(dayGroup.total)}</span>
+                       </div>
                     </div>
 
-                    {/* Transaction Detail Table for this Bank */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-[11px] text-left">
-                        <thead className="text-[9px] text-muted-foreground/60 uppercase bg-secondary/10 border-b border-border/10">
-                          <tr>
-                            <th className="px-6 py-2.5 font-bold">Tanggal Cair</th>
-                            <th className="px-4 py-2.5 font-bold">Faktur / TRX ID</th>
-                            <th className="px-4 py-2.5 font-bold">Sumber Dana</th>
-                            <th className="px-4 py-2.5 text-right font-bold">Nilai</th>
-                            <th className="px-4 py-2.5 text-center font-bold">Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/10">
-                          {bankGroup.items.map(tx => (
-                            <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
-                              <td className="px-6 py-3 text-muted-foreground font-medium">{formatDate(tx.tanggalCair)}</td>
-                              <td className="px-4 py-3">
-                                <span className="font-bold text-foreground">{tx.noFaktur || "-"}</span>
-                                <div className="text-[9px] text-muted-foreground/50 font-mono tracking-tighter">ID: {tx.id}</div>
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className="px-2 py-0.5 bg-secondary/50 rounded-full font-bold text-muted-foreground/80 uppercase tracking-tighter">
-                                  {tx.sumber}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-right font-black text-emerald-500/80">{formatRupiah(tx.nilai)}</td>
-                              <td className="px-4 py-3 text-center">
-                                {canEdit && (
-                                  <button
-                                    onClick={() => {
-                                      if (window.confirm('Batalkan pencairan untuk faktur ini? Data akan kembali ke daftar tunggu.')) {
-                                        cancelSettledMutation.mutate(tx.penjualanId);
-                                      }
-                                    }}
-                                    disabled={cancelSettledMutation.isPending}
-                                    className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded transition-colors opacity-0 group-hover/row:opacity-100 disabled:opacity-50"
-                                    title="Batalkan Pencairan"
-                                  >
-                                    <XCircle className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="divide-y divide-border/10">
+                      {dayGroup.banks.map((bankGroup: any, j: number) => (
+                        <div key={j} className="overflow-hidden">
+                          {/* Bank Header Section */}
+                          <div className="bg-emerald-500/[0.02] px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 bg-card rounded-xl border border-emerald-500/20 shadow-sm transition-transform group-hover:scale-105">
+                                <Landmark className="w-5 h-5 text-emerald-500" />
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
+                                <p className="text-[9px] font-mono text-muted-foreground leading-none">{bankGroup.account}</p>
+                              </div>
+                            </div>
+                            <div className="text-left sm:text-right">
+                              <div className="text-lg font-black text-emerald-600">{formatRupiah(bankGroup.total)}</div>
+                              <div className="text-[9px] font-bold text-emerald-500/60 uppercase tracking-[0.1em]">{bankGroup.count} Transaksi</div>
+                            </div>
+                          </div>
+
+                          {/* Transaction Detail Table for this Bank */}
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-[11px] text-left">
+                              <thead className="text-[9px] text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
+                                <tr>
+                                  <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX ID</th>
+                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Sumber Dana</th>
+                                  <th className="px-4 py-2 text-right font-bold uppercase tracking-widest">Nilai</th>
+                                  <th className="px-4 py-2 text-center font-bold uppercase tracking-widest">Aksi</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border/10">
+                                {bankGroup.items.map((tx: any) => (
+                                  <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
+                                    <td className="px-6 py-3">
+                                      <span className="font-bold text-foreground text-[10px]">{tx.noFaktur || "-"}</span>
+                                      <div className="text-[8px] text-muted-foreground/50 font-mono tracking-tighter uppercase">{tx.sumber} | ID: {tx.id}</div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-[9px]">
+                                        {tx.sumber}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-[10px]">{formatRupiah(tx.nilai)}</td>
+                                    <td className="px-4 py-3 text-center">
+                                      {canEdit && (
+                                        <button
+                                          onClick={() => {
+                                            if (window.confirm('Batalkan pencairan untuk faktur ini? Data akan kembali ke daftar tunggu.')) {
+                                              cancelSettledMutation.mutate(tx.penjualanId);
+                                            }
+                                          }}
+                                          disabled={cancelSettledMutation.isPending}
+                                          className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover/row:opacity-100 disabled:opacity-50"
+                                          title="Batalkan Pencairan"
+                                        >
+                                          <XCircle className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
