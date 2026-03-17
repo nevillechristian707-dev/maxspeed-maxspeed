@@ -178,7 +178,9 @@ router.delete("/:id", async (req, res) => {
     const db = getDb();
     if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
-    await db.delete(penjualanTable).where(eq(penjualanTable.id, parseInt(req.params.id)));
+    const id = parseInt(req.params.id);
+    await db.delete(transaksiBank).where(eq(transaksiBank.penjualanId, id));
+    await db.delete(penjualanTable).where(eq(penjualanTable.id, id));
     return res.json({ success: true, message: "Deleted" });
   } catch (err) {
     return res.status(500).json({ error: "Internal Server Error" });
