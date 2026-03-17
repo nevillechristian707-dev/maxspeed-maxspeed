@@ -1,0 +1,1430 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: MAX SPEED RACING SHOP Dashboard API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: dashboard
+    description: Dashboard summary
+  - name: penjualan
+    description: Sales transactions
+  - name: pencairan
+    description: Disbursements
+  - name: biaya
+    description: Operational expenses
+  - name: master-barang
+    description: Product master data
+  - name: master-bank
+    description: Bank master data
+  - name: master-online-shop
+    description: Online shop master data
+  - name: customer
+    description: Customer master data
+  - name: modal
+    description: Capital/cost view
+  - name: laporan
+    description: Reports
+  - name: users
+    description: User management
+  - name: roles
+    description: Role management
+
+paths:
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  
+  /users/{id}:
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /roles:
+    get:
+      operationId: listRoles
+      tags: [roles]
+      summary: List roles
+      responses:
+        "200":
+          description: Roles list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+    post:
+      operationId: createRole
+      tags: [roles]
+      summary: Create role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoleRequest"
+      responses:
+        "201":
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+  
+  /roles/{id}:
+    put:
+      operationId: updateRole
+      tags: [roles]
+      summary: Update role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoleRequest"
+      responses:
+        "200":
+          description: Role updated
+    delete:
+      operationId: deleteRole
+      tags: [roles]
+      summary: Delete role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/chart:
+    get:
+      operationId: getDashboardChart
+      tags: [dashboard]
+      summary: Get sales chart data
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [daily, monthly]
+            default: monthly
+      responses:
+        "200":
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChartData"
+
+  /penjualan:
+    get:
+      operationId: listPenjualan
+      tags: [penjualan]
+      summary: List sales transactions
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: paymentMethod
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Penjualan"
+    post:
+      operationId: createPenjualan
+      tags: [penjualan]
+      summary: Create a sale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePenjualanRequest"
+      responses:
+        "201":
+          description: Sale created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Penjualan"
+
+  /penjualan/{id}:
+    get:
+      operationId: getPenjualan
+      tags: [penjualan]
+      summary: Get a sale
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sale
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Penjualan"
+    put:
+      operationId: updatePenjualan
+      tags: [penjualan]
+      summary: Update a sale
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePenjualanRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Penjualan"
+    delete:
+      operationId: deletePenjualan
+      tags: [penjualan]
+      summary: Delete a sale
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /pencairan:
+    get:
+      operationId: listPencairan
+      tags: [pencairan]
+      summary: List unsettled online/credit sales
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Unsettled transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PencairanItem"
+
+  /pencairan/transaksi-bank:
+    get:
+      operationId: listTransaksiBank
+      tags: [pencairan]
+      summary: List bank transactions (recap of settlements)
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bank transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransaksiBank"
+
+  /pencairan/{id}/mark-settled:
+    post:
+      operationId: markSettled
+      tags: [pencairan]
+      summary: Mark transaction as settled and record to bank
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkSettledRequest"
+      responses:
+        "200":
+          description: Settled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PencairanItem"
+
+  /biaya:
+    get:
+      operationId: listBiaya
+      tags: [biaya]
+      summary: List expenses
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Expenses list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Biaya"
+    post:
+      operationId: createBiaya
+      tags: [biaya]
+      summary: Create expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBiayaRequest"
+      responses:
+        "201":
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Biaya"
+
+  /biaya/{id}:
+    delete:
+      operationId: deleteBiaya
+      tags: [biaya]
+      summary: Delete expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /master-barang:
+    get:
+      operationId: listMasterBarang
+      tags: [master-barang]
+      summary: List products
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MasterBarang"
+    post:
+      operationId: createMasterBarang
+      tags: [master-barang]
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterBarangRequest"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterBarang"
+
+  /master-barang/{id}:
+    put:
+      operationId: updateMasterBarang
+      tags: [master-barang]
+      summary: Update product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterBarangRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterBarang"
+    delete:
+      operationId: deleteMasterBarang
+      tags: [master-barang]
+      summary: Delete product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /master-bank:
+    get:
+      operationId: listMasterBank
+      tags: [master-bank]
+      summary: List banks
+      responses:
+        "200":
+          description: Banks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MasterBank"
+    post:
+      operationId: createMasterBank
+      tags: [master-bank]
+      summary: Create bank
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterBankRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterBank"
+
+  /master-bank/{id}:
+    delete:
+      operationId: deleteMasterBank
+      tags: [master-bank]
+      summary: Delete bank
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /master-online-shop:
+    get:
+      operationId: listMasterOnlineShop
+      tags: [master-online-shop]
+      summary: List online shops
+      responses:
+        "200":
+          description: Online shops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MasterOnlineShop"
+    post:
+      operationId: createMasterOnlineShop
+      tags: [master-online-shop]
+      summary: Create online shop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMasterOnlineShopRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MasterOnlineShop"
+
+  /master-online-shop/{id}:
+    delete:
+      operationId: deleteMasterOnlineShop
+      tags: [master-online-shop]
+      summary: Delete online shop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /customer:
+    get:
+      operationId: listCustomer
+      tags: [customer]
+      summary: List customers
+      responses:
+        "200":
+          description: Customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customer]
+      summary: Create customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customer/{id}:
+    delete:
+      operationId: deleteCustomer
+      tags: [customer]
+      summary: Delete customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /modal:
+    get:
+      operationId: listModal
+      tags: [modal]
+      summary: List capital/cost detail view
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Modal list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModalResponse"
+
+  /laporan/profit:
+    get:
+      operationId: getLaporanProfit
+      tags: [laporan]
+      summary: Get profit report
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profit report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitReport"
+
+  /laporan/payment-breakdown:
+    get:
+      operationId: getPaymentBreakdown
+      tags: [laporan]
+      summary: Get payment method breakdown
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentBreakdown"
+
+  /laporan/top-products:
+    get:
+      operationId: getTopProducts
+      tags: [laporan]
+      summary: Get top selling products
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Top products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopProduct"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required: [username, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: "#/components/schemas/User"
+      required: [success, user]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        permissions:
+          type: object
+          additionalProperties: true
+      required: [id, username, name, role]
+
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+      required: [username, password, name, role]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        permissions:
+          type: object
+          additionalProperties: true
+      required: [id, name, permissions]
+
+    CreateRoleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        permissions:
+          type: object
+          additionalProperties: true
+      required: [name, permissions]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalPenjualan:
+          type: number
+        totalModal:
+          type: number
+        totalBiaya:
+          type: number
+        laba:
+          type: number
+        labaShared:
+          type: number
+        totalTransaksi:
+          type: integer
+        cashTotal:
+          type: number
+        bankTotal:
+          type: number
+        onlineShopTotal:
+          type: number
+        kreditTotal:
+          type: number
+        kreditBelumCair:
+          type: number
+        onlineShopBelumCair:
+          type: number
+        biayaItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/Biaya"
+      required:
+        - totalPenjualan
+        - totalModal
+        - totalBiaya
+        - laba
+        - labaShared
+        - totalTransaksi
+        - cashTotal
+        - bankTotal
+        - onlineShopTotal
+        - kreditTotal
+        - kreditBelumCair
+        - onlineShopBelumCair
+        - biayaItems
+
+    ChartData:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        penjualan:
+          type: array
+          items:
+            type: number
+        laba:
+          type: array
+          items:
+            type: number
+      required: [labels, penjualan, laba]
+
+    Penjualan:
+      type: object
+      properties:
+        id:
+          type: integer
+        tanggal:
+          type: string
+        nomor:
+          type: integer
+        kodeTransaksi:
+          type: string
+        kodeBarang:
+          type: string
+        namaBarang:
+          type: string
+        brand:
+          type: string
+        harga:
+          type: number
+        qty:
+          type: integer
+        total:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [cash, bank, online_shop, kredit]
+        nilaiCash:
+          type: number
+          nullable: true
+        namaBank:
+          type: string
+          nullable: true
+        nilaiBank:
+          type: number
+          nullable: true
+        namaOnlineShop:
+          type: string
+          nullable: true
+        nilaiOnlineShop:
+          type: number
+          nullable: true
+        namaCustomer:
+          type: string
+          nullable: true
+        nilaiKredit:
+          type: number
+          nullable: true
+        statusCair:
+          type: string
+          enum: [pending, cair]
+          nullable: true
+        tanggalCair:
+          type: string
+          nullable: true
+        hargaBeli:
+          type: number
+          nullable: true
+        noFaktur:
+          type: string
+          nullable: true
+        totalModal:
+          type: number
+          nullable: true
+      required:
+        - id
+        - tanggal
+        - nomor
+        - kodeTransaksi
+        - kodeBarang
+        - namaBarang
+        - brand
+        - harga
+        - qty
+        - total
+        - paymentMethod
+
+    CreatePenjualanRequest:
+      type: object
+      properties:
+        tanggal:
+          type: string
+        kodeBarang:
+          type: string
+        harga:
+          type: number
+        qty:
+          type: integer
+        paymentMethod:
+          type: string
+          enum: [cash, bank, online_shop, kredit]
+        nilaiCash:
+          type: number
+          nullable: true
+        namaBank:
+          type: string
+          nullable: true
+        nilaiBank:
+          type: number
+          nullable: true
+        namaOnlineShop:
+          type: string
+          nullable: true
+        nilaiOnlineShop:
+          type: number
+          nullable: true
+        namaCustomer:
+          type: string
+          nullable: true
+        nilaiKredit:
+          type: number
+          nullable: true
+        noFaktur:
+          type: string
+          nullable: true
+      required: [tanggal, kodeBarang, harga, qty, paymentMethod]
+
+    PencairanItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        tanggal:
+          type: string
+        kodeTransaksi:
+          type: string
+        noFaktur:
+          type: string
+          nullable: true
+        namaBarang:
+          type: string
+        paymentMethod:
+          type: string
+        namaOnlineShop:
+          type: string
+          nullable: true
+        namaCustomer:
+          type: string
+          nullable: true
+        nilai:
+          type: number
+        status:
+          type: string
+          enum: [pending, cair]
+        tanggalCair:
+          type: string
+          nullable: true
+      required: [id, tanggal, kodeTransaksi, namaBarang, paymentMethod, nilai, status]
+
+    MarkSettledRequest:
+      type: object
+      properties:
+        tanggalCair:
+          type: string
+        namaBank:
+          type: string
+        rekeningBank:
+          type: string
+      required: [tanggalCair, namaBank, rekeningBank]
+
+    TransaksiBank:
+      type: object
+      properties:
+        id:
+          type: integer
+        tanggalCair:
+          type: string
+        noFaktur:
+          type: string
+          nullable: true
+        nilai:
+          type: number
+        sumber:
+          type: string
+        namaBank:
+          type: string
+        rekeningBank:
+          type: string
+        penjualanId:
+          type: integer
+      required: [id, tanggalCair, nilai, sumber, namaBank, rekeningBank, penjualanId]
+
+    Biaya:
+      type: object
+      properties:
+        id:
+          type: integer
+        tanggal:
+          type: string
+        keterangan:
+          type: string
+        nilai:
+          type: number
+      required: [id, tanggal, keterangan, nilai]
+
+    CreateBiayaRequest:
+      type: object
+      properties:
+        tanggal:
+          type: string
+        keterangan:
+          type: string
+        nilai:
+          type: number
+      required: [tanggal, keterangan, nilai]
+
+    MasterBarang:
+      type: object
+      properties:
+        id:
+          type: integer
+        kodeBarang:
+          type: string
+        namaBarang:
+          type: string
+        brand:
+          type: string
+        supplier:
+          type: string
+        hargaBeli:
+          type: number
+        hargaJual:
+          type: number
+      required: [id, kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual]
+
+    CreateMasterBarangRequest:
+      type: object
+      properties:
+        kodeBarang:
+          type: string
+        namaBarang:
+          type: string
+        brand:
+          type: string
+        supplier:
+          type: string
+        hargaBeli:
+          type: number
+        hargaJual:
+          type: number
+      required: [kodeBarang, namaBarang, brand, supplier, hargaBeli, hargaJual]
+
+    MasterBank:
+      type: object
+      properties:
+        id:
+          type: integer
+        namaBank:
+          type: string
+        nomorRekening:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [id, namaBank, nomorRekening]
+
+    CreateMasterBankRequest:
+      type: object
+      properties:
+        namaBank:
+          type: string
+        nomorRekening:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [namaBank, nomorRekening]
+
+    MasterOnlineShop:
+      type: object
+      properties:
+        id:
+          type: integer
+        namaOnlineShop:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [id, namaOnlineShop]
+
+    CreateMasterOnlineShopRequest:
+      type: object
+      properties:
+        namaOnlineShop:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [namaOnlineShop]
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        namaCustomer:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [id, namaCustomer]
+
+    CreateCustomerRequest:
+      type: object
+      properties:
+        namaCustomer:
+          type: string
+        keterangan:
+          type: string
+          nullable: true
+      required: [namaCustomer]
+
+    ModalItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        tanggal:
+          type: string
+        kodeTransaksi:
+          type: string
+        kodeBarang:
+          type: string
+        namaBarang:
+          type: string
+        brand:
+          type: string
+        qty:
+          type: integer
+        harga:
+          type: number
+        total:
+          type: number
+        hargaBeli:
+          type: number
+        totalModal:
+          type: number
+        paymentMethod:
+          type: string
+      required:
+        - id
+        - tanggal
+        - kodeTransaksi
+        - kodeBarang
+        - namaBarang
+        - brand
+        - qty
+        - harga
+        - total
+        - hargaBeli
+        - totalModal
+        - paymentMethod
+
+    ModalResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModalItem"
+        totalPenjualan:
+          type: number
+        totalModal:
+          type: number
+        totalLaba:
+          type: number
+      required: [items, totalPenjualan, totalModal, totalLaba]
+
+    ProfitReport:
+      type: object
+      properties:
+        startDate:
+          type: string
+        endDate:
+          type: string
+        totalPenjualan:
+          type: number
+        totalModal:
+          type: number
+        totalBiaya:
+          type: number
+        laba:
+          type: number
+        labaShared:
+          type: number
+      required: [startDate, endDate, totalPenjualan, totalModal, totalBiaya, laba, labaShared]
+
+    PaymentBreakdown:
+      type: object
+      properties:
+        cash:
+          type: number
+        bank:
+          type: number
+        onlineShop:
+          type: number
+        kredit:
+          type: number
+        kreditCair:
+          type: number
+        onlineShopCair:
+          type: number
+      required: [cash, bank, onlineShop, kredit, kreditCair, onlineShopCair]
+
+    TopProduct:
+      type: object
+      properties:
+        kodeBarang:
+          type: string
+        namaBarang:
+          type: string
+        brand:
+          type: string
+        totalQty:
+          type: integer
+        totalPenjualan:
+          type: number
+      required: [kodeBarang, namaBarang, brand, totalQty, totalPenjualan]

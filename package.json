@@ -1,0 +1,32 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.32.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andikubusho/maxspeed.git"
+  },
+  "homepage": "https://github.com/andikubusho/maxspeed",
+  "scripts": {
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "dev": "pnpm -r --filter \"@workspace/api-server\" --filter \"@workspace/racing-shop\" dev",
+    "start": "pnpm --filter \"@workspace/api-server\" start",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "prettier": "^3.8.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0",
+      "esbuild": "0.27.3"
+    }
+  }
+}
