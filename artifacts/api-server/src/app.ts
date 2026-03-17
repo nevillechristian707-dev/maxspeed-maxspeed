@@ -43,10 +43,12 @@ const sessionConfig: any = {
   secret: process.env.SESSION_SECRET ?? "maxspeed-racing-shop-secret-2024",
   resave: false,
   saveUninitialized: false,
+  proxy: true,
+  name: "maxspeed.sid",
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: true, // Always true for Railway/Vercel HTTPS
     httpOnly: true,
-    sameSite: "lax" as const,
+    sameSite: "none" as const, // Required for cross-domain cookies
     maxAge: 24 * 60 * 60 * 1000,
   },
 };
