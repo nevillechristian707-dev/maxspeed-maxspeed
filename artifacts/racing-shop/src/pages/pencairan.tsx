@@ -78,9 +78,13 @@ export default function Pencairan() {
   const periodLabel = getIndonesianPeriodLabel(selectedMonth, selectedYear);
 
   const [selectedDate, setSelectedDate] = useState(formatDateToYYYYMMDD(new Date()));
-  const [searchQuery, setSearchQuery] = useState("");
   const [markedIds, setMarkedIds] = useState<Set<number>>(new Set());
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // Individual Search States
+  const [searchOnlineShop, setSearchOnlineShop] = useState("");
+  const [searchKredit, setSearchKredit] = useState("");
+  const [searchHistory, setSearchHistory] = useState("");
   
   // Bank Selection Modal State
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
@@ -183,8 +187,8 @@ export default function Pencairan() {
 
   const onlineShopPending = useMemo(() => {
     let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (searchOnlineShop) {
+      const query = searchOnlineShop.toLowerCase();
       items = items.filter(item => 
         formatDate(item.tanggal).toLowerCase().includes(query) ||
         item.kodeTransaksi.toLowerCase().includes(query) ||
@@ -194,12 +198,12 @@ export default function Pencairan() {
       );
     }
     return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  }, [data, searchQuery]);
+  }, [data, searchOnlineShop]);
 
   const kreditPending = useMemo(() => {
     let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (searchKredit) {
+      const query = searchKredit.toLowerCase();
       items = items.filter(item => 
         formatDate(item.tanggal).toLowerCase().includes(query) ||
         item.kodeTransaksi.toLowerCase().includes(query) ||
@@ -209,7 +213,7 @@ export default function Pencairan() {
       );
     }
     return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  }, [data, searchQuery]);
+  }, [data, searchKredit]);
 
   const totalMarked = useMemo(() => {
     return Array.from(markedIds).reduce((sum, id) => {
@@ -228,10 +232,27 @@ export default function Pencairan() {
   const bankSummaries = useMemo(() => {
     if (!bankTransactions) return [];
     
+    // Filter by search query first
+    let filteredTransactions = bankTransactions;
+    if (searchHistory) {
+      const query = searchHistory.toLowerCase();
+      filteredTransactions = bankTransactions.filter((tx: any) => 
+        formatDate(tx.tanggal).toLowerCase().includes(query) ||
+        (tx.noFaktur || "").toLowerCase().includes(query) ||
+        tx.kodeTransaksi?.toLowerCase().includes(query) ||
+        tx.namaBarang?.toLowerCase().includes(query) ||
+        (tx.brand || "").toLowerCase().includes(query) ||
+        tx.namaBank.toLowerCase().includes(query) ||
+        (tx.rekeningBank || "").toLowerCase().includes(query) ||
+        (tx.namaOnlineShop || "").toLowerCase().includes(query) ||
+        (tx.namaCustomer || "").toLowerCase().includes(query)
+      );
+    }
+
     // Group by Date first
     const dailyGroups: Record<string, { date: string; banks: Record<string, any>; total: number }> = {};
     
-    bankTransactions.forEach(tx => {
+    filteredTransactions.forEach(tx => {
       const dateKey = tx.tanggalCair || "Unknown";
       if (!dailyGroups[dateKey]) {
         dailyGroups[dateKey] = { date: dateKey, banks: {}, total: 0 };
@@ -255,7 +276,7 @@ export default function Pencairan() {
         ...day,
         banks: Object.values(day.banks).sort((a: any, b: any) => b.total - a.total)
       }));
-  }, [bankTransactions]);
+  }, [bankTransactions, searchHistory]);
 
   const currentInstallments = useMemo(() => {
     if (!itemToSettle || !bankTransactions) return [];
@@ -270,16 +291,11 @@ export default function Pencairan() {
             <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
               <Wallet className="text-primary" /> Pencairan Dana
             </h1>
-            <p className="text-muted-foreground mt-1">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
+            <p className="text-muted-foreground mt-1 text-sm">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
           </div>
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Cari transaksi atau platform..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 bg-secondary/10 border-none ring-1 ring-border"
-            />
+          <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-2xl border border-border/50">
+             <span className="text-xs font-black text-muted-foreground uppercase tracking-widest px-2">Periode Aktif:</span>
+             <span className="text-sm font-black text-primary uppercase">{periodLabel}</span>
           </div>
         </div>
 
@@ -291,24 +307,35 @@ export default function Pencairan() {
               <CardTitle className="text-purple-400 flex items-center gap-2 uppercase tracking-tighter decoration-purple-500/30 underline-offset-4 underline">
                 <Store className="w-5 h-5 text-purple-500" /> Piutang Online Shop
               </CardTitle>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-7">Menunggu pencairan dari dana tertahan marketplace</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Dana marketplace belum cair</p>
             </div>
-            <div className="flex items-center gap-3">
-              {totalOnlineShopMarked > 0 && (
-                <div className="mr-4 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center gap-2">
-                   <span className="text-xs font-black uppercase text-purple-400">Total Cair:</span>
-                   <span className="text-sm font-black text-purple-500 tabular-nums">{formatRupiah(totalOnlineShopMarked)}</span>
-                </div>
-              )}
-              {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => onlineShopPending.some(p => p.id === id)) && (
-                <Button 
-                  onClick={() => handleOpenBankModal(null, true)}
-                  disabled={markSettledMutation.isPending}
-                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
-                >
-                  Lunasi Terpilih
-                </Button>
-              )}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input 
+                  placeholder="Cari Tgl, Faktur, TRX, Produk..." 
+                  value={searchOnlineShop}
+                  onChange={(e) => setSearchOnlineShop(e.target.value)}
+                  className="pl-9 h-9 text-xs bg-secondary/5 border-border/50"
+                />
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {totalOnlineShopMarked > 0 && (
+                  <div className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-[10px] font-black uppercase text-purple-400">Terpilih:</span>
+                    <span className="text-xs font-black text-purple-500 tabular-nums">{formatRupiah(totalOnlineShopMarked)}</span>
+                  </div>
+                )}
+                {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => onlineShopPending.some(p => p.id === id)) && (
+                  <Button 
+                    onClick={() => handleOpenBankModal(null, true)}
+                    disabled={markSettledMutation.isPending}
+                    className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
+                  >
+                    Cairkan
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -469,18 +496,29 @@ export default function Pencairan() {
               <CardTitle className="text-orange-400 flex items-center gap-2 uppercase tracking-tighter decoration-orange-500/30 underline-offset-4 underline">
                 <CreditCard className="w-5 h-5 text-orange-500" /> Piutang Penjualan Kredit
               </CardTitle>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-7">Tagihan jatuh tempo yang belum dibayarkan oleh customer</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Tagihan jatuh tempo customer</p>
             </div>
-            <div className="flex items-center gap-3">
-              {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => kreditPending.some(p => p.id === id)) && (
-                <Button 
-                  onClick={() => handleOpenBankModal(null, true)}
-                  disabled={markSettledMutation.isPending}
-                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
-                >
-                  Lunasi Terpilih
-                </Button>
-              )}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input 
+                  placeholder="Cari Tgl, Faktur, TRX, Produk..." 
+                  value={searchKredit}
+                  onChange={(e) => setSearchKredit(e.target.value)}
+                  className="pl-9 h-9 text-xs bg-secondary/5 border-border/50"
+                />
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => kreditPending.some(p => p.id === id)) && (
+                  <Button 
+                    onClick={() => handleOpenBankModal(null, true)}
+                    disabled={markSettledMutation.isPending}
+                    className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
+                  >
+                    Lunasi
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -614,14 +652,28 @@ export default function Pencairan() {
 
         {/* Disbursement Data by Bank */}
         <Card className="border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-          <CardHeader className="border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-2">
-            <CardTitle className="text-emerald-500 flex items-center gap-2">
-              <Building2 className="w-5 h-5" /> Data Pencairan per Bank
-            </CardTitle>
-            <div className="px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-              <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">
-                Periode: {periodLabel}
-              </span>
+          <CardHeader className="border-b border-border/50 flex flex-col xl:flex-row xl:items-center justify-between gap-4 py-4">
+            <div className="flex flex-col gap-1">
+              <CardTitle className="text-emerald-500 flex items-center gap-2 uppercase tracking-tighter decoration-emerald-500/30 underline-offset-4 underline">
+                <Building2 className="w-5 h-5 text-emerald-500" /> Data Pencairan per Bank
+              </CardTitle>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Rekapitulasi kas masuk periode ini</p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Cari Tgl, Faktur, TRX, Produk, Bank..." 
+                  value={searchHistory}
+                  onChange={(e) => setSearchHistory(e.target.value)}
+                  className="pl-10 h-10 text-sm bg-secondary/10 border-emerald-500/20 shadow-inner"
+                />
+              </div>
+              <div className="px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">
+                  Periode: {periodLabel}
+                </span>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
