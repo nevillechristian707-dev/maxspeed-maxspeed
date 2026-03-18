@@ -12,5 +12,6 @@ export const transaksiBank = pgTable("transaksi_bank", {
 }, (table) => {
   return [
     index("idx_transaksi_bank_penjualan_id").on(table.penjualanId),
+    index("idx_transaksi_bank_tanggal_cair").on(table.tanggalCair),
   ];
 });
