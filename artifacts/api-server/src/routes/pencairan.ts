@@ -158,7 +158,8 @@ router.get("/transaksi-bank", async (req, res) => {
         brand: penjualanTable.brand,
         kodeTransaksi: penjualanTable.kodeTransaksi,
         namaOnlineShop: penjualanTable.namaOnlineShop,
-        namaCustomer: penjualanTable.namaCustomer
+        namaCustomer: penjualanTable.namaCustomer,
+        tanggal: penjualanTable.tanggal
       })
       .from(transaksiBank)
       .leftJoin(penjualanTable, eq(transaksiBank.penjualanId, penjualanTable.id))

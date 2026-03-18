@@ -676,6 +676,7 @@ export default function Pencairan() {
                             <table className="w-full text-[11px] text-left">
                               <thead className="text-[9px] text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
                                 <tr>
+                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Tgl Faktur</th>
                                   <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX</th>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Produk & Brand</th>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Sumber Dana</th>
@@ -686,6 +687,9 @@ export default function Pencairan() {
                               <tbody className="divide-y divide-border/10">
                                 {bankGroup.items.map((tx: any) => (
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
+                                    <td className="px-4 py-3 whitespace-nowrap text-[10px] text-muted-foreground font-bold">
+                                      {formatDate(tx.tanggal)}
+                                    </td>
                                     <td className="px-6 py-3">
                                       <span className="font-bold text-foreground text-[10px]">{tx.noFaktur || "-"}</span>
                                       <div className="text-[8px] text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
