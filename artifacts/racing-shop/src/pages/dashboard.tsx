@@ -60,6 +60,7 @@ export default function Dashboard() {
     return {
       name: compactDate,
       fullDate: formatDate(label),
+      rawDate: label,
       Penjualan: Number(chartData?.penjualan?.[i] || 0),
       Laba: Number(chartData?.laba?.[i] || 0)
     };
@@ -195,7 +196,10 @@ export default function Dashboard() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : isErrorChart ? (
-              <div className="flex h-full items-center justify-center p-8 text-muted-foreground italic text-xs">Gagal memuat rekapan harian</div>
+              <div className="flex flex-col h-full items-center justify-center p-8 text-center">
+                <p className="text-rose-500 font-bold text-xs uppercase mb-1">Gagal memuat rekapan harian</p>
+                <p className="text-muted-foreground text-[10px] italic opacity-70">{(chartData as any)?.message || "Internal Server Error"}</p>
+              </div>
             ) : (
               <table className="w-full text-xs text-left border-collapse sticky-header">
                 <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
@@ -207,9 +211,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-border/10">
                   {[...formattedChartData].sort((a, b) => {
-                    const dateA = new Date((chartData?.labels || [])[formattedChartData.indexOf(a)]);
-                    const dateB = new Date((chartData?.labels || [])[formattedChartData.indexOf(b)]);
-                    return dateB.getTime() - dateA.getTime();
+                    return new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime();
                   }).map((item, idx) => (
                     <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
                       <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors">

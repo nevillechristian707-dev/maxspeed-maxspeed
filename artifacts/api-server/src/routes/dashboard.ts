@@ -135,6 +135,7 @@ router.get("/chart", async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
     const format = "YYYY-MM-DD";
+    const dateLabel = sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`;
     
     // We want to show TOTAL sales by 'tanggal' (date sold), irrespective of payment status.
     const conds = [];
@@ -142,14 +143,14 @@ router.get("/chart", async (req, res) => {
     if (endDate) conds.push(lte(penjualanTable.tanggal, String(endDate)));
 
     const chartRows = await db.select({
-      label: sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`,
+      label: dateLabel,
       penjualan: sql<string>`sum(${penjualanTable.total})`,
       modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
     })
     .from(penjualanTable)
     .where(conds.length ? and(...conds) : undefined)
-    .groupBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`)
-    .orderBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`);
+    .groupBy(dateLabel)
+    .orderBy(dateLabel);
 
     const labels = chartRows.map((r: any) => r.label);
     const penjualan = chartRows.map((r: any) => n(r.penjualan));
@@ -160,9 +161,13 @@ router.get("/chart", async (req, res) => {
       penjualan,
       laba,
     });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal Server Error" });
+  } catch (err: any) {
+    console.error("GET /api/dashboard/chart error:", err);
+    return res.status(500).json({ 
+      error: "Internal Server Error", 
+      message: err.message, 
+      detail: err.detail || err.cause?.message || "Check server logs for details"
+    });
   }
 });
 
