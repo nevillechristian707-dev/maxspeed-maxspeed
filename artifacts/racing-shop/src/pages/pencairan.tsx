@@ -165,29 +165,33 @@ export default function Pencairan() {
   const canDelete = checkPermission('delete');
 
   const onlineShopPending = useMemo(() => {
-    const items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
-    if (!searchQuery) return items;
-    const query = searchQuery.toLowerCase();
-    return items.filter(item => 
-      formatDate(item.tanggal).toLowerCase().includes(query) ||
-      item.kodeTransaksi.toLowerCase().includes(query) ||
-      (item.noFaktur || "").toLowerCase().includes(query) ||
-      item.namaBarang.toLowerCase().includes(query) ||
-      (item.namaOnlineShop || "").toLowerCase().includes(query)
-    );
+    let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter(item => 
+        formatDate(item.tanggal).toLowerCase().includes(query) ||
+        item.kodeTransaksi.toLowerCase().includes(query) ||
+        (item.noFaktur || "").toLowerCase().includes(query) ||
+        item.namaBarang.toLowerCase().includes(query) ||
+        (item.namaOnlineShop || "").toLowerCase().includes(query)
+      );
+    }
+    return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
   }, [data, searchQuery]);
 
   const kreditPending = useMemo(() => {
-    const items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
-    if (!searchQuery) return items;
-    const query = searchQuery.toLowerCase();
-    return items.filter(item => 
-      formatDate(item.tanggal).toLowerCase().includes(query) ||
-      item.kodeTransaksi.toLowerCase().includes(query) ||
-      (item.noFaktur || "").toLowerCase().includes(query) ||
-      item.namaBarang.toLowerCase().includes(query) ||
-      (item.namaCustomer || "").toLowerCase().includes(query)
-    );
+    let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      items = items.filter(item => 
+        formatDate(item.tanggal).toLowerCase().includes(query) ||
+        item.kodeTransaksi.toLowerCase().includes(query) ||
+        (item.noFaktur || "").toLowerCase().includes(query) ||
+        item.namaBarang.toLowerCase().includes(query) ||
+        (item.namaCustomer || "").toLowerCase().includes(query)
+      );
+    }
+    return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
   }, [data, searchQuery]);
 
   const totalMarked = useMemo(() => {
@@ -333,7 +337,7 @@ export default function Pencairan() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="font-black text-purple-400 text-[10px] uppercase block mb-1">{item.namaOnlineShop}</span>
-                        <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
@@ -400,7 +404,7 @@ export default function Pencairan() {
                        <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-purple-500/30 line-clamp-2">{item.namaBarang}</div>
+                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
@@ -503,7 +507,7 @@ export default function Pencairan() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="font-black text-orange-400 text-[10px] uppercase block mb-1">{item.namaCustomer}</span>
-                        <div className="text-xs truncate max-w-[200px] leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
@@ -570,7 +574,7 @@ export default function Pencairan() {
                        <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-orange-500/30 line-clamp-2">{item.namaBarang}</div>
+                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-orange-500">{formatRupiah(item.nilai)}</div>

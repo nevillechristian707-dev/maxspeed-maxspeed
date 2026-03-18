@@ -430,7 +430,7 @@ export default function Laporan() {
                     <tr key={i} className="hover:bg-primary/[0.03] transition-colors group/row">
                       <td className="px-4 py-3.5 flex items-center gap-3">
                         <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-black ${i < 3 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-secondary text-muted-foreground'}`}>{i + 1}</span>
-                        <div className="max-w-[150px] truncate">
+                        <div>
                           <div className="font-bold text-[11px] text-foreground mb-0.5">{p.namaBarang}</div>
                           <div className="text-[9px] text-muted-foreground font-mono uppercase tracking-tighter">{p.brand}</div>
                         </div>
@@ -535,7 +535,7 @@ export default function Laporan() {
                                 {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
                              </span>
                           </div>
-                          <div className="text-xs font-bold text-foreground border-l-2 border-primary/30 pl-2 line-clamp-2">{s.namaBarang}</div>
+                          <div className="text-xs font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
                           <div className="flex justify-between items-end pt-1">
                              <div className="space-y-1">
                                <div className="text-[9px] text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
@@ -711,7 +711,7 @@ export default function Laporan() {
                               <tr key={s.id}>
                                 <td className="px-2 py-2 border whitespace-nowrap">{s.tanggal}</td>
                                 <td className="px-2 py-2 border font-bold">{s.noFaktur || '-'}</td>
-                                <td className="px-2 py-2 border max-w-[150px] truncate">{s.namaBarang}</td>
+                                <td className="px-2 py-2 border">{s.namaBarang}</td>
                                 <td className="px-2 py-2 border text-center">{s.qty}</td>
                                 <td className="px-2 py-2 border text-right font-bold">{formatRupiah(s.total)}</td>
                                 <td className="px-2 py-2 border text-right font-black text-emerald-600">

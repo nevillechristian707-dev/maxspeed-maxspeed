@@ -145,7 +145,7 @@ export default function Modal() {
                   </div>
                   
                   <div className="px-3 py-2 bg-secondary/30 rounded-lg border border-border/10">
-                     <div className="text-xs font-black text-foreground line-clamp-2 leading-tight">{item.namaBarang}</div>
+                     <div className="text-xs font-black text-foreground leading-tight">{item.namaBarang}</div>
                      <div className="text-[9px] font-black text-primary/80 mt-1 uppercase tracking-widest">{item.qty} Unit</div>
                   </div>
 
