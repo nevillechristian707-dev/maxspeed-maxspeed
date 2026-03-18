@@ -648,7 +648,8 @@ export default function Pencairan() {
                             <table className="w-full text-[11px] text-left">
                               <thead className="text-[9px] text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
                                 <tr>
-                                  <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX ID</th>
+                                  <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX</th>
+                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Produk & Brand</th>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Sumber Dana</th>
                                   <th className="px-4 py-2 text-right font-bold uppercase tracking-widest">Nilai</th>
                                   <th className="px-4 py-2 text-center font-bold uppercase tracking-widest">Aksi</th>
@@ -659,11 +660,15 @@ export default function Pencairan() {
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
                                     <td className="px-6 py-3">
                                       <span className="font-bold text-foreground text-[10px]">{tx.noFaktur || "-"}</span>
-                                      <div className="text-[8px] text-muted-foreground/50 font-mono tracking-tighter uppercase">{tx.sumber} | ID: {tx.id}</div>
+                                      <div className="text-[8px] text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <div className="font-bold text-foreground text-[10px]">{tx.namaBarang}</div>
+                                      <div className="text-[8px] text-primary font-black uppercase mt-1 tracking-widest">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
                                     <td className="px-4 py-3">
                                       <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-[9px]">
-                                        {tx.sumber}
+                                        {tx.sumber.replace('_', ' ')}
                                       </span>
                                     </td>
                                     <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-[10px]">{formatRupiah(tx.nilai)}</td>

@@ -134,7 +134,22 @@ router.get("/transaksi-bank", async (req, res) => {
     if (startDate) conditions.push(gte(transaksiBank.tanggalCair, String(startDate)));
     if (endDate) conditions.push(lte(transaksiBank.tanggalCair, String(endDate)));
     
-    const rows = await db.select().from(transaksiBank)
+    const rows = await db.select({
+        id: transaksiBank.id,
+        tanggalCair: transaksiBank.tanggalCair,
+        noFaktur: transaksiBank.noFaktur,
+        nilai: transaksiBank.nilai,
+        sumber: transaksiBank.sumber,
+        namaBank: transaksiBank.namaBank,
+        rekeningBank: transaksiBank.rekeningBank,
+        penjualanId: transaksiBank.penjualanId,
+        namaBarang: penjualanTable.namaBarang,
+        kodeBarang: penjualanTable.kodeBarang,
+        brand: penjualanTable.brand,
+        kodeTransaksi: penjualanTable.kodeTransaksi
+      })
+      .from(transaksiBank)
+      .leftJoin(penjualanTable, eq(transaksiBank.penjualanId, penjualanTable.id))
       .where(conditions.length ? and(...conditions) : undefined);
     
     return res.json(rows);
