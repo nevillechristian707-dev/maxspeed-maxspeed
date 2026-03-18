@@ -617,7 +617,28 @@ export default function Penjualan() {
                             <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/20 shadow-sm"><Pencil className="w-3.5 h-3.5" /></button>
                           )}
                           {canDelete && (
-                            <button onClick={() => setDeleteConfirmId(item.id)} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20 shadow-sm"><Trash2 className="w-3.5 h-3.5" /></button>
+                            <button 
+                              onClick={() => {
+                                if ((item.totalPaid || 0) > 0) {
+                                  toast({
+                                    title: "Tindakan Ditolak",
+                                    description: `Transaksi ini sudah masuk di Pencairan Perbank (${formatRupiah(item.totalPaid)}). Silakan batalkan pencairan terlebih dahulu.`,
+                                    variant: "destructive"
+                                  });
+                                } else {
+                                  setDeleteConfirmId(item.id);
+                                }
+                              }} 
+                              className={cn(
+                                "p-1.5 rounded-lg transition-colors border shadow-sm",
+                                (item.totalPaid || 0) > 0
+                                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed"
+                                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
+                              )}
+                              title={(item.totalPaid || 0) > 0 ? "Sudah masuk pencairan" : "Hapus Transaksi"}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       </td>
@@ -686,8 +707,23 @@ export default function Penjualan() {
                        )}
                        {canDelete && (
                          <button 
-                           onClick={() => setDeleteConfirmId(item.id)} 
-                           className="p-2.5 text-rose-400 hover:text-rose-300 bg-rose-500/5 hover:bg-rose-500/10 rounded-xl border border-rose-500/20 transition-colors shadow-sm active:scale-90"
+                           onClick={() => {
+                            if ((item.totalPaid || 0) > 0) {
+                              toast({
+                                title: "Ditolak",
+                                description: "Sudah masuk pencairan. Batalkan di menu Pencairan.",
+                                variant: "destructive"
+                              });
+                            } else {
+                              setDeleteConfirmId(item.id);
+                            }
+                           }} 
+                           className={cn(
+                             "p-2.5 rounded-xl border transition-colors shadow-sm active:scale-90",
+                             (item.totalPaid || 0) > 0
+                               ? "text-muted-foreground/30 border-muted-foreground/10"
+                               : "text-rose-400 hover:text-rose-300 bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/20"
+                           )}
                          >
                            <Trash2 className="w-4 h-4" />
                          </button>

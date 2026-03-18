@@ -179,10 +179,19 @@ router.delete("/:id", async (req, res) => {
     if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const id = parseInt(req.params.id);
-    await db.delete(transaksiBank).where(eq(transaksiBank.penjualanId, id));
+    
+    // Check if there are any bank transactions associated with this sale
+    const existingTx = await db.select().from(transaksiBank).where(eq(transaksiBank.penjualanId, id));
+    if (existingTx.length > 0) {
+      return res.status(400).json({ 
+        error: "Transaksi sudah masuk di menu Pencairan Perbank. Silakan batalkan pencairan terlebih dahulu sebelum menghapus transaksi ini." 
+      });
+    }
+
     await db.delete(penjualanTable).where(eq(penjualanTable.id, id));
     return res.json({ success: true, message: "Deleted" });
   } catch (err) {
+    console.error("Error deleting sale:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });

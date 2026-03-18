@@ -192,62 +192,63 @@ export default function Dashboard() {
           <CardContent className="flex-1 pt-6 min-h-[300px] sm:min-h-[400px]">
             <div className="h-[300px] sm:h-[400px] w-full mt-2">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={formattedChartData} margin={{ top: 5, right: 10, bottom: 5, left: -15 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <LineChart data={formattedChartData} margin={{ top: 10, right: 10, bottom: 5, left: -10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" vertical={false} />
                   <XAxis 
                     dataKey="name" 
-                    stroke="rgba(255,255,255,0.4)" 
-                    fontSize={10} 
+                    stroke="rgba(255,255,255,0.7)" 
+                    fontSize={11} 
                     tickLine={false} 
                     axisLine={false}
-                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.5)' }}
+                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.9)' }}
                   />
                   <YAxis 
-                    stroke="rgba(255,255,255,0.4)" 
-                    fontSize={10} 
+                    stroke="rgba(255,255,255,0.7)" 
+                    fontSize={11} 
                     tickLine={false} 
                     axisLine={false}
-                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.5)' }}
+                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.9)' }}
                     tickFormatter={(val) => val >= 1000000 ? `${val / 1000000}M` : val >= 1000 ? `${val / 1000}K` : val}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'rgba(5,5,5,0.95)', 
-                      border: '1px solid rgba(255,255,255,0.1)', 
+                      backgroundColor: 'rgba(5,5,5,1)', 
+                      border: '2px solid rgba(255,255,255,0.2)', 
                       borderRadius: '16px',
-                      boxShadow: '0 20px 50px -10px rgba(0,0,0,0.8)',
-                      padding: '12px'
+                      boxShadow: '0 20px 50px -10px rgba(0,0,0,1)',
+                      padding: '16px'
                     }}
-                    labelStyle={{ color: 'hsl(var(--primary))', fontWeight: '900', fontSize: '11px', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                    labelStyle={{ color: 'hsl(var(--primary))', fontWeight: '900', fontSize: '13px', marginBottom: '12px', textTransform: 'uppercase' }}
                     labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
                     formatter={(value: number, name: string) => [
-                      <span className="font-black text-white tabular-nums text-xs">{formatRupiah(value)}</span>, 
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mr-2">{name}</span>
+                      <span className="font-black text-white tabular-nums text-sm">{formatRupiah(value)}</span>, 
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-3">{name}</span>
                     ]}
                   />
                   <Legend 
                     verticalAlign="top" 
                     align="right" 
                     iconType="circle" 
-                    wrapperStyle={{ paddingTop: '0px', paddingBottom: '30px', fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                    iconSize={10}
+                    wrapperStyle={{ paddingTop: '0px', paddingBottom: '50px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}
                   />
                   <Line 
                     name="Penjualan"
                     type="monotone" 
                     dataKey="Penjualan" 
                     stroke="hsl(var(--primary))" 
-                    strokeWidth={4} 
-                    dot={{ r: 3, strokeWidth: 2, fill: 'hsl(var(--background))' }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }} 
+                    strokeWidth={6} 
+                    dot={{ r: 6, strokeWidth: 4, fill: 'hsl(var(--background))' }} 
+                    activeDot={{ r: 9, strokeWidth: 0, fill: 'hsl(var(--primary))' }} 
                   />
                   <Line 
                     name="Laba"
                     type="monotone" 
                     dataKey="Laba" 
-                    stroke="#10b981" 
-                    strokeWidth={4} 
-                    dot={{ r: 3, strokeWidth: 2, fill: 'hsl(var(--background))' }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }} 
+                    stroke="#00ff88" 
+                    strokeWidth={6} 
+                    dot={{ r: 6, strokeWidth: 4, fill: 'hsl(var(--background))' }} 
+                    activeDot={{ r: 9, strokeWidth: 0, fill: '#00ff88' }} 
                   />
                 </LineChart>
               </ResponsiveContainer>

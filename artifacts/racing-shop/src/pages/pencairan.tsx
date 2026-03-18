@@ -66,7 +66,9 @@ export default function Pencairan() {
       await deleteMutation.mutateAsync({ id });
       toast({ title: "Terhapus", description: "Data transaksi berhasil dihapus." });
       queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
       setDeleteConfirmId(null);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -195,6 +197,13 @@ export default function Pencairan() {
     }, 0);
   }, [markedIds, data]);
 
+  const totalOnlineShopMarked = useMemo(() => {
+    return Array.from(markedIds).reduce((sum, id) => {
+      const item = onlineShopPending.find(x => x.id === id);
+      return sum + (item ? (item.nilai || 0) : 0);
+    }, 0);
+  }, [markedIds, onlineShopPending]);
+
   const bankSummaries = useMemo(() => {
     if (!bankTransactions) return [];
     
@@ -264,6 +273,12 @@ export default function Pencairan() {
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-7">Menunggu pencairan dari dana tertahan marketplace</p>
             </div>
             <div className="flex items-center gap-3">
+              {totalOnlineShopMarked > 0 && (
+                <div className="mr-4 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center gap-2">
+                   <span className="text-[10px] font-black uppercase text-purple-400">Total Cair:</span>
+                   <span className="text-sm font-black text-purple-500 tabular-nums">{formatRupiah(totalOnlineShopMarked)}</span>
+                </div>
+              )}
               {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => onlineShopPending.some(p => p.id === id)) && (
                 <Button 
                   onClick={() => handleOpenBankModal(null, true)}
@@ -332,7 +347,30 @@ export default function Pencairan() {
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
                           {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Cairkan</button>}
-                          {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus Piutang"><XCircle className="w-3.5 h-3.5"/></button>}
+                          {canDelete && (
+                            <button 
+                              onClick={() => {
+                                if ((item.totalPaid || 0) > 0) {
+                                  toast({ 
+                                    title: "Tindakan Ditolak", 
+                                    description: "Transaksi ini sudah masuk pencairan. Batalkan dulu di riwayat pencairan.", 
+                                    variant: "destructive" 
+                                  });
+                                } else {
+                                  setDeleteConfirmId(item.id);
+                                }
+                              }} 
+                              className={cn(
+                                "p-1 rounded border",
+                                (item.totalPaid || 0) > 0 
+                                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed" 
+                                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
+                              )}
+                              title={(item.totalPaid || 0) > 0 ? "Tidak bisa dihapus karena sudah masuk pencairan" : "Hapus Piutang"}
+                            >
+                              <XCircle className="w-3.5 h-3.5"/>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -370,7 +408,29 @@ export default function Pencairan() {
                     </div>
                     <div className="flex gap-2">
                       {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
-                      {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><XCircle className="w-4 h-4"/></button>}
+                      {canDelete && (
+                         <button 
+                         onClick={() => {
+                           if ((item.totalPaid || 0) > 0) {
+                             toast({ 
+                               title: "Ditolak", 
+                               description: "Sudah masuk pencairan. Batalkan dulu riwayatnya.", 
+                               variant: "destructive" 
+                             });
+                           } else {
+                             setDeleteConfirmId(item.id);
+                           }
+                         }} 
+                         className={cn(
+                           "p-2 rounded-lg border",
+                           (item.totalPaid || 0) > 0 
+                             ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed" 
+                             : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
+                         )}
+                         >
+                           <XCircle className="w-4 h-4"/>
+                         </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -457,7 +517,30 @@ export default function Pencairan() {
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
                           {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
-                          {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded border border-rose-500/20" title="Hapus"><XCircle className="w-3.5 h-3.5"/></button>}
+                          {canDelete && (
+                            <button 
+                              onClick={() => {
+                                if ((item.totalPaid || 0) > 0) {
+                                  toast({ 
+                                    title: "Tindakan Ditolak", 
+                                    description: "Transaksi sudah memiliki riwayat angsuran. Batalkan pencairan terlebih dahulu.", 
+                                    variant: "destructive" 
+                                  });
+                                } else {
+                                  setDeleteConfirmId(item.id);
+                                }
+                              }}
+                              className={cn(
+                                "p-1 rounded border",
+                                (item.totalPaid || 0) > 0 
+                                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed" 
+                                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
+                              )}
+                              title={(item.totalPaid || 0) > 0 ? "Tidak bisa dihapus" : "Hapus"}
+                            >
+                              <XCircle className="w-3.5 h-3.5"/>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
