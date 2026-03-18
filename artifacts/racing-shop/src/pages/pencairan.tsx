@@ -609,37 +609,40 @@ export default function Pencairan() {
             ) : bankSummaries.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground italic font-medium">Belum ada data pencairan periode ini.</div>
             ) : (
-              <div className="divide-y divide-border/30">
+              <div className="p-4 space-y-8 bg-secondary/5">
                 {bankSummaries.map((dayGroup, i) => (
                   <div key={i} className="border-b last:border-0 border-border/20">
                     {/* Date Header */}
-                    <div className="bg-secondary/20 px-6 py-2.5 border-y border-border/20 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
-                       <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-primary" />
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{formatDate(dayGroup.date)}</span>
+                    <div className="bg-primary/5 px-4 py-2 rounded-t-xl border-x border-t border-primary/20 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Calendar className="w-4 h-4 text-primary" />
+                          </div>
+                          <span className="text-xs font-black uppercase tracking-[0.15em] text-foreground">{formatDate(dayGroup.date)}</span>
                        </div>
-                       <div className="text-[10px] font-black text-muted-foreground uppercase">
-                          Total Cair: <span className="text-emerald-500 font-black">{formatRupiah(dayGroup.total)}</span>
+                       <div className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-2">
+                          <span className="opacity-50 tracking-widest">Total Cair:</span>
+                          <span className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20">{formatRupiah(dayGroup.total)}</span>
                        </div>
                     </div>
 
-                    <div className="divide-y divide-border/10">
+                    <div className="space-y-4 p-4 border-x border-b border-border/20 bg-card/30 rounded-b-xl">
                       {dayGroup.banks.map((bankGroup: any, j: number) => (
-                        <div key={j} className="overflow-hidden">
+                        <div key={j} className="overflow-hidden border border-border/20 rounded-xl bg-card shadow-sm hover:shadow-md transition-all duration-300">
                           {/* Bank Header Section */}
-                          <div className="bg-emerald-500/[0.02] px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2.5 bg-card rounded-xl border border-emerald-500/20 shadow-sm transition-transform group-hover:scale-105">
-                                <Landmark className="w-5 h-5 text-emerald-500" />
+                          <div className="bg-emerald-500/[0.03] px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/10">
+                            <div className="flex items-center gap-4">
+                              <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl border border-emerald-500/30 shadow-sm">
+                                <Landmark className="w-6 h-6 text-emerald-500" />
                               </div>
                               <div>
                                 <h3 className="text-sm font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
-                                <p className="text-[9px] font-mono text-muted-foreground leading-none">{bankGroup.account}</p>
+                                <p className="text-[10px] font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
                               </div>
                             </div>
-                            <div className="text-left sm:text-right">
-                              <div className="text-lg font-black text-emerald-600">{formatRupiah(bankGroup.total)}</div>
-                              <div className="text-[9px] font-bold text-emerald-500/60 uppercase tracking-[0.1em]">{bankGroup.count} Transaksi</div>
+                            <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end gap-2">
+                              <div className="text-xl font-black text-emerald-600 drop-shadow-sm">{formatRupiah(bankGroup.total)}</div>
+                              <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 text-[9px] font-black uppercase rounded border border-emerald-500/20">{bankGroup.count} Transaksi</div>
                             </div>
                           </div>
 
