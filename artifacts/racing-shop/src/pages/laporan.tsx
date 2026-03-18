@@ -1045,11 +1045,28 @@ export default function Laporan() {
                   }
                 });
 
-                // Split list into chunks for pages
                 const pageSize = 25;
-                const chunks = [];
-                for (let i = 0; i < list.length; i += pageSize) {
-                  chunks.push(list.slice(i, i + pageSize));
+                const chunks: any[][] = [];
+                let currentChunk: any[] = [];
+
+                list.forEach((item) => {
+                  // If it's a header and we already have some items, start a new page
+                  if (item.isHeader && currentChunk.length > 0) {
+                    chunks.push(currentChunk);
+                    currentChunk = [];
+                  }
+
+                  currentChunk.push(item);
+
+                  // If standard page size is reached, move to new chunk
+                  if (currentChunk.length >= pageSize) {
+                    chunks.push(currentChunk);
+                    currentChunk = [];
+                  }
+                });
+
+                if (currentChunk.length > 0) {
+                  chunks.push(currentChunk);
                 }
 
                 if (chunks.length === 0) return null;
