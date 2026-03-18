@@ -107,26 +107,15 @@ export default function Pencairan() {
 
   const handleConfirmSettle = async () => {
     try {
-      let settleData: any;
-      
-      if (selectedBankId === "cash") {
-        settleData = {
-          tanggalCair: selectedDate,
-          namaBank: "CASH",
-          rekeningBank: "KAS TUNAI",
-          nilai: parseFloat(nilaiPembayaran) || 0
-        };
-      } else {
-        if (!selectedBankInfo) {
-          toast({ title: "Error", description: "Silakan pilih bank terlebih dahulu.", variant: "destructive" });
-          return;
-        }
-        settleData = {
-          tanggalCair: selectedDate,
-          namaBank: selectedBankInfo.namaBank,
-          rekeningBank: selectedBankInfo.nomorRekening,
-          nilai: parseFloat(nilaiPembayaran) || 0
-        };
+      const baseSettleData = {
+        tanggalCair: selectedDate,
+        namaBank: selectedBankId === "cash" ? "CASH" : selectedBankInfo?.namaBank,
+        rekeningBank: selectedBankId === "cash" ? "KAS TUNAI" : selectedBankInfo?.nomorRekening,
+      };
+
+      if (selectedBankId !== "cash" && !selectedBankInfo) {
+        toast({ title: "Error", description: "Silakan pilih bank terlebih dahulu.", variant: "destructive" });
+        return;
       }
 
       if (isBulkSettle) {
@@ -135,19 +124,30 @@ export default function Pencairan() {
         for (const id of idsToProcess) {
           const item = data?.find(x => x.id === id);
           if (item) {
-            const itemSettleData = { 
-              ...settleData, 
-              nilai: item.nilai 
-            };
-            await markSettledMutation.mutateAsync({ id, data: itemSettleData });
-            successCount++;
+            // Force Number conversion and set a default if NaN
+            const amountToPay = Number(item.nilai) || 0;
+            if (amountToPay > 0) {
+              await markSettledMutation.mutateAsync({ 
+                id, 
+                data: { ...baseSettleData, nilai: amountToPay } as any 
+              });
+              successCount++;
+            }
           }
         }
-        toast({ title: "Success", description: `${successCount} transaksi berhasil dicairkan.` });
+        toast({ title: "Berhasil", description: `${successCount} transaksi berhasil dicairkan.` });
         setMarkedIds(new Set());
       } else if (itemToSettle !== null) {
-        await markSettledMutation.mutateAsync({ id: itemToSettle, data: { ...settleData, nilai: parseFloat(nilaiPembayaran) || 0 } });
-        toast({ title: "Success", description: `Transaksi berhasil dicairkan.` });
+        const amountToPay = parseFloat(nilaiPembayaran) || 0;
+        if (amountToPay <= 0) {
+          toast({ title: "Gagal", description: "Nilai pembayaran harus lebih besar dari 0.", variant: "destructive" });
+          return;
+        }
+        await markSettledMutation.mutateAsync({ 
+          id: itemToSettle, 
+          data: { ...baseSettleData, nilai: amountToPay } as any 
+        });
+        toast({ title: "Berhasil", description: `Transaksi berhasil dicairkan.` });
       }
 
       queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
@@ -712,7 +712,7 @@ export default function Pencairan() {
                                             }
                                           }}
                                           disabled={cancelSettledMutation.isPending}
-                                          className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover/row:opacity-100 disabled:opacity-50"
+                                          className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors disabled:opacity-50"
                                           title="Batalkan Pencairan"
                                         >
                                           <XCircle className="w-3.5 h-3.5" />
