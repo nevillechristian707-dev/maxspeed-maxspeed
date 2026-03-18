@@ -134,32 +134,32 @@ router.get("/chart", async (req, res) => {
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { startDate, endDate } = req.query;
-    const format = "YYYY-MM-DD";
-    const dateLabel = sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`;
-    
     // We want to show TOTAL sales by 'tanggal' (date sold), irrespective of payment status.
     const conds = [];
     if (startDate) conds.push(gte(penjualanTable.tanggal, String(startDate)));
     if (endDate) conds.push(lte(penjualanTable.tanggal, String(endDate)));
 
     const chartRows = await db.select({
-      label: dateLabel,
+      label: penjualanTable.tanggal,
+      count: sql<number>`count(*)`,
       penjualan: sql<string>`sum(${penjualanTable.total})`,
       modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
     })
     .from(penjualanTable)
     .where(conds.length ? and(...conds) : undefined)
-    .groupBy(dateLabel)
-    .orderBy(dateLabel);
+    .groupBy(penjualanTable.tanggal)
+    .orderBy(penjualanTable.tanggal);
 
     const labels = chartRows.map((r: any) => r.label);
     const penjualan = chartRows.map((r: any) => n(r.penjualan));
     const laba = chartRows.map((r: any) => n(r.penjualan) - n(r.modal));
+    const counts = chartRows.map((r: any) => n(r.count));
 
     return res.json({
       labels,
       penjualan,
       laba,
+      counts
     });
   } catch (err: any) {
     console.error("GET /api/dashboard/chart error:", err);

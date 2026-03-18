@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: summary, isLoading: loadingSummary, isError: isErrorSummary, refetch: refetchSummary } = useGetDashboardSummary(dateParams);
-  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, refetch: refetchChart } = useGetDashboardChart(dateParams);
+  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, error: chartError, refetch: refetchChart } = useGetDashboardChart(dateParams);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -62,7 +62,8 @@ export default function Dashboard() {
       fullDate: formatDate(label),
       rawDate: label,
       Penjualan: Number(chartData?.penjualan?.[i] || 0),
-      Laba: Number(chartData?.laba?.[i] || 0)
+      Laba: Number(chartData?.laba?.[i] || 0),
+      Transaksi: Number((chartData as any)?.counts?.[i] || 0)
     };
   });
 
@@ -198,13 +199,14 @@ export default function Dashboard() {
             ) : isErrorChart ? (
               <div className="flex flex-col h-full items-center justify-center p-8 text-center">
                 <p className="text-rose-500 font-bold text-xs uppercase mb-1">Gagal memuat rekapan harian</p>
-                <p className="text-muted-foreground text-[10px] italic opacity-70">{(chartData as any)?.message || "Internal Server Error"}</p>
+                <p className="text-muted-foreground text-[10px] italic opacity-70">{(chartError as any)?.message || "Internal Server Error"}</p>
               </div>
             ) : (
               <table className="w-full text-xs text-left border-collapse sticky-header">
                 <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
                   <tr>
                     <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
+                    <th className="px-4 py-4 text-center font-black tracking-widest">TRX</th>
                     <th className="px-4 py-4 text-right font-black tracking-widest">Penjualan (Daily)</th>
                     <th className="px-6 py-4 text-right font-black tracking-widest text-emerald-500">Laba (Harian)</th>
                   </tr>
@@ -216,6 +218,9 @@ export default function Dashboard() {
                     <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
                       <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors">
                         {item.fullDate}
+                      </td>
+                      <td className="px-4 py-3 text-center font-black text-muted-foreground/60">
+                        {item.Transaksi}
                       </td>
                       <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter">
                         {formatRupiah(item.Penjualan)}
