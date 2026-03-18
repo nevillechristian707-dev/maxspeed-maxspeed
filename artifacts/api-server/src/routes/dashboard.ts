@@ -144,6 +144,10 @@ router.get("/chart", async (req, res) => {
       count: sql<number>`count(*)`,
       penjualan: sql<string>`sum(${penjualanTable.total})`,
       modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
+      cash: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'cash' then ${penjualanTable.total}::numeric else 0 end)`,
+      bank: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'bank' then ${penjualanTable.total}::numeric else 0 end)`,
+      onlineShop: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'online_shop' then ${penjualanTable.total}::numeric else 0 end)`,
+      kredit: sql<string>`sum(case when ${penjualanTable.paymentMethod} = 'kredit' then ${penjualanTable.total}::numeric else 0 end)`,
     })
     .from(penjualanTable)
     .where(conds.length ? and(...conds) : undefined)
@@ -154,12 +158,20 @@ router.get("/chart", async (req, res) => {
     const penjualan = chartRows.map((r: any) => n(r.penjualan));
     const laba = chartRows.map((r: any) => n(r.penjualan) - n(r.modal));
     const counts = chartRows.map((r: any) => n(r.count));
+    const cash = chartRows.map((r: any) => n(r.cash));
+    const bank = chartRows.map((r: any) => n(r.bank));
+    const onlineShop = chartRows.map((r: any) => n(r.onlineShop));
+    const kredit = chartRows.map((r: any) => n(r.kredit));
 
     return res.json({
       labels,
       penjualan,
       laba,
-      counts
+      counts,
+      cash,
+      bank,
+      onlineShop,
+      kredit
     });
   } catch (err: any) {
     console.error("GET /api/dashboard/chart error:", err);

@@ -57,13 +57,18 @@ export default function Dashboard() {
   const formattedChartData = (chartData?.labels || []).map((label, i) => {
     const date = new Date(label);
     const compactDate = !isNaN(date.getTime()) ? `${date.getDate()}/${date.getMonth() + 1}` : label;
+    const d = chartData as any;
     return {
       name: compactDate,
       fullDate: formatDate(label),
       rawDate: label,
-      Penjualan: Number(chartData?.penjualan?.[i] || 0),
-      Laba: Number(chartData?.laba?.[i] || 0),
-      Transaksi: Number((chartData as any)?.counts?.[i] || 0)
+      Penjualan: Number(d?.penjualan?.[i] || 0),
+      Laba: Number(d?.laba?.[i] || 0),
+      Transaksi: Number(d?.counts?.[i] || 0),
+      Cash: Number(d?.cash?.[i] || 0),
+      Bank: Number(d?.bank?.[i] || 0),
+      OnlineShop: Number(d?.onlineShop?.[i] || 0),
+      Kredit: Number(d?.kredit?.[i] || 0)
     };
   });
 
@@ -202,43 +207,61 @@ export default function Dashboard() {
                 <p className="text-muted-foreground text-[10px] italic opacity-70">{(chartError as any)?.message || "Internal Server Error"}</p>
               </div>
             ) : (
-              <table className="w-full text-xs text-left border-collapse sticky-header">
-                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
-                    <th className="px-4 py-4 text-center font-black tracking-widest">TRX</th>
-                    <th className="px-4 py-4 text-right font-black tracking-widest">Penjualan (Daily)</th>
-                    <th className="px-6 py-4 text-right font-black tracking-widest text-emerald-500">Laba (Harian)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/10">
-                  {[...formattedChartData].sort((a, b) => {
-                    return new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime();
-                  }).map((item, idx) => (
-                    <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
-                      <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors">
-                        {item.fullDate}
-                      </td>
-                      <td className="px-4 py-3 text-center font-black text-muted-foreground/60">
-                        {item.Transaksi}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter">
-                        {formatRupiah(item.Penjualan)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-mono font-black tabular-nums tracking-tighter text-emerald-500">
-                        {formatRupiah(item.Laba)}
-                      </td>
-                    </tr>
-                  ))}
-                  {formattedChartData.length === 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px] text-left border-collapse sticky-header min-w-[800px]">
+                  <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
                     <tr>
-                      <td colSpan={3} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
-                        Tidak ada data transaksi di periode ini.
-                      </td>
+                      <th className="px-6 py-4 font-black tracking-widest sticky left-0 bg-secondary/40 z-20">Tanggal</th>
+                      <th className="px-4 py-4 text-center font-black tracking-widest border-l border-border/10">TRX</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500/80">Cash</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-blue-500/80">Bank</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-purple-500/80">OS</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-orange-500/80">KRD</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10">Total</th>
+                      <th className="px-6 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500">Laba</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border/10">
+                    {[...formattedChartData].sort((a, b) => {
+                      return new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime();
+                    }).map((item, idx) => (
+                      <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
+                        <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors sticky left-0 bg-background/50 backdrop-blur-sm z-10">
+                          {item.fullDate}
+                        </td>
+                        <td className="px-4 py-3 text-center font-black text-muted-foreground/60 border-l border-border/5">
+                          {item.Transaksi}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-emerald-500/80">
+                          {formatRupiah(item.Cash)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-blue-500/80">
+                          {formatRupiah(item.Bank)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-purple-500/80">
+                          {formatRupiah(item.OnlineShop)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-orange-500/80">
+                          {formatRupiah(item.Kredit)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/10">
+                          {formatRupiah(item.Penjualan)}
+                        </td>
+                        <td className="px-6 py-3 text-right font-mono font-black tabular-nums tracking-tighter text-emerald-500 border-l border-border/5">
+                          {formatRupiah(item.Laba)}
+                        </td>
+                      </tr>
+                    ))}
+                    {formattedChartData.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
+                          Tidak ada data transaksi di periode ini.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
           </CardContent>
         </Card>
