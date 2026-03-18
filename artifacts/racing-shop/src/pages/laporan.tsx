@@ -22,6 +22,16 @@ export default function Laporan() {
       day: 'numeric'
     }).format(date);
   };
+
+  const formatDateSimple = (d: string) => {
+    if (!d) return "-";
+    const date = new Date(d);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const { dateParams, selectedYear, selectedMonth } = useMonthYear();
   const printRef = useRef<HTMLDivElement>(null);
   const [isPreview, setIsPreview] = useState(false);
@@ -1027,11 +1037,10 @@ export default function Laporan() {
                   if (cat.data.length > 0) {
                     list.push({ isHeader: true, label: cat.label });
                     cat.data.forEach((item, idxx) => {
-                      list.push({ isHeader: false, ...item, id: `${cat.label}-${idxx}`, isBankTx: (cat as any).isBankTx, categoryId: (cat as any).label });
+                      list.push({ ...item, isHeader: false, id: `${cat.label}-${idxx}`, categoryId: cat.label });
                     });
-                    // Add Summary Row
-                    const tQty = cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? 1 : (s.qty || 0)), 0);
-                    const tJual = cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0)), 0);
+                    const tQty = cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0);
+                    const tJual = cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0);
                     list.push({ isTotal: true, label: `TOTAL ${cat.label}`, qty: tQty, total: tJual });
                   }
                 });
@@ -1043,53 +1052,83 @@ export default function Laporan() {
                   chunks.push(list.slice(i, i + pageSize));
                 }
 
-                return chunks.map((chunk, pageIdx) => (
+                if (chunks.length === 0) return null;
+
+                return chunks.map((chunk: any[], pageIdx: number) => (
                   <div key={pageIdx} className="report-page">
                     <div className="flex justify-between items-center border-b border-primary/20 pb-2 mb-4">
-                       <h3 className="m-0 border-none p-0">IV. Rincian Penjualan per Metode Bayar</h3>
-                       <span className="text-xs font-medium tracking-tight font-black text-slate-400">BAGIAN {pageIdx + 1}/{chunks.length}</span>
+                       <h3 className="m-0 border-none p-0 text-slate-800">IV. Rincian Penjualan per Metode Bayar</h3>
+                       <span className="text-[10px] font-black uppercase text-slate-400">Halaman Detail {pageIdx + 1}/{chunks.length}</span>
                     </div>
-                    <div className="space-y-4 flex-1">
-                      {chunk.map((item, itemIdx) => {
+
+                    <div className="space-y-6 flex-1">
+                      {chunk.map((item: any, itemIdx: number) => {
                         if (item.isHeader) {
+                          const IconComp = (item.label === 'CASH (TUNAI)') ? DollarSign :
+                                          (item.label === 'BANK (TRANSFER)') ? Landmark :
+                                          (item.label === 'ONLINE SHOP') ? Store :
+                                          (item.label === 'KREDIT (TEMPO)') ? CreditCard : ShoppingCart;
+
                           return (
-                            <div key={itemIdx} className="bg-slate-900 text-white px-3 py-1.5 text-xs italic tracking-tighter font-black uppercase tracking-widest mt-4 first:mt-0 shadow-sm flex justify-between">
-                              <span>KATEGORI: {item.label}</span>
-                              <span className="text-[8px] opacity-60">Faktur / Produk / Transaksi</span>
+                            <div key={itemIdx} className="bg-slate-900 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest mt-6 first:mt-0 shadow-md flex justify-between items-center rounded-t-xl">
+                              <div className="flex items-center gap-2">
+                                <IconComp className="w-4 h-4 text-orange-400" />
+                                <span>KATEGORI: {item.label}</span>
+                              </div>
+                              <span className="text-[8px] opacity-60 italic">Metode Pembayaran</span>
                             </div>
                           );
                         }
+
                         if (item.isTotal) {
                           return (
-                            <div key={itemIdx} className="grid grid-cols-7 gap-2 bg-slate-50 border-y-2 border-slate-900 rounded p-2 text-xs font-bold leading-none items-center mt-1 mb-4">
-                               <div className="col-span-4 text-right font-black uppercase tracking-widest">{item.label}</div>
-                               <div className="text-center font-black">{item.qty}</div>
-                               <div className="text-right font-black text-primary text-[10px]">{formatRupiah(item.total)}</div>
+                            <div key={itemIdx} className="grid grid-cols-9 gap-2 bg-slate-50 border-y-2 border-slate-900 rounded-b-xl p-2.5 text-[10px] items-center mb-6 shadow-sm">
+                               <div className="col-span-6 text-right font-black uppercase tracking-widest text-slate-500">RINGKASAN {item.label.replace('TOTAL ', '')}</div>
+                               <div className="text-center font-black text-slate-900">{item.qty}</div>
+                               <div className="text-right font-black text-primary border-l border-slate-200 pl-2">{formatRupiah(item.total)}</div>
                                <div className=""></div>
                             </div>
                           );
                         }
+
+                        const isFirstInChunk = itemIdx === 0 || chunk[itemIdx - 1]?.isHeader;
+
                         return (
-                          <div key={item.id} className="grid grid-cols-7 gap-2 border border-slate-200 rounded p-1.5 text-xs font-bold leading-none items-center hover:bg-slate-50 transition-colors">
-                            <div className="font-medium text-slate-500">{item.tanggal || item.tanggalCair}</div>
-                            <div className="font-black text-slate-900 border-l px-2">{item.noFaktur || '-'}</div>
-                            <div className="col-span-2 font-bold truncate opacity-80 leading-tight">
-                               {item.categoryId === 'KREDIT (TEMPO)' && <div className="text-[6px] text-orange-600 font-black">{item.namaCustomer || 'UMUM'}</div>}
-                               {item.isBankTx && <div className="text-[6px] text-emerald-600 font-black">{item.namaBank}</div>}
-                               {item.namaBarang}
-                            </div>
-                            <div className="text-center font-black">{item.isBankTx ? 1 : item.qty}</div>
-                            <div className="text-right font-black text-primary text-[9px]">{formatRupiah(item.isBankTx ? item.nilai : item.total)}</div>
-                            <div className="text-center bg-slate-100 rounded py-0.5 font-black uppercase tracking-tighter text-[6px] border border-slate-200">
-                                {item.statusCair === 'cair' || item.isBankTx ? 'LUNAS' : 'PEND'}
+                          <div key={item.id} className="border-x border-slate-200 bg-white">
+                            {isFirstInChunk && (
+                               <div className="grid grid-cols-9 gap-2 bg-slate-50/80 border-b border-slate-200 px-3 py-1.5 text-[8px] font-black uppercase text-slate-400 italic">
+                                  <div>Tanggal</div>
+                                  <div>Faktur</div>
+                                  <div className="col-span-4">Keterangan / Item</div>
+                                  <div className="text-center">Qty</div>
+                                  <div className="text-right">Nilai Total</div>
+                                  <div className="text-center">Status</div>
+                               </div>
+                            )}
+                            <div className="grid grid-cols-9 gap-2 px-3 py-1.5 items-center border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors">
+                              <div className="text-[8px] font-medium text-slate-500 tabular-nums">{formatDateSimple(item.tanggal || item.tanggalCair)}</div>
+                              <div className="text-[8px] font-black text-slate-900 font-mono tracking-tighter">{item.noFaktur || '-'}</div>
+                              <div className="col-span-4 py-0.5">
+                                 {item.categoryId === 'KREDIT (TEMPO)' && <div className="text-[7px] text-orange-600 font-black leading-none mb-1 uppercase tracking-tight">{item.namaCustomer || 'UMUM'}</div>}
+                                 <div className="text-[8px] font-black leading-tight text-slate-800 break-words line-clamp-2">{item.namaBarang}</div>
+                                 <div className="text-[6px] text-slate-400 font-mono tracking-tighter mt-0.5">{item.kodeBarang}</div>
+                              </div>
+                              <div className="text-center text-[8px] font-black tabular-nums">{item.qty}</div>
+                              <div className="text-right text-[8px] font-black text-primary tabular-nums">{formatRupiah(item.total)}</div>
+                              <div className="text-center">
+                                  <span className="px-2 py-0.5 rounded-full text-[6px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-200 tracking-tighter shadow-sm">
+                                      {item.statusCair === 'cair' ? 'LUNAS' : 'PENDING'}
+                                  </span>
+                              </div>
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                    <div className="mt-auto pt-4 border-t border-slate-100 text-xs font-bold leading-none text-slate-400 flex justify-between italic">
-                       <p>Halaman Detail ({pageIdx + 1}/{chunks.length})</p>
-                       <p>MAX SPEED Dashboard Analytical Report • {new Date().toLocaleDateString('id-ID')}</p>
+
+                    <div className="mt-auto pt-4 border-t border-slate-100 text-[10px] font-bold text-slate-400 flex justify-between italic">
+                       <p>Detailed Breakdown ({pageIdx + 1}/{chunks.length})</p>
+                       <p>MAX SPEED REPORTING ENGINE • {new Date().toLocaleDateString('id-ID')}</p>
                     </div>
                   </div>
                 ));
