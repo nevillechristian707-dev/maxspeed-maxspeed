@@ -185,8 +185,12 @@ export default function Pencairan() {
   const canEdit = checkPermission('edit');
   const canDelete = checkPermission('delete');
 
+  const allOnlineShopItems = useMemo(() => {
+    return data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
+  }, [data]);
+
   const onlineShopPending = useMemo(() => {
-    let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'online_shop') || [];
+    let items = allOnlineShopItems;
     if (searchOnlineShop) {
       const query = searchOnlineShop.toLowerCase();
       items = items.filter(item => 
@@ -198,10 +202,14 @@ export default function Pencairan() {
       );
     }
     return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  }, [data, searchOnlineShop]);
+  }, [allOnlineShopItems, searchOnlineShop]);
+
+  const allKreditItems = useMemo(() => {
+    return data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
+  }, [data]);
 
   const kreditPending = useMemo(() => {
-    let items = data?.filter(x => (x.status === 'pending' || x.status === 'partial') && x.paymentMethod === 'kredit') || [];
+    let items = allKreditItems;
     if (searchKredit) {
       const query = searchKredit.toLowerCase();
       items = items.filter(item => 
@@ -213,7 +221,7 @@ export default function Pencairan() {
       );
     }
     return [...items].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  }, [data, searchKredit]);
+  }, [allKreditItems, searchKredit]);
 
   const totalMarked = useMemo(() => {
     return Array.from(markedIds).reduce((sum, id) => {
@@ -222,12 +230,27 @@ export default function Pencairan() {
     }, 0);
   }, [markedIds, data]);
 
+  const totalOnlineShopMarkedNum = useMemo(() => {
+    return Array.from(markedIds).filter(id => allOnlineShopItems.some(item => item.id === id)).length;
+  }, [markedIds, allOnlineShopItems]);
+
   const totalOnlineShopMarked = useMemo(() => {
     return Array.from(markedIds).reduce((sum, id) => {
-      const item = onlineShopPending.find(x => x.id === id);
+      const item = allOnlineShopItems.find(x => x.id === id);
       return sum + (item ? (item.nilai || 0) : 0);
     }, 0);
-  }, [markedIds, onlineShopPending]);
+  }, [markedIds, allOnlineShopItems]);
+
+  const totalKreditMarkedNum = useMemo(() => {
+    return Array.from(markedIds).filter(id => allKreditItems.some(item => item.id === id)).length;
+  }, [markedIds, allKreditItems]);
+
+  const totalKreditMarked = useMemo(() => {
+    return Array.from(markedIds).reduce((sum, id) => {
+      const item = allKreditItems.find(x => x.id === id);
+      return sum + (item ? (item.nilai || 0) : 0);
+    }, 0);
+  }, [markedIds, allKreditItems]);
 
   const bankSummaries = useMemo(() => {
     if (!bankTransactions) return [];
@@ -322,11 +345,11 @@ export default function Pencairan() {
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 {totalOnlineShopMarked > 0 && (
                   <div className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg flex items-center gap-2 whitespace-nowrap">
-                    <span className="text-[10px] font-black uppercase text-purple-400">Terpilih:</span>
+                    <span className="text-[10px] font-black uppercase text-purple-400">Total {totalOnlineShopMarkedNum} Item:</span>
                     <span className="text-xs font-black text-purple-500 tabular-nums">{formatRupiah(totalOnlineShopMarked)}</span>
                   </div>
                 )}
-                {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => onlineShopPending.some(p => p.id === id)) && (
+                {canEdit && totalOnlineShopMarked > 0 && (
                   <Button 
                     onClick={() => handleOpenBankModal(null, true)}
                     disabled={markSettledMutation.isPending}
@@ -509,7 +532,13 @@ export default function Pencairan() {
                 />
               </div>
               <div className="flex items-center gap-3 w-full sm:w-auto">
-                {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => kreditPending.some(p => p.id === id)) && (
+                {totalKreditMarked > 0 && (
+                  <div className="px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-[10px] font-black uppercase text-orange-400">Total {totalKreditMarkedNum} Item:</span>
+                    <span className="text-xs font-black text-orange-500 tabular-nums">{formatRupiah(totalKreditMarked)}</span>
+                  </div>
+                )}
+                {canEdit && totalKreditMarked > 0 && (
                   <Button 
                     onClick={() => handleOpenBankModal(null, true)}
                     disabled={markSettledMutation.isPending}
