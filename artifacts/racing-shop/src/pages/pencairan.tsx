@@ -667,9 +667,12 @@ export default function Pencairan() {
                                       <div className="text-[8px] text-primary font-black uppercase mt-1 tracking-widest">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
                                     <td className="px-4 py-3">
-                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-[9px]">
+                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-[9px] block mb-1 w-fit">
                                         {tx.sumber.replace('_', ' ')}
                                       </span>
+                                      <div className="text-[10px] font-bold text-foreground">
+                                        {tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}
+                                      </div>
                                     </td>
                                     <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-[10px]">{formatRupiah(tx.nilai)}</td>
                                     <td className="px-4 py-3 text-center">

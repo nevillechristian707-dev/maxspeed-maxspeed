@@ -11,6 +11,7 @@ import {
   useListCustomer,
   useGetMe
 } from "@workspace/api-client-react";
+import { Input } from "@/components/ui/input";
 import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, generateKodeTransaksi, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
@@ -67,6 +68,7 @@ export default function Penjualan() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   
   const { data: user } = useGetMe();
 
@@ -78,8 +80,22 @@ export default function Penjualan() {
   const filteredListData = useMemo(() => {
     if (!listData) return [];
     let filtered = statusFilter === "all" ? listData : listData.filter(item => item.statusCair === statusFilter);
+    
+    if (searchTerm) {
+      const query = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => 
+        (item.namaBarang || "").toLowerCase().includes(query) ||
+        (item.brand || "").toLowerCase().includes(query) ||
+        (item.kodeBarang || "").toLowerCase().includes(query) ||
+        (item.noFaktur || "").toLowerCase().includes(query) ||
+        (item.kodeTransaksi || "").toLowerCase().includes(query) ||
+        (item.namaOnlineShop || "").toLowerCase().includes(query) ||
+        (item.namaCustomer || "").toLowerCase().includes(query)
+      );
+    }
+
     return [...filtered].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-  }, [listData, statusFilter]);
+  }, [listData, statusFilter, searchTerm]);
   
   const filteredBarang = useMemo(() => {
     if (!barangData) return [];
@@ -529,8 +545,17 @@ export default function Penjualan() {
               </CardTitle>
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{getIndonesianPeriodLabel(selectedMonth, selectedYear)}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-2 py-1 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Cari transaksi..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-9 bg-background border-border/50 text-xs"
+                />
+              </div>
+              <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-2 py-1 shadow-sm h-9">
                 <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">Status:</span>
                 <select 
                   value={statusFilter}
