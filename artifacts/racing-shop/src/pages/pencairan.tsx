@@ -106,18 +106,28 @@ export default function Pencairan() {
   };
 
   const handleConfirmSettle = async () => {
-    if (!selectedBankInfo) {
-      toast({ title: "Error", description: "Silakan pilih bank terlebih dahulu.", variant: "destructive" });
-      return;
-    }
-
     try {
-      const settleData = {
-        tanggalCair: selectedDate,
-        namaBank: selectedBankInfo.namaBank,
-        rekeningBank: selectedBankInfo.nomorRekening,
-        nilai: parseFloat(nilaiPembayaran) || 0
-      };
+      let settleData: any;
+      
+      if (selectedBankId === "cash") {
+        settleData = {
+          tanggalCair: selectedDate,
+          namaBank: "CASH",
+          rekeningBank: "KAS TUNAI",
+          nilai: parseFloat(nilaiPembayaran) || 0
+        };
+      } else {
+        if (!selectedBankInfo) {
+          toast({ title: "Error", description: "Silakan pilih bank terlebih dahulu.", variant: "destructive" });
+          return;
+        }
+        settleData = {
+          tanggalCair: selectedDate,
+          namaBank: selectedBankInfo.namaBank,
+          rekeningBank: selectedBankInfo.nomorRekening,
+          nilai: parseFloat(nilaiPembayaran) || 0
+        };
+      }
 
       if (isBulkSettle) {
         let successCount = 0;
@@ -126,11 +136,11 @@ export default function Pencairan() {
           await markSettledMutation.mutateAsync({ id, data: settleData });
           successCount++;
         }
-        toast({ title: "Success", description: `${successCount} transaksi berhasil dicairkan ke ${selectedBankInfo.namaBank}.` });
+        toast({ title: "Success", description: `${successCount} transaksi berhasil dicairkan.` });
         setMarkedIds(new Set());
       } else if (itemToSettle !== null) {
         await markSettledMutation.mutateAsync({ id: itemToSettle, data: settleData });
-        toast({ title: "Success", description: `Transaksi berhasil dicairkan ke ${selectedBankInfo.namaBank}.` });
+        toast({ title: "Success", description: `Transaksi berhasil dicairkan.` });
       }
 
       queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
@@ -735,6 +745,9 @@ export default function Pencairan() {
                   <SelectValue placeholder="Pilih bank..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="cash" className="font-black text-emerald-600 bg-emerald-50/50">
+                    KAS / TUNAI (CASH)
+                  </SelectItem>
                   {banks?.map((bank: any) => (
                     <SelectItem key={bank.id} value={bank.id.toString()} className="font-medium">
                       {bank.namaBank} - {bank.nomorRekening}
@@ -788,17 +801,23 @@ export default function Pencairan() {
                   />
                 </div>
               </div>
-            )}
-
-            {selectedBankInfo && (
+            )}            {selectedBankId === "cash" ? (
+              <div className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-xs">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-emerald-700 font-bold uppercase">Metode Pembayaran:</span>
+                  <span className="font-black text-emerald-600">TUNAI / CASH</span>
+                </div>
+                <div className="text-[10px] text-emerald-500/70 italic">Uang akan dicatat masuk ke saldo Kas Toko.</div>
+              </div>
+            ) : selectedBankInfo && (
               <div className="p-3 bg-secondary/30 rounded-lg border border-border/50 text-xs">
                 <div className="flex justify-between mb-1">
                   <span className="text-muted-foreground">Penerima:</span>
                   <span className="font-bold">{selectedBankInfo.namaBank}</span>
                 </div>
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between text-muted-foreground text-[10px]">
                   <span>Nomor Rekening:</span>
-                  <span className="font-mono text-foreground font-bold">{selectedBankInfo.nomorRekening}</span>
+                  <span className="font-mono">{selectedBankInfo.nomorRekening}</span>
                 </div>
               </div>
             )}

@@ -251,6 +251,7 @@ export default function Laporan() {
           didDrawPage: (data) => {
             doc.setFontSize(8);
             doc.setTextColor(150);
+            doc.text("Dicetak otomatis oleh Sistem Dashboard Max Speed", 14, 285);
             doc.text(`Halaman ${doc.getNumberOfPages()}`, 196, 285, { align: 'right' });
           }
         });
@@ -747,57 +748,66 @@ export default function Laporan() {
                 </div>
               </div>
 
-              {/* PAGE 2+: DETAILED BREAKDOWN */}
-              <div className="report-page">
-                <h3>IV. Rincian Penjualan per Metode Bayar</h3>
-                <div className="space-y-8">
-                  {[
-                    { label: 'CASH (TUNAI)', data: salesByCategory.cash },
-                    { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
-                    { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-                    { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
-                  ].map((cat) => ( cat.data.length > 0 && 
-                    <div key={cat.label} className="border border-slate-200 rounded overflow-hidden">
-                      <div className="bg-slate-100 px-3 py-1.5 text-[9px] font-black border-b border-slate-200 flex justify-between">
-                         <span>KATEGORI: {cat.label}</span>
-                         <span>{cat.data.length} Transaksi</span>
-                      </div>
-                      <table className="w-full text-[7px] mb-0">
-                        <thead>
-                          <tr className="bg-white">
-                            <th className="p-1 border text-slate-600">TGL</th>
-                            <th className="p-1 border text-slate-600">FAKTUR</th>
-                            <th className="p-1 border text-slate-600">PRODUK</th>
-                            <th className="p-1 border text-slate-600 text-center">QTY</th>
-                            <th className="p-1 border text-slate-600 text-right">JUAL</th>
-                            <th className="p-1 border text-slate-600 text-right">LABA</th>
-                            <th className="p-1 border text-slate-600 text-center">STATUS</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cat.data.map((s: any) => (
-                            <tr key={s.id}>
-                              <td className="p-1 border">{s.tanggal}</td>
-                              <td className="p-1 border font-bold">{s.noFaktur || '-'}</td>
-                              <td className="p-1 border truncate max-w-[120px]">{s.namaBarang}</td>
-                              <td className="p-1 border text-center">{s.qty}</td>
-                              <td className="p-1 border text-right font-bold">{formatRupiah(s.total)}</td>
-                              <td className="p-1 border text-right font-black text-emerald-600">
-                                {formatRupiah((s.total || 0) - ((s.hargaBeli || 0) * (s.qty || 0)))}
-                              </td>
-                              <td className="p-1 border text-center text-[6px] font-black">{s.statusCair === 'cair' ? 'LUNAS' : 'PEND'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+              {/* PAGE 2+: DETAILED BREAKDOWN - AUTO SPACING */}
+              {(() => {
+                const list: any[] = [];
+                [
+                  { label: 'CASH (TUNAI)', data: salesByCategory.cash },
+                  { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
+                  { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
+                  { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
+                ].forEach(cat => {
+                  if (cat.data.length > 0) {
+                    list.push({ isHeader: true, label: cat.label });
+                    cat.data.forEach((item, idxx) => {
+                      list.push({ isHeader: false, ...item, id: `${cat.label}-${idxx}` });
+                    });
+                  }
+                });
+
+                // Split list into chunks for pages
+                const pageSize = 25;
+                const chunks = [];
+                for (let i = 0; i < list.length; i += pageSize) {
+                  chunks.push(list.slice(i, i + pageSize));
+                }
+
+                return chunks.map((chunk, pageIdx) => (
+                  <div key={pageIdx} className="report-page">
+                    <div className="flex justify-between items-center border-b border-primary/20 pb-2 mb-4">
+                       <h3 className="m-0 border-none p-0">IV. Rincian Penjualan per Metode Bayar</h3>
+                       <span className="text-[10px] font-black text-slate-400">BAGIAN {pageIdx + 1}/{chunks.length}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-auto pt-8 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
-                   <p>Halaman 2/2 - Detailed breakdown</p>
-                   <p>Max Speed Dashboard System</p>
-                </div>
-              </div>
+                    <div className="space-y-4 flex-1">
+                      {chunk.map((item, itemIdx) => {
+                        if (item.isHeader) {
+                          return (
+                            <div key={itemIdx} className="bg-slate-900 text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest mt-4 first:mt-0 shadow-sm">
+                              KATEGORI: {item.label}
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={item.id} className="grid grid-cols-7 gap-2 border border-slate-200 rounded p-1.5 text-[7px] items-center hover:bg-slate-50 transition-colors">
+                            <div className="font-medium text-slate-500">{item.tanggal}</div>
+                            <div className="font-black text-slate-900 border-l px-2">{item.noFaktur || '-'}</div>
+                            <div className="col-span-2 font-bold truncate opacity-80">{item.namaBarang}</div>
+                            <div className="text-center font-black">{item.qty}</div>
+                            <div className="text-right font-black text-primary">{formatRupiah(item.total)}</div>
+                            <div className="text-center bg-slate-100 rounded py-0.5 font-black uppercase tracking-tighter text-[6px] border border-slate-200">
+                                {item.statusCair === 'cair' ? 'LUNAS' : 'PEND'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-auto pt-4 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
+                       <p>Halaman Detail ({pageIdx + 1}/{chunks.length})</p>
+                       <p>MAX SPEED Dashboard Analytical Report • {new Date().toLocaleDateString('id-ID')}</p>
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </div>
