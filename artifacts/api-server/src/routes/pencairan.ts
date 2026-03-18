@@ -111,9 +111,14 @@ router.post("/:id/mark-settled", async (req, res) => {
       .where(eq(transaksiBank.penjualanId, id));
     
     const totalPaid = parseFloat(txs[0]?.total || "0");
-    const totalTarget = p.paymentMethod === 'online_shop' ? toNumber(p.nilaiOnlineShop) : toNumber(p.nilaiKredit);
     
-    const newStatus = totalPaid >= (totalTarget - 1) ? "cair" : "partial"; // -1 to handle float rounding
+    // Unify target calculation with the GET route logic
+    const totalTarget = p.paymentMethod === 'online_shop' 
+        ? toNumber(p.nilaiOnlineShop) 
+        : (p.paymentMethod === 'kredit' ? toNumber(p.nilaiKredit) : toNumber(p.total));
+    
+    // Status should be 'cair' if target is reached (with small tolerance)
+    const newStatus = totalPaid >= (totalTarget - 0.1) ? "cair" : "partial";
 
     const updated = await db.update(penjualanTable)
       .set({ 
