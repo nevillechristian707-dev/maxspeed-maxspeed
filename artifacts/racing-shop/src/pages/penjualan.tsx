@@ -77,8 +77,8 @@ export default function Penjualan() {
 
   const filteredListData = useMemo(() => {
     if (!listData) return [];
-    if (statusFilter === "all") return listData;
-    return listData.filter(item => item.statusCair === statusFilter);
+    let filtered = statusFilter === "all" ? listData : listData.filter(item => item.statusCair === statusFilter);
+    return [...filtered].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
   }, [listData, statusFilter]);
   
   const filteredBarang = useMemo(() => {
@@ -586,7 +586,7 @@ export default function Penjualan() {
                         <div className="font-mono text-[9px] text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-bold text-foreground truncate max-w-[200px]">{item.namaBarang}</div>
+                        <div className="font-bold text-foreground">{item.namaBarang}</div>
                         <div className="text-[9px] text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
                       </td>
                       <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
