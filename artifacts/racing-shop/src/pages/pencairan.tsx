@@ -133,13 +133,20 @@ export default function Pencairan() {
         let successCount = 0;
         const idsToProcess = Array.from(markedIds);
         for (const id of idsToProcess) {
-          await markSettledMutation.mutateAsync({ id, data: settleData });
-          successCount++;
+          const item = data?.find(x => x.id === id);
+          if (item) {
+            const itemSettleData = { 
+              ...settleData, 
+              nilai: item.nilai 
+            };
+            await markSettledMutation.mutateAsync({ id, data: itemSettleData });
+            successCount++;
+          }
         }
         toast({ title: "Success", description: `${successCount} transaksi berhasil dicairkan.` });
         setMarkedIds(new Set());
       } else if (itemToSettle !== null) {
-        await markSettledMutation.mutateAsync({ id: itemToSettle, data: settleData });
+        await markSettledMutation.mutateAsync({ id: itemToSettle, data: { ...settleData, nilai: parseFloat(nilaiPembayaran) || 0 } });
         toast({ title: "Success", description: `Transaksi berhasil dicairkan.` });
       }
 
