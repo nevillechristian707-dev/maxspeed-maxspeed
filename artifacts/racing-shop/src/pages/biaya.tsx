@@ -87,14 +87,14 @@ export default function Biaya() {
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground">Tanggal</label>
+                <label className="text-sm text-muted-foreground">Tanggal</label>
                 <DatePicker 
                   date={form.tanggal ? new Date(form.tanggal) : undefined}
                   onChange={(date) => setForm({...form, tanggal: formatDateToYYYYMMDD(date)})}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground">Keterangan</label>
+                <label className="text-sm text-muted-foreground">Keterangan</label>
                 <input 
                   type="text" 
                   required
@@ -105,7 +105,7 @@ export default function Biaya() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground">Nilai (Rp)</label>
+                <label className="text-sm text-muted-foreground">Nilai (Rp)</label>
                 <input 
                   type="number" 
                   required
@@ -140,7 +140,7 @@ export default function Biaya() {
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
+                <thead className="text-sm text-muted-foreground uppercase bg-secondary/50 border-b border-border">
                   <tr>
                     <th className="px-6 py-4">Tanggal</th>
                     <th className="px-4 py-4">Keterangan</th>
@@ -180,7 +180,7 @@ export default function Biaya() {
               ) : data?.map(item => (
                 <div key={item.id} className="p-4 space-y-2 bg-card/60 my-2 rounded-xl border border-border/20">
                   <div className="flex justify-between items-start">
-                    <div className="text-[10px] font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
+                    <div className="text-xs font-medium tracking-tight font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
                     {canDelete && (
                       <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-500 bg-rose-500/5 rounded-lg border border-rose-500/20">
                         <Trash2 className="w-4 h-4" />

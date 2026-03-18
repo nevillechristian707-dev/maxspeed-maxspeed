@@ -291,12 +291,12 @@ export default function Pencairan() {
               <CardTitle className="text-purple-400 flex items-center gap-2 uppercase tracking-tighter decoration-purple-500/30 underline-offset-4 underline">
                 <Store className="w-5 h-5 text-purple-500" /> Piutang Online Shop
               </CardTitle>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-7">Menunggu pencairan dari dana tertahan marketplace</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-7">Menunggu pencairan dari dana tertahan marketplace</p>
             </div>
             <div className="flex items-center gap-3">
               {totalOnlineShopMarked > 0 && (
                 <div className="mr-4 px-4 py-1.5 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center gap-2">
-                   <span className="text-[10px] font-black uppercase text-purple-400">Total Cair:</span>
+                   <span className="text-xs font-black uppercase text-purple-400">Total Cair:</span>
                    <span className="text-sm font-black text-purple-500 tabular-nums">{formatRupiah(totalOnlineShopMarked)}</span>
                 </div>
               )}
@@ -304,7 +304,7 @@ export default function Pencairan() {
                 <Button 
                   onClick={() => handleOpenBankModal(null, true)}
                   disabled={markSettledMutation.isPending}
-                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-xs"
+                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
                 >
                   Lunasi Terpilih
                 </Button>
@@ -315,7 +315,7 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                <thead className="text-xs text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
                   <tr>
                     <th className="px-4 py-2.5 w-10">
                       <Checkbox 
@@ -347,29 +347,29 @@ export default function Pencairan() {
                       <td className="px-4 py-3">
                         <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">{formatDate(item.tanggal)}</td>
                       <td className="px-4 py-3">
-                        <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                        <div className="font-bold text-foreground text-sm">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-xs font-medium text-muted-foreground leading-none">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-black text-purple-400 text-[10px] uppercase block mb-1">{item.namaOnlineShop}</span>
-                        <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <span className="font-black text-purple-400 text-xs uppercase block mb-1">{item.namaOnlineShop}</span>
+                        <div className="text-sm leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
                         <div className="flex flex-col items-end mt-1">
                           {item.status === 'partial' && (
                             <>
-                              <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-emerald-500/20 mb-1">Piutang Terbayar</span>
-                              <span className="text-[8px] text-orange-400 font-bold italic">Sisa Piutang: {formatRupiah(item.nilai)}</span>
+                              <span className="text-xs font-medium bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-emerald-500/20 mb-1">Piutang Terbayar</span>
+                              <span className="text-xs font-bold text-orange-400 font-bold italic">Sisa Piutang: {formatRupiah(item.nilai)}</span>
                             </>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
-                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Cairkan</button>}
+                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-xs font-black rounded transition-all uppercase">Cairkan</button>}
                           {canDelete && (
                             <button 
                               onClick={() => {
@@ -414,23 +414,23 @@ export default function Pencairan() {
                     <div className="flex gap-3 items-start">
                       <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
                       <div>
-                        <div className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{item.namaOnlineShop}</div>
-                        <div className="text-xs font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                        <div className="text-xs font-black text-purple-500 uppercase tracking-widest">{item.namaOnlineShop}</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-[9px] font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
-                       <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                       <div className="text-xs font-medium font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-xs font-medium font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
+                  <div className="text-sm text-muted-foreground pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
-                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
+                      {item.status === 'partial' && <div className="text-xs font-bold text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
-                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
+                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-xs font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
                       {canDelete && (
                          <button 
                          onClick={() => {
@@ -469,14 +469,14 @@ export default function Pencairan() {
               <CardTitle className="text-orange-400 flex items-center gap-2 uppercase tracking-tighter decoration-orange-500/30 underline-offset-4 underline">
                 <CreditCard className="w-5 h-5 text-orange-500" /> Piutang Penjualan Kredit
               </CardTitle>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-7">Tagihan jatuh tempo yang belum dibayarkan oleh customer</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-7">Tagihan jatuh tempo yang belum dibayarkan oleh customer</p>
             </div>
             <div className="flex items-center gap-3">
               {canEdit && markedIds.size > 0 && Array.from(markedIds).some(id => kreditPending.some(p => p.id === id)) && (
                 <Button 
                   onClick={() => handleOpenBankModal(null, true)}
                   disabled={markSettledMutation.isPending}
-                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-xs"
+                  className="bg-emerald-600 hover:bg-emerald-700 font-bold h-9 px-4 text-sm"
                 >
                   Lunasi Terpilih
                 </Button>
@@ -487,7 +487,7 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                <thead className="text-xs text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
                   <tr>
                     <th className="px-4 py-2.5 w-10">
                       <Checkbox 
@@ -519,29 +519,29 @@ export default function Pencairan() {
                       <td className="px-4 py-3">
                         <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">{formatDate(item.tanggal)}</td>
                       <td className="px-4 py-3">
-                        <div className="font-bold text-foreground text-xs">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-[9px] text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                        <div className="font-bold text-foreground text-sm">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-xs font-medium text-muted-foreground leading-none">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-black text-orange-400 text-[10px] uppercase block mb-1">{item.namaCustomer}</span>
-                        <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <span className="font-black text-orange-400 text-xs uppercase block mb-1">{item.namaCustomer}</span>
+                        <div className="text-sm leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
                         <div className="flex flex-col items-end mt-1">
                           {item.status === 'partial' && (
                             <>
-                              <span className="text-[9px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20 mb-1">Terbayar Sebagian</span>
-                              <span className="text-[8px] text-orange-400 font-bold italic">Sisa: {formatRupiah(item.nilai)}</span>
+                              <span className="text-xs font-medium bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20 mb-1">Terbayar Sebagian</span>
+                              <span className="text-xs font-bold text-orange-400 font-bold italic">Sisa: {formatRupiah(item.nilai)}</span>
                             </>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
-                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black rounded transition-all uppercase">Lunasi</button>}
+                          {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-3 py-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-xs font-black rounded transition-all uppercase">Lunasi</button>}
                           {canDelete && (
                             <button 
                               onClick={() => {
@@ -586,23 +586,23 @@ export default function Pencairan() {
                     <div className="flex gap-3 items-start">
                       <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
                       <div>
-                        <div className="text-[10px] font-black text-orange-500 uppercase tracking-widest">{item.namaCustomer}</div>
-                        <div className="text-xs font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                        <div className="text-xs font-black text-orange-500 uppercase tracking-widest">{item.namaCustomer}</div>
+                        <div className="text-sm font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-[9px] font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
-                       <div className="text-[9px] font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                       <div className="text-xs font-medium font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-xs font-medium font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-xs text-muted-foreground pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
+                  <div className="text-sm text-muted-foreground pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
-                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
+                      {item.status === 'partial' && <div className="text-xs font-bold text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
-                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Lunasi</button>}
+                      {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-xs font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Lunasi</button>}
                       {canDelete && <button onClick={() => setDeleteConfirmId(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20"><XCircle className="w-4 h-4"/></button>}
                     </div>
                   </div>
@@ -619,7 +619,7 @@ export default function Pencairan() {
               <Building2 className="w-5 h-5" /> Data Pencairan per Bank
             </CardTitle>
             <div className="px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+              <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">
                 Periode: {periodLabel}
               </span>
             </div>
@@ -641,13 +641,13 @@ export default function Pencairan() {
                             <Calendar className="w-5 h-5 text-indigo-400" />
                           </div>
                           <div>
-                            <span className="text-xs font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
-                            <div className="text-[8px] text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter">Riwayat Pencairan Harian</div>
+                            <span className="text-sm font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
+                            <div className="text-xs font-bold text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter">Riwayat Pencairan Harian</div>
                           </div>
                        </div>
-                       <div className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-3">
+                       <div className="text-xs font-black text-muted-foreground uppercase flex items-center gap-3">
                           <span className="opacity-40 tracking-[0.2em] hidden sm:inline">Total Kas Masuk:</span>
-                          <span className="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-xs">{formatRupiah(dayGroup.total)}</span>
+                          <span className="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-sm">{formatRupiah(dayGroup.total)}</span>
                        </div>
                     </div>
 
@@ -662,19 +662,19 @@ export default function Pencairan() {
                               </div>
                               <div>
                                 <h3 className="text-sm font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
-                                <p className="text-[10px] font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
+                                <p className="text-xs font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
                               </div>
                             </div>
                             <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end gap-2">
                               <div className="text-xl font-black text-emerald-600 drop-shadow-sm">{formatRupiah(bankGroup.total)}</div>
-                              <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 text-[9px] font-black uppercase rounded border border-emerald-500/20">{bankGroup.count} Transaksi</div>
+                              <div className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 text-xs font-medium font-black uppercase rounded border border-emerald-500/20">{bankGroup.count} Transaksi</div>
                             </div>
                           </div>
 
                           {/* Transaction Detail Table for this Bank */}
                           <div className="overflow-x-auto">
                             <table className="w-full text-[11px] text-left">
-                              <thead className="text-[9px] text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
+                              <thead className="text-xs font-medium text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
                                 <tr>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Tgl Faktur</th>
                                   <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX</th>
@@ -687,26 +687,26 @@ export default function Pencairan() {
                               <tbody className="divide-y divide-border/10">
                                 {bankGroup.items.map((tx: any) => (
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
-                                    <td className="px-4 py-3 whitespace-nowrap text-[10px] text-muted-foreground font-bold">
+                                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground font-bold">
                                       {formatDate(tx.tanggal)}
                                     </td>
                                     <td className="px-6 py-3">
-                                      <span className="font-bold text-foreground text-[10px]">{tx.noFaktur || "-"}</span>
-                                      <div className="text-[8px] text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
+                                      <span className="font-bold text-foreground text-xs">{tx.noFaktur || "-"}</span>
+                                      <div className="text-xs font-bold text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
                                     </td>
                                     <td className="px-4 py-3">
-                                      <div className="font-bold text-foreground text-[10px]">{tx.namaBarang}</div>
-                                      <div className="text-[8px] text-primary font-black uppercase mt-1 tracking-widest">{tx.brand || '-'} • {tx.kodeBarang}</div>
+                                      <div className="font-bold text-foreground text-xs">{tx.namaBarang}</div>
+                                      <div className="text-xs font-bold text-primary font-black uppercase mt-1 tracking-widest">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
                                     <td className="px-4 py-3">
-                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-[9px] block mb-1 w-fit">
+                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-xs font-medium block mb-1 w-fit">
                                         {tx.sumber.replace('_', ' ')}
                                       </span>
-                                      <div className="text-[10px] font-bold text-foreground">
+                                      <div className="text-xs font-bold text-foreground">
                                         {tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}
                                       </div>
                                     </td>
-                                    <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-[10px]">{formatRupiah(tx.nilai)}</td>
+                                    <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-xs">{formatRupiah(tx.nilai)}</td>
                                     <td className="px-4 py-3 text-center">
                                       {canEdit && (
                                         <button
@@ -750,7 +750,7 @@ export default function Pencairan() {
           </DialogHeader>
           <div className="py-6 flex flex-col gap-4">
             <div className="space-y-2">
-              <Label htmlFor="bank" className="text-xs font-bold uppercase text-muted-foreground">Bank</Label>
+              <Label htmlFor="bank" className="text-sm font-bold uppercase text-muted-foreground">Bank</Label>
               <Select value={selectedBankId} onValueChange={setSelectedBankId}>
                 <SelectTrigger id="bank" className="font-bold">
                   <SelectValue placeholder="Pilih bank..." />
@@ -769,7 +769,7 @@ export default function Pencairan() {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase text-muted-foreground">Tanggal Cair</Label>
+              <Label className="text-sm font-bold uppercase text-muted-foreground">Tanggal Cair</Label>
               <DatePicker 
                 date={selectedDate ? new Date(selectedDate) : undefined}
                 onChange={(date) => setSelectedDate(formatDateToYYYYMMDD(date))}
@@ -778,19 +778,19 @@ export default function Pencairan() {
 
             {currentInstallments.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Riwayat Pembayaran Sebelumnya</Label>
+                <Label className="text-xs font-black uppercase text-muted-foreground tracking-widest">Riwayat Pembayaran Sebelumnya</Label>
                 <div className="max-h-[120px] overflow-y-auto space-y-1.5 p-2 bg-secondary/10 rounded-xl border border-border/10">
                   {currentInstallments.map((tx: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center text-[10px] bg-card/60 p-2 rounded-lg border border-border/5">
+                    <div key={idx} className="flex justify-between items-center text-xs bg-card/60 p-2 rounded-lg border border-border/5">
                       <div className="flex flex-col">
                         <span className="font-black text-foreground">{formatDate(tx.tanggalCair)}</span>
-                        <span className="text-[8px] text-muted-foreground uppercase">{tx.namaBank}</span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase">{tx.namaBank}</span>
                       </div>
                       <span className="font-black text-emerald-500 tabular-nums">{formatRupiah(tx.nilai)}</span>
                     </div>
                   ))}
                   <div className="pt-1.5 mt-1 border-t border-border/20 flex justify-between items-center px-1">
-                    <span className="text-[9px] font-black text-muted-foreground uppercase">Total Terbayar</span>
+                    <span className="text-xs font-medium font-black text-muted-foreground uppercase">Total Terbayar</span>
                     <span className="text-[11px] font-black text-emerald-600">{formatRupiah(currentInstallments.reduce((s: number, c: any) => s + Number(c.nilai), 0))}</span>
                   </div>
                 </div>
@@ -799,9 +799,9 @@ export default function Pencairan() {
 
             {!isBulkSettle && (
               <div className="space-y-2">
-                <Label htmlFor="nilai" className="text-xs font-bold uppercase text-muted-foreground">Nilai Pembayaran / Cicilan</Label>
+                <Label htmlFor="nilai" className="text-sm font-bold uppercase text-muted-foreground">Nilai Pembayaran / Cicilan</Label>
                 <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">Rp</div>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">Rp</div>
                   <Input 
                     id="nilai"
                     type="number"
@@ -813,20 +813,20 @@ export default function Pencairan() {
                 </div>
               </div>
             )}            {selectedBankId === "cash" ? (
-              <div className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-xs">
+              <div className="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-sm">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-emerald-700 font-bold uppercase">Metode Pembayaran:</span>
                   <span className="font-black text-emerald-600">TUNAI / CASH</span>
                 </div>
-                <div className="text-[10px] text-emerald-500/70 italic">Uang akan dicatat masuk ke saldo Kas Toko.</div>
+                <div className="text-xs text-emerald-500/70 italic">Uang akan dicatat masuk ke saldo Kas Toko.</div>
               </div>
             ) : selectedBankInfo && (
-              <div className="p-3 bg-secondary/30 rounded-lg border border-border/50 text-xs">
+              <div className="p-3 bg-secondary/30 rounded-lg border border-border/50 text-sm">
                 <div className="flex justify-between mb-1">
                   <span className="text-muted-foreground">Penerima:</span>
                   <span className="font-bold">{selectedBankInfo.namaBank}</span>
                 </div>
-                <div className="flex justify-between text-muted-foreground text-[10px]">
+                <div className="flex justify-between text-muted-foreground text-xs">
                   <span>Nomor Rekening:</span>
                   <span className="font-mono">{selectedBankInfo.nomorRekening}</span>
                 </div>
@@ -836,11 +836,11 @@ export default function Pencairan() {
             {itemToSettle && (
               <div className="mt-2 p-3 bg-card rounded-2xl border border-border/50 shadow-inner">
                 <div className="flex justify-between items-center mb-2">
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Total Tagihan Saat Ini</span>
+                   <span className="text-xs font-black text-muted-foreground uppercase tracking-wider">Total Tagihan Saat Ini</span>
                    <span className="text-sm font-black text-foreground">{formatRupiah(data?.find(x => x.id === itemToSettle)?.nilai)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-border/50">
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Sisa Setelah Bayar</span>
+                   <span className="text-xs font-black text-muted-foreground uppercase tracking-wider">Sisa Setelah Bayar</span>
                    <span className={cn(
                      "text-sm font-black tabular-nums",
                      (data?.find(x => x.id === itemToSettle)?.nilai || 0) - (parseFloat(nilaiPembayaran) || 0) > 0 
@@ -852,7 +852,7 @@ export default function Pencairan() {
                 </div>
                 {(data?.find(x => x.id === itemToSettle)?.nilai || 0) - (parseFloat(nilaiPembayaran) || 0) > 0 && (
                   <div className="mt-2 text-center">
-                    <span className="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Akan dicatat sebagai Cicilan</span>
+                    <span className="text-xs font-bold bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Akan dicatat sebagai Cicilan</span>
                   </div>
                 )}
               </div>
@@ -860,7 +860,7 @@ export default function Pencairan() {
 
             {isBulkSettle && (
               <div className="mt-2 p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                <p className="text-xs text-center font-bold text-emerald-600">
+                <p className="text-sm text-center font-bold text-emerald-600">
                   Total Dana Cair (Bulk): {formatRupiah(totalMarked)}
                 </p>
               </div>

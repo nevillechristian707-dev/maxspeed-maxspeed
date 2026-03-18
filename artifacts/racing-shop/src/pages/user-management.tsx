@@ -268,27 +268,27 @@ export default function UserManagement() {
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Username</label>
+                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Username</label>
                   <input value={userForm.username} onChange={e => setUserForm({...userForm, username: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="johndoe" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Lengkap</label>
+                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Lengkap</label>
                   <input value={userForm.name} onChange={e => setUserForm({...userForm, name: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="John Doe" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Role</label>
+                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Role</label>
                   <select value={userForm.role} onChange={e => setUserForm({...userForm, role: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none">
                     <option value="">-- Pilih Role --</option>
                     {roles?.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Password {editingUserId && "(Kosongkan jika tidak diubah)"}</label>
+                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Password {editingUserId && "(Kosongkan jika tidak diubah)"}</label>
                   <input type="password" value={userForm.password} onChange={e => setUserForm({...userForm, password: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="••••••••" />
                 </div>
                 {!editingUserId && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Konfirmasi Password</label>
+                    <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Konfirmasi Password</label>
                     <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="••••••••" />
                   </div>
                 )}
@@ -313,17 +313,17 @@ export default function UserManagement() {
               </CardHeader>
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Role</label>
+                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Role</label>
                   <input value={roleForm.name} onChange={e => setRoleForm({...roleForm, name: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none font-bold" placeholder="Kasir" />
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Hak Akses / Permissions</label>
+                    <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Hak Akses / Permissions</label>
                     <div className="flex gap-2">
-                       <button onClick={() => handleAllPermissionsToggle(true)} className="text-[9px] font-black uppercase text-primary hover:text-primary/70 transition-colors flex items-center gap-1">
+                       <button onClick={() => handleAllPermissionsToggle(true)} className="text-xs italic tracking-tighter font-black uppercase text-primary hover:text-primary/70 transition-colors flex items-center gap-1">
                          <CheckCheck className="w-3 h-3" /> Full Access
                        </button>
-                       <button onClick={() => handleAllPermissionsToggle(false)} className="text-[9px] font-black uppercase text-rose-500 hover:text-rose-500/70 transition-colors flex items-center gap-1">
+                       <button onClick={() => handleAllPermissionsToggle(false)} className="text-xs italic tracking-tighter font-black uppercase text-rose-500 hover:text-rose-500/70 transition-colors flex items-center gap-1">
                          <X className="w-3 h-3" /> Clear All
                        </button>
                     </div>
@@ -332,7 +332,7 @@ export default function UserManagement() {
                     {MENU_LIST.map(menu => (
                       <div key={menu} className="border border-border/40 rounded-xl p-3 bg-secondary/10 hover:border-primary/20 transition-all group/menu">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-bold text-xs text-foreground group-hover/menu:text-primary transition-colors">{menu}</h4>
+                          <h4 className="font-bold text-sm text-foreground group-hover/menu:text-primary transition-colors">{menu}</h4>
                           <div className="flex gap-2 opacity-0 group-hover/menu:opacity-100 transition-opacity">
                             <button onClick={() => handleBulkPermissionToggle(menu, true)} className="text-[8px] font-black uppercase text-primary hover:underline">All</button>
                             <button onClick={() => handleBulkPermissionToggle(menu, false)} className="text-[8px] font-black uppercase text-rose-500 hover:underline">None</button>
@@ -347,7 +347,7 @@ export default function UserManagement() {
                                 onChange={() => handlePermissionToggle(menu, action)}
                                 className="w-3.5 h-3.5 rounded text-primary focus:ring-primary/40 border-border bg-background"
                               />
-                              <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground uppercase">{action}</span>
+                              <span className="text-xs font-medium tracking-tight font-medium text-muted-foreground group-hover:text-foreground uppercase">{action}</span>
                             </label>
                           ))}
                         </div>
@@ -383,7 +383,7 @@ export default function UserManagement() {
                </CardHeader>
                <CardContent className="p-0 overflow-x-auto">
                  <table className="w-full text-sm text-left border-collapse">
-                   <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/30">
+                   <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/30">
                      <tr>
                        <th className="px-4 py-3 font-black tracking-widest">Username</th>
                        <th className="px-4 py-3 font-black tracking-widest">Nama Lengkap</th>
@@ -404,7 +404,7 @@ export default function UserManagement() {
                           </td>
                           <td className="px-4 py-3 font-black text-foreground">{user.name}</td>
                           <td className="px-4 py-3">
-                            <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider">
+                            <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 rounded-lg text-xs italic tracking-tighter font-black uppercase tracking-wider">
                               {user.role}
                             </span>
                           </td>
@@ -444,7 +444,7 @@ export default function UserManagement() {
                </CardHeader>
                <CardContent className="p-0 overflow-x-auto">
                  <table className="w-full text-sm text-left border-collapse">
-                   <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/30">
+                   <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/30">
                      <tr>
                        <th className="px-4 py-3 font-black tracking-widest w-1/4">Nama Role</th>
                        <th className="px-4 py-3 font-black tracking-widest">Ringkasan Hak Akses</th>
@@ -460,7 +460,7 @@ export default function UserManagement() {
                         <tr key={role.id} className="hover:bg-primary/[0.02] transition-colors align-top">
                           <td className="px-4 py-5">
                             <div className="font-black text-foreground tracking-tight">{role.name}</div>
-                            <div className="text-[10px] text-muted-foreground/60 font-mono mt-1">ID: {role.id}</div>
+                            <div className="text-xs font-medium tracking-tight text-muted-foreground/60 font-mono mt-1">ID: {role.id}</div>
                           </td>
                           <td className="px-4 py-5">
                             <div className="flex flex-wrap gap-2">
@@ -468,7 +468,7 @@ export default function UserManagement() {
                                 if (actions.length === 0) return null;
                                 return (
                                   <div key={menu} className="flex flex-col gap-1.5 border border-border/40 p-2 rounded-xl bg-secondary/20 hover:border-primary/30 transition-colors">
-                                    <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest">{menu}</span>
+                                    <span className="text-xs italic tracking-tighter font-black uppercase text-muted-foreground tracking-widest">{menu}</span>
                                     <div className="flex flex-wrap gap-1">
                                       {actions.map((act: string) => (
                                         <span key={act} className="text-[8px] uppercase tracking-tighter bg-primary/10 text-primary px-2 py-0.5 rounded-md font-bold border border-primary/5">{act}</span>

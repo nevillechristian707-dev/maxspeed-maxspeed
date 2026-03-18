@@ -378,7 +378,7 @@ export default function Laporan() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-2 bg-card border-primary/20 backdrop-blur-xl shadow-2xl">
-                <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest">Pilih Format Output</DropdownMenuLabel>
+                <DropdownMenuLabel className="px-3 py-2 text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest">Pilih Format Output</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-primary/10" />
                 
                 <DropdownMenuItem onClick={handlePrint} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-primary/5 rounded-lg group">
@@ -386,8 +386,8 @@ export default function Laporan() {
                     <Monitor className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-tight">Tampilan Layar</span>
-                    <span className="text-[9px] text-muted-foreground">Cetak ke Printer / PDF Browser</span>
+                    <span className="text-sm font-black uppercase tracking-tight">Tampilan Layar</span>
+                    <span className="text-xs italic tracking-tighter text-muted-foreground">Cetak ke Printer / PDF Browser</span>
                   </div>
                 </DropdownMenuItem>
 
@@ -396,8 +396,8 @@ export default function Laporan() {
                     <FileDown className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-tight">Data Excel (.xlsx)</span>
-                    <span className="text-[9px] text-muted-foreground">Rincian data untuk audit & olah data</span>
+                    <span className="text-sm font-black uppercase tracking-tight">Data Excel (.xlsx)</span>
+                    <span className="text-xs italic tracking-tighter text-muted-foreground">Rincian data untuk audit & olah data</span>
                   </div>
                 </DropdownMenuItem>
 
@@ -406,8 +406,8 @@ export default function Laporan() {
                     <FileText className="w-4 h-4" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-black uppercase tracking-tight">Dokumen PDF (.pdf)</span>
-                    <span className="text-[9px] text-muted-foreground">Arsip laporan resmi bulanan</span>
+                    <span className="text-sm font-black uppercase tracking-tight">Dokumen PDF (.pdf)</span>
+                    <span className="text-xs italic tracking-tighter text-muted-foreground">Arsip laporan resmi bulanan</span>
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -426,19 +426,19 @@ export default function Laporan() {
               <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-primary" /> Rekap Penjualan
               </CardTitle>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tight">Perolehan Kotor (Cair + Pending)</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-tight">Perolehan Kotor (Cair + Pending)</p>
             </CardHeader>
             <CardContent className="space-y-4 py-6 relative z-10">
               <div className="flex justify-between items-center bg-secondary/10 p-4 rounded-xl border border-white/5">
-                <span className="text-muted-foreground text-[10px] uppercase font-black">Total Omzet</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-black">Total Omzet</span>
                 <span className="font-black text-xl text-foreground tracking-tight">{formatRupiah(allStats.omzet)}</span>
               </div>
               <div className="flex justify-between items-center px-2">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold">Total Modal</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Total Modal</span>
                 <span className="font-bold text-orange-400/80">{formatRupiah(allStats.modal)}</span>
               </div>
               <div className="flex justify-between items-center bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 shadow-inner">
-                <span className="text-emerald-500 text-[10px] font-black uppercase italic">Potensi Keuntungan</span>
+                <span className="text-emerald-500 text-xs font-medium tracking-tight font-black uppercase italic">Potensi Keuntungan</span>
                 <span className="text-xl font-black text-emerald-400 tracking-tight">{formatRupiah(allStats.profit)}</span>
               </div>
             </CardContent>
@@ -451,27 +451,27 @@ export default function Laporan() {
               <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2 text-primary">
                 <ChartIcon className="w-5 h-5" /> Laba Rugi Realitas
               </CardTitle>
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-tight">Khusus Transaksi yang Sudah Lunas</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-tight">Khusus Transaksi yang Sudah Lunas</p>
             </CardHeader>
             <CardContent className="space-y-4 py-6 relative z-10">
               <div className="flex justify-between items-center px-4 py-2 bg-background/50 rounded-lg border border-white/5">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold">Omzet Cair</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Omzet Cair</span>
                 <span className="font-black text-foreground tracking-tight">{formatRupiah(profit?.totalPenjualan)}</span>
               </div>
               <div className="flex justify-between items-center px-2">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold">Modal Cair</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Modal Cair</span>
                 <span className="font-bold text-orange-400/80">- {formatRupiah(profit?.totalModal)}</span>
               </div>
               <div className="flex justify-between items-center px-2 border-b border-border/50 pb-2">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold">Beban Operasional</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Beban Operasional</span>
                 <span className="font-bold text-rose-400/80">- {formatRupiah(profit?.totalBiaya)}</span>
               </div>
               <div className="flex justify-between items-center bg-primary p-4 rounded-xl shadow-lg shadow-primary/30 transform active:scale-95 transition-transform">
-                <span className="text-primary-foreground text-xs font-black uppercase tracking-wider">LABA BERSIH</span>
+                <span className="text-primary-foreground text-sm font-black uppercase tracking-wider">LABA BERSIH</span>
                 <span className="text-2xl font-black text-primary-foreground tracking-tight">{formatRupiah(profit?.laba)}</span>
               </div>
               <div className="flex justify-between items-center px-4 py-3 bg-secondary/20 rounded-xl border border-border/50">
-                <span className="text-muted-foreground text-[10px] uppercase font-black italic">Alokasi Laba (10%)</span>
+                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-black italic">Alokasi Laba (10%)</span>
                 <span className="font-black text-foreground tracking-tight underline decoration-primary decoration-2 underline-offset-4">{formatRupiah(profit?.labaShared)}</span>
               </div>
             </CardContent>
@@ -483,8 +483,8 @@ export default function Laporan() {
               <CardTitle className="flex items-center gap-2 text-sm uppercase tracking-widest font-black"><Trophy className="w-4 h-4 text-yellow-500"/> Top Performance</CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                   <tr>
                     <th className="px-4 py-3 font-black tracking-widest">Produk</th>
                     <th className="px-4 py-3 text-right font-black tracking-widest">Omzet</th>
@@ -494,10 +494,10 @@ export default function Laporan() {
                   {topProducts?.slice(0, 10).map((p, i) => (
                     <tr key={i} className="hover:bg-primary/[0.03] transition-colors group/row">
                       <td className="px-4 py-3.5 flex items-center gap-3">
-                        <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-black ${i < 3 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-secondary text-muted-foreground'}`}>{i + 1}</span>
+                        <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-xs font-medium tracking-tight font-black ${i < 3 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-secondary text-muted-foreground'}`}>{i + 1}</span>
                         <div>
                           <div className="font-bold text-[11px] text-foreground mb-0.5">{p.namaBarang}</div>
-                          <div className="text-[9px] text-muted-foreground font-mono uppercase tracking-tighter">{p.brand}</div>
+                          <div className="text-xs italic tracking-tighter text-muted-foreground font-mono uppercase tracking-tighter">{p.brand}</div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5 text-right font-black text-emerald-400 text-[11px] tabular-nums">{formatRupiah(p.totalPenjualan)}</td>
@@ -531,14 +531,14 @@ export default function Laporan() {
                       <cat.icon className={`w-5 h-5 text-${cat.color}-400`} />
                     </div>
                     {cat.label}
-                    <span className="ml-auto text-[10px] bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{cat.data.length} TRX</span>
+                    <span className="ml-auto text-xs font-medium tracking-tight bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{cat.data.length} TRX</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   {/* Desktop View */}
                   <div className="hidden md:block overflow-x-auto custom-scrollbar">
                     <table className="w-full text-[12px] text-left border-collapse">
-                      <thead className="bg-secondary/40 text-muted-foreground uppercase text-[9px] tracking-widest font-black border-b border-border/50">
+                      <thead className="bg-secondary/40 text-muted-foreground uppercase text-xs italic tracking-tighter tracking-widest font-black border-b border-border/50">
                         <tr>
                           <th className="px-6 py-4">Tanggal</th>
                           <th className="px-4 py-4">No. Faktur</th>
@@ -561,7 +561,7 @@ export default function Laporan() {
                               <td className="px-4 py-4 font-black text-foreground tracking-tighter">{s.noFaktur || '-'}</td>
                               <td className="px-4 py-4 min-w-[200px]">
                                 <div className="font-bold text-foreground leading-snug group-hover/row:text-primary transition-colors">{s.namaBarang}</div>
-                                <div className="text-[9px] text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
+                                <div className="text-xs italic tracking-tighter text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
                               </td>
                               <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{s.qty}</td>
                               <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(m)}</td>
@@ -572,7 +572,7 @@ export default function Laporan() {
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                                <span className={`px-3 py-1 rounded-lg text-xs italic tracking-tighter font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
                                   {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
                                 </span>
                               </td>
@@ -593,21 +593,21 @@ export default function Laporan() {
                         <div key={s.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-3">
                           <div className="flex justify-between items-start">
                              <div>
-                               <div className="text-[10px] font-black text-primary uppercase tracking-widest">{s.tanggal}</div>
-                               <div className="text-xs font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
+                               <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{s.tanggal}</div>
+                               <div className="text-sm font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
                              </div>
-                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                             <span className={`px-2 py-0.5 rounded text-xs font-bold leading-none font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
                                 {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
                              </span>
                           </div>
-                          <div className="text-xs font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
+                          <div className="text-sm font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
                           <div className="flex justify-between items-end pt-1">
                              <div className="space-y-1">
-                               <div className="text-[9px] text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
-                               <div className="text-[9px] text-muted-foreground italic">Modal: {formatRupiah(m)}</div>
+                               <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
+                               <div className="text-xs italic tracking-tighter text-muted-foreground italic">Modal: {formatRupiah(m)}</div>
                              </div>
                              <div className="text-right">
-                               <div className="text-[9px] uppercase font-black text-muted-foreground tracking-tighter">Profit</div>
+                               <div className="text-xs italic tracking-tighter uppercase font-black text-muted-foreground tracking-tighter">Profit</div>
                                <div className={`text-sm font-black ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{l >= 0 ? '+' : ''}{formatRupiah(l)}</div>
                              </div>
                           </div>
@@ -631,7 +631,7 @@ export default function Laporan() {
                 TUTUP PREVIEW
               </Button>
               <div className="h-4 w-[1px] bg-white/20" />
-              <p className="text-xs font-black uppercase text-white tracking-widest">Preview Laporan Layar (A4 Layout)</p>
+              <p className="text-sm font-black uppercase text-white tracking-widest">Preview Laporan Layar (A4 Layout)</p>
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" onClick={exportPDF} className="bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-2">
@@ -649,9 +649,9 @@ export default function Laporan() {
               <div className="report-page">
                 <div className="text-center border-b-2 border-slate-900 mb-6 pb-6">
                   <h1 className="text-4xl font-black text-rose-600 mb-1">MAX SPEED RACING SHOP</h1>
-                  <p className="text-slate-500 uppercase tracking-[0.2em] font-medium text-[10px]">Laporan Keuangan Strategis & Performa Perusahaan</p>
+                  <p className="text-slate-500 uppercase tracking-[0.2em] font-medium text-xs font-medium tracking-tight">Laporan Keuangan Strategis & Performa Perusahaan</p>
                   <div className="mt-4 flex justify-center gap-3">
-                     <span className="px-4 py-1 bg-slate-100 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-700">Periode: {getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
+                     <span className="px-4 py-1 bg-slate-100 rounded-full text-xs font-medium tracking-tight font-black uppercase tracking-widest text-slate-700">Periode: {getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
                   </div>
                 </div>
 
@@ -718,7 +718,7 @@ export default function Laporan() {
 
                   <section>
                     <h3>III. Top Performance (Peringkat Produk)</h3>
-                    <table className="w-full text-[9px]">
+                    <table className="w-full text-xs italic tracking-tighter">
                       <thead>
                         <tr>
                           <th className="w-12 text-center">Rank</th>
@@ -732,7 +732,7 @@ export default function Laporan() {
                             <td className="text-center font-bold">{i + 1}</td>
                             <td>
                                <div className="font-bold">{p.namaBarang}</div>
-                               <div className="text-[7px] text-slate-500 uppercase">{p.brand}</div>
+                               <div className="text-xs font-bold leading-none opacity-50 text-slate-500 uppercase">{p.brand}</div>
                             </td>
                             <td className="text-right font-bold">{formatRupiah(p.totalPenjualan)}</td>
                           </tr>
@@ -742,7 +742,7 @@ export default function Laporan() {
                   </section>
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
+                <div className="mt-auto pt-8 border-t border-slate-100 text-xs font-bold leading-none text-slate-400 flex justify-between italic">
                    <p>Halaman 1/2 - Strategic Recap</p>
                    <p>Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
                 </div>
@@ -776,19 +776,19 @@ export default function Laporan() {
                   <div key={pageIdx} className="report-page">
                     <div className="flex justify-between items-center border-b border-primary/20 pb-2 mb-4">
                        <h3 className="m-0 border-none p-0">IV. Rincian Penjualan per Metode Bayar</h3>
-                       <span className="text-[10px] font-black text-slate-400">BAGIAN {pageIdx + 1}/{chunks.length}</span>
+                       <span className="text-xs font-medium tracking-tight font-black text-slate-400">BAGIAN {pageIdx + 1}/{chunks.length}</span>
                     </div>
                     <div className="space-y-4 flex-1">
                       {chunk.map((item, itemIdx) => {
                         if (item.isHeader) {
                           return (
-                            <div key={itemIdx} className="bg-slate-900 text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest mt-4 first:mt-0 shadow-sm">
+                            <div key={itemIdx} className="bg-slate-900 text-white px-3 py-1.5 text-xs italic tracking-tighter font-black uppercase tracking-widest mt-4 first:mt-0 shadow-sm">
                               KATEGORI: {item.label}
                             </div>
                           );
                         }
                         return (
-                          <div key={item.id} className="grid grid-cols-7 gap-2 border border-slate-200 rounded p-1.5 text-[7px] items-center hover:bg-slate-50 transition-colors">
+                          <div key={item.id} className="grid grid-cols-7 gap-2 border border-slate-200 rounded p-1.5 text-xs font-bold leading-none opacity-50 items-center hover:bg-slate-50 transition-colors">
                             <div className="font-medium text-slate-500">{item.tanggal}</div>
                             <div className="font-black text-slate-900 border-l px-2">{item.noFaktur || '-'}</div>
                             <div className="col-span-2 font-bold truncate opacity-80">{item.namaBarang}</div>
@@ -801,7 +801,7 @@ export default function Laporan() {
                         );
                       })}
                     </div>
-                    <div className="mt-auto pt-4 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
+                    <div className="mt-auto pt-4 border-t border-slate-100 text-xs font-bold leading-none text-slate-400 flex justify-between italic">
                        <p>Halaman Detail ({pageIdx + 1}/{chunks.length})</p>
                        <p>MAX SPEED Dashboard Analytical Report • {new Date().toLocaleDateString('id-ID')}</p>
                     </div>

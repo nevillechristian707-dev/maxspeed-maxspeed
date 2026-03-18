@@ -359,7 +359,7 @@ export default function MasterBarang() {
 
             {importTab === "file" && !previewItems.length && (
               <div>
-                <p className="text-xs text-muted-foreground mb-3">
+                <p className="text-sm text-muted-foreground mb-3">
                   Upload file Excel (.xlsx/.xls) dengan kolom: <span className="text-foreground font-medium">Kode Barang, Nama Barang, Brand, Supplier, Harga Beli, Harga Jual</span>
                 </p>
                 <div
@@ -368,7 +368,7 @@ export default function MasterBarang() {
                 >
                   <Upload className="w-8 h-8 text-blue-400 mx-auto mb-2" />
                   <p className="text-sm text-blue-300 font-medium">Klik untuk pilih file Excel</p>
-                  <p className="text-xs text-muted-foreground mt-1">.xlsx atau .xls</p>
+                  <p className="text-sm text-muted-foreground mt-1">.xlsx atau .xls</p>
                 </div>
                 <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
               </div>
@@ -376,7 +376,7 @@ export default function MasterBarang() {
 
             {importTab === "paste" && !previewItems.length && (
               <div>
-                <p className="text-xs text-muted-foreground mb-3">
+                <p className="text-sm text-muted-foreground mb-3">
                   Salin data dari Excel (Ctrl+C), lalu paste di sini. Urutan kolom: <span className="text-foreground font-medium">Kode Barang | Nama Barang | Brand | Supplier | Harga Beli | Harga Jual</span>. Baris pertama boleh header atau langsung data.
                 </p>
                 <textarea
@@ -396,12 +396,12 @@ export default function MasterBarang() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-sm font-medium text-foreground">{previewItems.length} baris siap diimport</p>
-                  <button onClick={resetImport} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                  <button onClick={resetImport} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
                     <X className="w-3 h-3" /> Reset
                   </button>
                 </div>
                 <div className="overflow-x-auto rounded-lg border border-border/50 mb-4 max-h-64">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-sm">
                     <thead className="bg-secondary/60 text-muted-foreground uppercase sticky top-0">
                       <tr>
                         <th className="px-3 py-2 text-left">Kode</th>
@@ -445,17 +445,17 @@ export default function MasterBarang() {
                 <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                   <div className="bg-secondary/50 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-emerald-400">{importResult.inserted}</div>
-                    <div className="text-xs text-muted-foreground">Barang baru ditambahkan</div>
+                    <div className="text-sm text-muted-foreground">Barang baru ditambahkan</div>
                   </div>
                   <div className="bg-secondary/50 rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-blue-400">{importResult.updated}</div>
-                    <div className="text-xs text-muted-foreground">Barang diupdate</div>
+                    <div className="text-sm text-muted-foreground">Barang diupdate</div>
                   </div>
                 </div>
                 {importResult.errors.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-xs text-destructive flex items-center gap-1 mb-1"><AlertCircle className="w-3 h-3" /> {importResult.errors.length} baris dilewati:</p>
-                    {importResult.errors.map((e, i) => <p key={i} className="text-xs text-muted-foreground pl-4">• {e}</p>)}
+                    <p className="text-sm text-destructive flex items-center gap-1 mb-1"><AlertCircle className="w-3 h-3" /> {importResult.errors.length} baris dilewati:</p>
+                    {importResult.errors.map((e, i) => <p key={i} className="text-sm text-muted-foreground pl-4">• {e}</p>)}
                   </div>
                 )}
                 <button onClick={() => { resetImport(); setShowImport(false); }} className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:bg-primary/90">
@@ -476,27 +476,27 @@ export default function MasterBarang() {
           <CardContent className="pt-4">
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">Kode Barang *</label>
+                <label className="text-sm text-muted-foreground block mb-1">Kode Barang *</label>
                 <input type="text" required value={form.kodeBarang} onChange={e => setForm({ ...form, kodeBarang: e.target.value })} placeholder="BRG001" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div className="xl:col-span-2">
-                <label className="text-xs text-muted-foreground block mb-1">Nama Barang *</label>
+                <label className="text-sm text-muted-foreground block mb-1">Nama Barang *</label>
                 <input type="text" required value={form.namaBarang} onChange={e => setForm({ ...form, namaBarang: e.target.value })} placeholder="Helm Racing Full Face" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">Brand *</label>
+                <label className="text-sm text-muted-foreground block mb-1">Brand *</label>
                 <input type="text" required value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} placeholder="Arai" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">Supplier</label>
+                <label className="text-sm text-muted-foreground block mb-1">Supplier</label>
                 <input type="text" value={form.supplier} onChange={e => setForm({ ...form, supplier: e.target.value })} placeholder="PT Sumber Motor" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">Harga Beli *</label>
+                <label className="text-sm text-muted-foreground block mb-1">Harga Beli *</label>
                 <input type="number" required min="0" value={form.hargaBeli} onChange={e => setForm({ ...form, hargaBeli: e.target.value })} placeholder="1200000" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">Harga Jual *</label>
+                <label className="text-sm text-muted-foreground block mb-1">Harga Jual *</label>
                 <input type="number" required min="0" value={form.hargaJual} onChange={e => setForm({ ...form, hargaJual: e.target.value })} placeholder="1750000" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
               </div>
               <div className="xl:col-span-3 flex justify-end gap-2 pt-2 border-t border-border/30">
@@ -527,7 +527,7 @@ export default function MasterBarang() {
           {/* Desktop View */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-muted-foreground uppercase bg-secondary/50 border-b border-border">
+              <thead className="text-sm text-muted-foreground uppercase bg-secondary/50 border-b border-border">
                 <tr>
                   <th className="px-4 py-3 font-black tracking-widest uppercase">Kode</th>
                   <th className="px-4 py-3 font-black tracking-widest uppercase">Nama Barang</th>
@@ -543,9 +543,9 @@ export default function MasterBarang() {
                   <tr><td colSpan={5} className="text-center py-10 text-muted-foreground font-black uppercase">Belum ada data barang</td></tr>
                 ) : filteredData.map(item => (
                   <tr key={item.id} className="border-b border-border/50 hover:bg-primary/[0.02] transition-colors group">
-                    <td className="px-4 py-3 font-mono text-[10px] text-muted-foreground">{item.kodeBarang}</td>
+                    <td className="px-4 py-3 font-mono text-xs font-medium tracking-tight text-muted-foreground">{item.kodeBarang}</td>
                     <td className="px-4 py-3 font-black text-foreground">{item.namaBarang}</td>
-                    <td className="px-4 py-3"><span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-wider">{item.brand}</span></td>
+                    <td className="px-4 py-3"><span className="text-xs font-medium tracking-tight bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-wider">{item.brand}</span></td>
                     <td className="px-4 py-3 text-right font-black text-emerald-500">{formatRupiah(item.hargaJual)}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -569,10 +569,10 @@ export default function MasterBarang() {
               <div key={item.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="text-[9px] font-mono text-muted-foreground uppercase">{item.kodeBarang}</div>
-                    <div className="text-xs font-black text-foreground mt-0.5">{item.namaBarang}</div>
+                    <div className="text-xs italic tracking-tighter font-mono text-muted-foreground uppercase">{item.kodeBarang}</div>
+                    <div className="text-sm font-black text-foreground mt-0.5">{item.namaBarang}</div>
                   </div>
-                  <span className="text-[8px] bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-widest">{item.brand}</span>
+                  <span className="text-xs font-bold leading-none bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-widest">{item.brand}</span>
                 </div>
                 <div className="flex justify-between items-center pt-1">
                   <div className="text-sm font-black text-emerald-500">{formatRupiah(item.hargaJual)}</div>

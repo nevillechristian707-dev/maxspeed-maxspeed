@@ -346,7 +346,7 @@ export default function Penjualan() {
                 {/* Basic Group */}
                 <div className="space-y-4">
                   <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Tanggal</label>
+                    <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Tanggal</label>
                     <Controller
                       name="tanggal"
                       control={form.control}
@@ -359,7 +359,7 @@ export default function Penjualan() {
                     />
                   </div>
                   <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">No Faktur</label>
+                    <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">No Faktur</label>
                     <input type="text" {...form.register("noFaktur")} placeholder="Contoh: INV-001" className="w-full bg-background border border-border/50 rounded-lg px-3 py-2.5 text-sm focus:border-primary outline-none shadow-sm" />
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export default function Penjualan() {
                 <div className="space-y-4 lg:col-span-2">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2 space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Pilih Produk</label>
+                      <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Pilih Produk</label>
                       <Controller
                         name="kodeBarang"
                         control={form.control}
@@ -416,11 +416,11 @@ export default function Penjualan() {
                                       >
                                         <div className="flex flex-col flex-1 overflow-hidden">
                                           <div className="flex justify-between items-center w-full">
-                                            <span className="font-black text-xs text-primary">{b.kodeBarang}</span>
-                                            <span className="text-[10px] text-emerald-500 font-black">{formatRupiah(b.hargaBeli || 0)}</span>
+                                            <span className="font-black text-sm text-primary">{b.kodeBarang}</span>
+                                            <span className="text-xs font-medium tracking-tight text-emerald-500 font-black">{formatRupiah(b.hargaBeli || 0)}</span>
                                           </div>
                                           <span className="text-[11px] font-bold text-foreground line-clamp-1">{b.namaBarang}</span>
-                                          <span className="text-[9px] text-muted-foreground/60 uppercase tracking-tighter">{b.brand} • Stok Tersedia</span>
+                                          <span className="text-xs italic tracking-tighter text-muted-foreground/60 uppercase tracking-tighter">{b.brand} • Stok Tersedia</span>
                                         </div>
                                       </CommandItem>
                                     ))}
@@ -433,7 +433,7 @@ export default function Penjualan() {
                       />
                     </div>
                     <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
-                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Qty</label>
+                      <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Qty</label>
                       <input 
                         type="number" 
                         min="1" 
@@ -447,19 +447,19 @@ export default function Penjualan() {
                   {selectedBarangInfo && (
                     <div className="flex gap-4 px-1 animate-in fade-in slide-in-from-left-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-black uppercase text-primary/40 tracking-widest">Brand:</span>
-                        <span className="text-[10px] font-bold text-primary uppercase">{selectedBarangInfo.brand}</span>
+                        <span className="text-xs italic tracking-tighter font-black uppercase text-primary/40 tracking-widest">Brand:</span>
+                        <span className="text-xs font-medium tracking-tight font-bold text-primary uppercase">{selectedBarangInfo.brand}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-black uppercase text-emerald-500/40 tracking-widest">Harga Beli:</span>
-                        <span className="text-[10px] font-bold text-emerald-600">{formatRupiah(selectedBarangInfo.hargaBeli || 0)}</span>
+                        <span className="text-xs italic tracking-tighter font-black uppercase text-emerald-500/40 tracking-widest">Harga Beli:</span>
+                        <span className="text-xs font-medium tracking-tight font-bold text-emerald-600">{formatRupiah(selectedBarangInfo.hargaBeli || 0)}</span>
                       </div>
                     </div>
                   )}
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5 focus-within:ring-1 focus-within:ring-primary/30 rounded-lg transition-all">
-                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Harga Satuan (Rp)</label>
+                      <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Harga Satuan (Rp)</label>
                       <input 
                         type="number" 
                         {...form.register("harga")} 
@@ -468,7 +468,7 @@ export default function Penjualan() {
                       />
                     </div>
                     <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 flex flex-col justify-center">
-                      <span className="text-[9px] font-black uppercase text-primary/60 tracking-widest leading-tight">Total Penjualan</span>
+                      <span className="text-xs italic tracking-tighter font-black uppercase text-primary/60 tracking-widest leading-tight">Total Penjualan</span>
                       <span className="text-xl font-black text-primary leading-tight">{formatRupiah(total)}</span>
                     </div>
                   </div>
@@ -477,11 +477,11 @@ export default function Penjualan() {
                 {/* Payment Group */}
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Metode Pembayaran</label>
+                    <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Metode Pembayaran</label>
                     <div className="grid grid-cols-2 gap-1.5">
                       {['cash', 'bank', 'online_shop', 'kredit'].map((method) => (
                         <label key={method} className={cn(
-                          "flex items-center justify-center p-2 rounded-lg border cursor-pointer transition-all text-[10px] font-black uppercase tracking-tighter",
+                          "flex items-center justify-center p-2 rounded-lg border cursor-pointer transition-all text-xs font-medium tracking-tight font-black uppercase tracking-tighter",
                           watchPaymentMethod === method 
                             ? "border-primary bg-primary text-white shadow-md shadow-primary/20" 
                             : "border-border/50 bg-background hover:bg-secondary/50 text-muted-foreground"
@@ -495,7 +495,7 @@ export default function Penjualan() {
 
                   {watchPaymentMethod === 'bank' && (
                     <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                      <select {...form.register("namaBank")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary shadow-sm" required>
+                      <select {...form.register("namaBank")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary shadow-sm" required>
                         <option value="">-- Nama Bank --</option>
                         {bankData?.map(b => <option key={b.id} value={b.namaBank}>{b.namaBank} ({b.nomorRekening})</option>)}
                       </select>
@@ -504,7 +504,7 @@ export default function Penjualan() {
 
                   {watchPaymentMethod === 'online_shop' && (
                     <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                      <select {...form.register("namaOnlineShop")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary shadow-sm" required>
+                      <select {...form.register("namaOnlineShop")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary shadow-sm" required>
                         <option value="">-- Platform OS --</option>
                         {osData?.map(o => <option key={o.id} value={o.namaOnlineShop}>{o.namaOnlineShop}</option>)}
                       </select>
@@ -513,7 +513,7 @@ export default function Penjualan() {
 
                   {watchPaymentMethod === 'kredit' && (
                     <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                      <select {...form.register("namaCustomer")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-xs outline-none focus:border-primary shadow-sm" required>
+                      <select {...form.register("namaCustomer")} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary shadow-sm" required>
                         <option value="">-- Customer --</option>
                         {customerData?.map(c => <option key={c.id} value={c.namaCustomer}>{c.namaCustomer}</option>)}
                       </select>
@@ -523,7 +523,7 @@ export default function Penjualan() {
                   <Button 
                     type="submit" 
                     disabled={createMutation.isPending || updateMutation.isPending}
-                    className="w-full py-5 font-black uppercase tracking-widest text-xs h-auto shadow-lg shadow-primary/20"
+                    className="w-full py-5 font-black uppercase tracking-widest text-sm h-auto shadow-lg shadow-primary/20"
                   >
                     {createMutation.isPending || updateMutation.isPending 
                       ? "Proses Data..." 
@@ -555,15 +555,15 @@ export default function Penjualan() {
                   placeholder="Cari transaksi..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-border/50 text-xs"
+                  className="pl-9 h-9 bg-background border-border/50 text-sm"
                 />
               </div>
               <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-2 py-1 shadow-sm h-9">
-                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">Status:</span>
+                <span className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-tighter">Status:</span>
                 <select 
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent text-[10px] font-bold outline-none cursor-pointer p-0.5 min-w-[80px]"
+                  className="bg-transparent text-xs font-medium tracking-tight font-bold outline-none cursor-pointer p-0.5 min-w-[80px]"
                 >
                   <option value="all" className="bg-card text-foreground">SEMUA</option>
                   <option value="cair" className="bg-card text-foreground">CAIR / SELESAI</option>
@@ -586,8 +586,8 @@ export default function Penjualan() {
           <CardContent className="p-0 table-container mobile-scroll-hint">
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                   <tr>
                     <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
                     <th className="px-4 py-4 font-black tracking-widest text-primary">Kode</th>
@@ -608,21 +608,21 @@ export default function Penjualan() {
                   ) : filteredListData?.map((item) => (
                     <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors group/row">
                       <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
-                      <td className="px-3 py-4 font-black text-primary tracking-tighter text-[10px]">{item.kodeBarang}</td>
+                      <td className="px-3 py-4 font-black text-primary tracking-tighter text-xs font-medium tracking-tight">{item.kodeBarang}</td>
                       <td className="px-4 py-4">
                         <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-[9px] text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
+                        <div className="font-mono text-xs italic tracking-tighter text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="font-bold text-foreground">{item.namaBarang}</div>
-                        <div className="text-[9px] text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
+                        <div className="text-xs italic tracking-tighter text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
                       </td>
                       <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
                       <td className="px-4 py-4 text-center font-black">{item.qty}</td>
                       <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
                       <td className="px-4 py-4">
                         <span className={cn(
-                          "inline-flex px-2 py-0.5 text-[9px] font-black uppercase rounded tracking-tighter",
+                          "inline-flex px-2 py-0.5 text-xs italic tracking-tighter font-black uppercase rounded tracking-tighter",
                           item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600' : 
                             item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600' : 
                             item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600' : 
@@ -630,14 +630,14 @@ export default function Penjualan() {
                         )}>
                           {item.paymentMethod.replace('_', ' ')}
                         </span>
-                        {item.statusCair === 'pending' && <div className="text-[9px] text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
+                        {item.statusCair === 'pending' && <div className="text-xs italic tracking-tighter text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
                         {item.statusCair === 'partial' && (
                           <div className="mt-1">
-                            <div className="text-[9px] text-orange-500 font-black uppercase">Cicilan</div>
-                            <div className="text-[8px] text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
+                            <div className="text-xs italic tracking-tighter text-orange-500 font-black uppercase">Cicilan</div>
+                            <div className="text-xs font-bold leading-none text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
                           </div>
                         )}
-                        {item.statusCair === 'cair' && <div className="text-[9px] text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
+                        {item.statusCair === 'cair' && <div className="text-xs italic tracking-tighter text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
                       </td>
                       <td className="px-5 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
@@ -681,23 +681,23 @@ export default function Penjualan() {
               {isLoading ? (
                 <div className="text-center py-20">
                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" />
-                   <p className="text-muted-foreground animate-pulse font-bold text-xs uppercase tracking-widest">Memuat Transaksi...</p>
+                   <p className="text-muted-foreground animate-pulse font-bold text-sm uppercase tracking-widest">Memuat Transaksi...</p>
                 </div>
               ) : filteredListData?.length === 0 ? (
-                <div className="text-center py-10 text-muted-foreground font-black uppercase text-xs tracking-tighter opacity-50 border-2 border-dashed border-border/20 rounded-2xl">
+                <div className="text-center py-10 text-muted-foreground font-black uppercase text-sm tracking-tighter opacity-50 border-2 border-dashed border-border/20 rounded-2xl">
                   Belum ada data.
                 </div>
               ) : filteredListData?.map((item) => (
                 <div key={item.id} className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
                   <div className="flex justify-between items-start mb-4">
                     <div className="space-y-1">
-                      <div className="text-[10px] font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
+                      <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
                       <div className="text-sm font-black text-foreground tracking-tight">{item.noFaktur || '-'}</div>
-                      <div className="text-[9px] font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
+                      <div className="text-xs italic tracking-tighter font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span className={cn(
-                        "px-2.5 py-1 text-[9px] font-black uppercase rounded-lg tracking-wider border",
+                        "px-2.5 py-1 text-xs italic tracking-tighter font-black uppercase rounded-lg tracking-wider border",
                         item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                           item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
                           item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
@@ -705,23 +705,23 @@ export default function Penjualan() {
                       )}>
                         {item.paymentMethod.replace('_', ' ')}
                       </span>
-                      {item.statusCair === 'pending' && <span className="text-[8px] bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-rose-500/20">Pending</span>}
-                      {item.statusCair === 'partial' && <span className="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Cicilan</span>}
-                      {item.statusCair === 'cair' && <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-emerald-500/20">Selesai</span>}
+                      {item.statusCair === 'pending' && <span className="text-xs font-bold leading-none bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-rose-500/20">Pending</span>}
+                      {item.statusCair === 'partial' && <span className="text-xs font-bold leading-none bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Cicilan</span>}
+                      {item.statusCair === 'cair' && <span className="text-xs font-bold leading-none bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-emerald-500/20">Selesai</span>}
                     </div>
                   </div>
                   
                   <div className="py-3 px-4 bg-secondary/30 rounded-xl border border-border/10 mb-4">
-                    <div className="text-xs font-black text-foreground mb-1">{item.namaBarang}</div>
+                    <div className="text-sm font-black text-foreground mb-1">{item.namaBarang}</div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
-                      <span className="text-xs font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-[8px]">PKT/PCS</span></span>
+                      <span className="text-xs italic tracking-tighter font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
+                      <span className="text-sm font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-xs font-bold leading-none">PKT/PCS</span></span>
                     </div>
                   </div>
 
                   <div className="flex justify-between items-center">
                     <div className="space-y-0.5">
-                      <div className="text-[8px] font-black text-muted-foreground uppercase tracking-wider">Total Transaksi</div>
+                      <div className="text-xs font-bold leading-none font-black text-muted-foreground uppercase tracking-wider">Total Transaksi</div>
                       <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
                     </div>
                     <div className="flex gap-2">

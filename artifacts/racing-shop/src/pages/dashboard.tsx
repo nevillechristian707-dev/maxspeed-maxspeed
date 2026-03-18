@@ -30,12 +30,12 @@ export default function Dashboard() {
     <div className="flex flex-col items-center justify-center p-8 bg-card/40 rounded-3xl border border-dashed border-rose-500/20 text-center gap-3">
        <Activity className="w-8 h-8 text-rose-500/50 animate-pulse" />
        <div>
-         <p className="text-rose-500 font-black uppercase tracking-widest text-[10px] mb-1">Gagal Memuat Data</p>
-         <p className="text-muted-foreground text-[10px] leading-relaxed max-w-[200px] mx-auto">{message}</p>
+         <p className="text-rose-500 font-black uppercase tracking-widest text-xs font-medium tracking-tight mb-1">Gagal Memuat Data</p>
+         <p className="text-muted-foreground text-xs font-medium tracking-tight leading-relaxed max-w-[200px] mx-auto">{message}</p>
        </div>
        <button 
          onClick={onRetry} 
-         className="px-4 py-2 rounded-xl bg-secondary border border-border text-[9px] font-black uppercase hover:bg-secondary/80 transition-all active:scale-95"
+         className="px-4 py-2 rounded-xl bg-secondary border border-border text-xs italic tracking-tighter font-black uppercase hover:bg-secondary/80 transition-all active:scale-95"
        >
          Coba Lagi
        </button>
@@ -47,7 +47,7 @@ export default function Dashboard() {
       <Layout>
         <div className="flex flex-col h-64 items-center justify-center gap-4">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-          <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest animate-pulse">Menghubungkan ke Server...</p>
+          <p className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest animate-pulse">Menghubungkan ke Server...</p>
         </div>
       </Layout>
     );
@@ -77,14 +77,14 @@ export default function Dashboard() {
       <Card className="overflow-hidden relative group border-border/40 hover:border-primary/50 transition-colors h-full">
         <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${colorClass} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform`} />
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
+          <CardTitle className="text-xs font-medium tracking-tight font-black text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
           <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass} bg-opacity-20`}>
             <Icon className="w-4 h-4 text-white" />
           </div>
         </CardHeader>
         <CardContent>
           <div className="text-xl sm:text-2xl font-display font-black tracking-tight">{value}</div>
-          {subtitle && <p className="text-[9px] text-muted-foreground mt-1 font-bold uppercase tracking-tight">{subtitle}</p>}
+          {subtitle && <p className="text-xs italic tracking-tighter text-muted-foreground mt-1 font-bold uppercase tracking-tight">{subtitle}</p>}
         </CardContent>
       </Card>
     </motion.div>
@@ -193,7 +193,7 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
             <div>
               <CardTitle className="text-lg uppercase font-black tracking-tight">Rekapan Harian: Penjualan & Laba</CardTitle>
-              <p className="text-[10px] text-muted-foreground mt-1 font-bold uppercase tracking-widest italic opacity-70">Mencakup semua transaksi (Lunas & Tempo)</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground mt-1 font-bold uppercase tracking-widest italic opacity-70">Mencakup semua transaksi (Lunas & Tempo)</p>
             </div>
           </CardHeader>
           <CardContent className="flex-1 p-0 h-[300px] sm:h-[400px] overflow-y-auto">
@@ -204,12 +204,12 @@ export default function Dashboard() {
             ) : isErrorChart ? (
               <div className="flex flex-col h-full items-center justify-center p-8 text-center">
                 <p className="text-rose-500 font-bold text-xs uppercase mb-1">Gagal memuat rekapan harian</p>
-                <p className="text-muted-foreground text-[10px] italic opacity-70">{(chartError as any)?.message || "Internal Server Error"}</p>
+                <p className="text-muted-foreground text-xs font-medium tracking-tight italic opacity-70">{(chartError as any)?.message || "Internal Server Error"}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-[11px] text-left border-collapse sticky-header min-w-[800px]">
-                  <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
+                <table className="w-full text-sm text-left border-collapse sticky-header min-w-[800px]">
+                  <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
                     <tr>
                       <th className="px-6 py-4 font-black tracking-widest sticky left-0 bg-secondary/40 z-20">Tanggal</th>
                       <th className="px-4 py-4 text-center font-black tracking-widest border-l border-border/10">TRX</th>
@@ -305,7 +305,7 @@ export default function Dashboard() {
                     <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(summary?.totalPenjualan ?? 0) > 0 ? ((summary?.onlineShopTotal ?? 0) / (summary?.totalPenjualan ?? 1)) * 100 : 0}%` }}></div>
                   </div>
                   {(summary?.onlineShopBelumCair ?? 0) > 0 && (
-                    <p className="text-[10px] text-orange-400 text-right font-bold uppercase tracking-wider">Belum Cair: {formatRupiah(summary?.onlineShopBelumCair)}</p>
+                    <p className="text-xs font-medium tracking-tight text-orange-400 text-right font-bold uppercase tracking-wider">Belum Cair: {formatRupiah(summary?.onlineShopBelumCair)}</p>
                   )}
                 </div>
 
@@ -318,7 +318,7 @@ export default function Dashboard() {
                     <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: `${(summary?.totalPenjualan ?? 0) > 0 ? ((summary?.kreditTotal ?? 0) / (summary?.totalPenjualan ?? 1)) * 100 : 0}%` }}></div>
                   </div>
                   {(summary?.kreditBelumCair ?? 0) > 0 && (
-                    <p className="text-[10px] text-orange-400 text-right font-bold uppercase tracking-wider">Belum Cair: {formatRupiah(summary?.kreditBelumCair)}</p>
+                    <p className="text-xs font-medium tracking-tight text-orange-400 text-right font-bold uppercase tracking-wider">Belum Cair: {formatRupiah(summary?.kreditBelumCair)}</p>
                   )}
                 </div>
 
