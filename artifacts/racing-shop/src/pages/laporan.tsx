@@ -2,7 +2,7 @@ import { useGetLaporanProfit, useGetTopProducts, useListPenjualan, useGetMe, use
 import { Layout } from "@/components/layout";
 import { formatRupiah, getIndonesianPeriodLabel } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart as ChartIcon, Trophy, FileDown, FileText, Printer, ShoppingCart, DollarSign, Landmark, Store, CreditCard, ChevronDown, DownloadCloud, Monitor } from "lucide-react";
+import { LineChart as ChartIcon, Trophy, FileDown, FileText, Printer, ShoppingCart, DollarSign, Landmark, Store, CreditCard, ChevronDown, DownloadCloud, Monitor, Calendar } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -12,6 +12,16 @@ import { useMonthYear } from "@/context/month-year-context";
 import { useState, useMemo, useEffect, useRef } from "react";
 
 export default function Laporan() {
+  const formatDateIndo = (d: string) => {
+    if (!d) return "-";
+    const date = new Date(d);
+    return new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  };
   const { dateParams, selectedYear, selectedMonth } = useMonthYear();
   const printRef = useRef<HTMLDivElement>(null);
   const [isPreview, setIsPreview] = useState(false);
@@ -46,6 +56,38 @@ export default function Laporan() {
     const modal = allSales.reduce((acc, curr) => acc + ((curr.hargaBeli || 0) * (curr.qty || 0)), 0);
     return { omzet, modal, profit: omzet - modal };
   }, [allSales]);
+
+  const bankReportSummaries = useMemo(() => {
+    if (!bankTransactions) return [];
+    
+    // Group by Date first
+    const dailyGroups: Record<string, { date: string; banks: Record<string, any>; total: number }> = {};
+    
+    bankTransactions.forEach(tx => {
+      const dateKey = tx.tanggalCair || "Unknown";
+      if (!dailyGroups[dateKey]) {
+        dailyGroups[dateKey] = { date: dateKey, banks: {}, total: 0 };
+      }
+      
+      const bankKey = `${tx.namaBank}-${tx.rekeningBank}`;
+      if (!dailyGroups[dateKey].banks[bankKey]) {
+        dailyGroups[dateKey].banks[bankKey] = { bank: tx.namaBank, account: tx.rekeningBank, total: 0, count: 0, items: [] };
+      }
+      
+      const amount = Number(tx.nilai);
+      dailyGroups[dateKey].banks[bankKey].total += amount;
+      dailyGroups[dateKey].banks[bankKey].count += 1;
+      dailyGroups[dateKey].banks[bankKey].items.push(tx);
+      dailyGroups[dateKey].total += amount;
+    });
+
+    return Object.values(dailyGroups)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .map(day => ({
+        ...day,
+        banks: Object.values(day.banks).sort((a: any, b: any) => b.total - a.total)
+      }));
+  }, [bankTransactions]);
 
   const exportExcel = () => {
     if (!profit || !allStats) return;
@@ -213,8 +255,7 @@ export default function Laporan() {
       { label: 'CASH (TUNAI)', data: salesByCategory.cash },
       { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
       { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-      { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit },
-      { label: 'PENCAIRAN BANK', data: bankTransactions || [], isBankTx: true }
+      { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
     ];
 
     categories.forEach((cat) => {
@@ -286,6 +327,55 @@ export default function Laporan() {
         currentY = (doc as any).lastAutoTable.finalY + 15;
       }
     });
+
+    // SECTION V: BANK DISBURSEMENT TIMELINE (Grouped)
+    if (bankReportSummaries.length > 0) {
+      doc.addPage();
+      doc.setFontSize(12); doc.setTextColor(30, 41, 59); doc.setFont('helvetica', 'bold');
+      doc.text("V. HISTORI PENCAIRAN BANK (TIMELINE)", 14, 20);
+      doc.setDrawColor(16, 185, 129); // Emerald
+      doc.line(14, 23, 196, 23);
+      
+      let vY = 32;
+      bankReportSummaries.forEach((day) => {
+        if (vY > 260) { doc.addPage(); vY = 20; }
+        
+        doc.setFontSize(10); doc.setTextColor(79, 70, 229); // Indigo
+        doc.text(`Timeline: ${formatDateIndo(day.date)}`, 14, vY);
+        doc.setFontSize(9); doc.setTextColor(16, 185, 129);
+        doc.text(`Total Kas: ${formatRupiah(day.total)}`, 196, vY, { align: 'right' });
+        
+        vY += 6;
+        
+        day.banks.forEach((bankGroup) => {
+          if (vY > 260) { doc.addPage(); vY = 20; }
+          
+          doc.setFontSize(8); doc.setTextColor(15, 23, 42); doc.setFont('helvetica', 'bold');
+          doc.text(`Bank: ${bankGroup.bank} (${bankGroup.account})`, 16, vY);
+          vY += 4;
+          
+          autoTable(doc, {
+            startY: vY,
+            head: [['Faktur', 'Produk & Brand', 'Sumber', 'Nilai Cair']],
+            body: bankGroup.items.map((tx: any) => [
+              tx.noFaktur || '-',
+              `${tx.namaBarang} (${tx.brand || '-'})`,
+              tx.sumber?.replace('_', ' ').toUpperCase(),
+              formatRupiah(tx.nilai)
+            ]),
+            theme: 'grid',
+            styles: { fontSize: 6.5, cellPadding: 2 },
+            headStyles: { fillColor: [51, 65, 85] },
+            columnStyles: { 3: { halign: 'right', fontStyle: 'bold' } },
+            margin: { left: 16, right: 14 }
+          });
+          
+          vY = (doc as any).lastAutoTable.finalY + 10;
+        });
+        
+        vY += 5;
+      });
+    }
 
     const filename = `Laporan_MaxSpeed_Keuangan_${selectedMonth}_${selectedYear}.pdf`;
     doc.save(filename);
@@ -551,8 +641,7 @@ export default function Laporan() {
               { id: 'cash', label: 'Penjualan Tunai / Cash', icon: DollarSign, color: 'emerald', data: salesByCategory.cash },
               { id: 'bank', label: 'Transfer Bank / Debit', icon: Landmark, color: 'blue', data: salesByCategory.bank },
               { id: 'online_shop', label: 'Online Shop / Marketplace', icon: Store, color: 'purple', data: salesByCategory.online_shop },
-              { id: 'kredit', label: 'Penjualan Kredit / Tempo', icon: CreditCard, color: 'orange', data: salesByCategory.kredit },
-              { id: 'pencairan', label: 'Laporan Pencairan Bank', icon: Landmark, color: 'emerald', data: bankTransactions || [], isBankTx: true }
+              { id: 'kredit', label: 'Penjualan Kredit / Tempo', icon: CreditCard, color: 'orange', data: salesByCategory.kredit }
             ].map((cat) => ( cat.data.length > 0 && 
               <Card key={cat.id} className="border-border/40 shadow-2xl overflow-hidden bg-card/40 backdrop-blur-md transition-all hover:border-primary/20 card">
                 <CardHeader className="bg-secondary/10 border-b border-border/50 py-4">
@@ -598,14 +687,14 @@ export default function Laporan() {
                               <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{(s as any).isBankTx ? 1 : s.qty}</td>
                               <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(m)}</td>
                               <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(j)}</td>
-                              <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${(l >= 0 || (s as any).isBankTx) ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                                 <span className="flex items-center justify-end gap-1">
-                                  {(l >= 0 && !(s as any).isBankTx) ? '+' : ''}{formatRupiah(l)}
+                                  {l >= 0 ? '+' : ''}{formatRupiah(l)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <span className={`px-3 py-1 rounded-lg text-xs italic tracking-tighter font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' || (s as any).isBankTx ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
-                                  {s.statusCair === 'cair' || (s as any).isBankTx ? 'Lunas' : 'Pending'}
+                                <span className={`px-3 py-1 rounded-lg text-xs italic tracking-tighter font-black uppercase tracking-widest shadow-sm border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                                  {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
                                 </span>
                               </td>
                             </tr>
@@ -616,14 +705,14 @@ export default function Laporan() {
                       <tfoot className="bg-secondary/20 font-black border-t-2 border-border/50">
                         <tr>
                           <td colSpan={3} className="px-6 py-4 text-right uppercase tracking-widest text-xs">Total {cat.label}</td>
-                          <td className="px-4 py-4 text-center tabular-nums">{cat.data.reduce((acc: number, s: any) => acc + ((s as any).isBankTx ? 1 : (s.qty || 0)), 0)}</td>
+                          <td className="px-4 py-4 text-center tabular-nums">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</td>
                           <td className="px-4 py-4 text-right tabular-nums">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0))}</td>
-                          <td className="px-4 py-4 text-right tabular-nums text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + ((s as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0)), 0))}</td>
+                          <td className="px-4 py-4 text-right tabular-nums text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</td>
                           <td className="px-4 py-4 text-right tabular-nums text-emerald-500">
                             {formatRupiah(cat.data.reduce((acc: number, s: any) => {
-                              const j = (s as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
+                              const j = s.total || 0;
                               const m = (s.hargaBeli || 0) * (s.qty || 0);
-                              return acc + ((s as any).isBankTx ? 0 : (j - m));
+                              return acc + (j - m);
                             }, 0))}
                           </td>
                           <td className="px-6 py-4"></td>
@@ -636,32 +725,31 @@ export default function Laporan() {
                   <div className="md:hidden divide-y divide-border/20 p-2">
                     {cat.data.map((s: any) => {
                       const m = (s.hargaBeli || 0) * (s.qty || 0);
-                      const j = (cat as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
-                      const l = (cat as any).isBankTx ? 0 : (j - m);
+                      const j = s.total || 0;
+                      const l = j - m;
                       return (
                         <div key={s.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-3">
                           <div className="flex justify-between items-start">
                              <div>
-                               <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{s.tanggal || s.tanggalCair}</div>
+                               <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{s.tanggal}</div>
                                <div className="text-sm font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
                              </div>
-                             <span className={`px-2 py-0.5 rounded text-xs font-bold leading-none font-black uppercase tracking-widest border ${s.statusCair === 'cair' || (cat as any).isBankTx ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
-                                {s.statusCair === 'cair' || (cat as any).isBankTx ? 'Lunas' : 'Pending'}
+                             <span className={`px-2 py-0.5 rounded text-xs font-bold leading-none font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                                {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
                              </span>
                           </div>
                           <div className="space-y-1">
                              {cat.id === 'kredit' && <div className="text-[10px] font-black uppercase text-orange-500">{s.namaCustomer || 'Umum'}</div>}
-                             {(cat as any).isBankTx && <div className="text-[10px] font-black uppercase text-emerald-600">{s.namaBank}</div>}
                              <div className="text-sm font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
                           </div>
                           <div className="flex justify-between items-end pt-1">
                              <div className="space-y-1">
-                               <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {(cat as any).isBankTx ? 1 : s.qty} • Jual: {formatRupiah(j)}</div>
+                               <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
                                <div className="text-xs italic tracking-tighter text-muted-foreground italic">Modal: {formatRupiah(m)}</div>
                              </div>
                              <div className="text-right">
                                <div className="text-xs italic tracking-tighter uppercase font-black text-muted-foreground tracking-tighter">Profit</div>
-                               <div className={`text-sm font-black ${l >= 0 || (cat as any).isBankTx ? 'text-emerald-500' : 'text-rose-500'}`}>{(l >= 0 && !(cat as any).isBankTx) ? '+' : ''}{formatRupiah(l)}</div>
+                               <div className={`text-sm font-black ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{(l >= 0) ? '+' : ''}{formatRupiah(l)}</div>
                              </div>
                           </div>
                         </div>
@@ -674,11 +762,11 @@ export default function Laporan() {
                        <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col">
                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Qty</span>
-                             <span className="font-black">{cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? 1 : (s.qty || 0)), 0)}</span>
+                             <span className="font-black">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</span>
                           </div>
                           <div className="flex flex-col items-end">
                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Jual</span>
-                             <span className="font-black text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0)), 0))}</span>
+                             <span className="font-black text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</span>
                           </div>
                           <div className="flex flex-col">
                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Modal</span>
@@ -688,9 +776,9 @@ export default function Laporan() {
                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Profit</span>
                              <span className="font-black text-emerald-500">
                                 {formatRupiah(cat.data.reduce((acc: number, s: any) => {
-                                  const jj = (s as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
+                                  const jj = s.total || 0;
                                   const mm = (s.hargaBeli || 0) * (s.qty || 0);
-                                  return acc + ((s as any).isBankTx ? 0 : (jj - mm));
+                                  return acc + (jj - mm);
                                 }, 0))}
                              </span>
                           </div>
@@ -702,6 +790,103 @@ export default function Laporan() {
             ))}
           </div>
         </div>
+
+        {/* BANK DISBURSEMENT HISTORY (Same as Pencairan Page) */}
+        {bankReportSummaries.length > 0 && (
+          <div className="mt-12 space-y-8 pb-10">
+            <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3 border-l-4 border-emerald-500 pl-4 uppercase tracking-tighter">
+              <Landmark className="text-emerald-500 w-6 h-6" /> Laporan Pencairan Bank
+            </h2>
+            
+            <div className="space-y-12">
+              {bankReportSummaries.map((dayGroup, i) => (
+                <div key={i} className="group/day relative">
+                  <div className="absolute -left-6 top-10 bottom-0 w-0.5 bg-border/20 hidden xl:block" />
+                  
+                  {/* Day Header */}
+                  <div className="bg-indigo-500/10 px-6 py-4 rounded-2xl border border-indigo-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-4 z-20 backdrop-blur-xl shadow-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center shadow-inner">
+                        <Calendar className="w-6 h-6 text-indigo-400" />
+                      </div>
+                      <div>
+                        <span className="text-lg font-black uppercase tracking-widest text-indigo-100">{formatDateIndo(dayGroup.date)}</span>
+                        <div className="text-xs font-bold text-indigo-400 uppercase mt-0.5 tracking-widest">Dana Cair Harian</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <span className="text-xs font-black text-muted-foreground uppercase opacity-40 hidden sm:inline">Total Kas Masuk:</span>
+                       <span className="bg-emerald-500/20 text-emerald-400 px-6 py-2 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-xl">{formatRupiah(dayGroup.total)}</span>
+                    </div>
+                  </div>
+
+                  {/* Banks Grouping */}
+                  <div className="mt-8 space-y-8 pl-0 xl:pl-4">
+                    {dayGroup.banks.map((bankGroup, j) => (
+                      <Card key={j} className="border-border/40 shadow-xl overflow-hidden bg-card/40 backdrop-blur-md">
+                        <div className="bg-emerald-500/[0.03] px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/10">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-background rounded-xl border border-emerald-500/30 shadow-sm">
+                              <Landmark className="w-6 h-6 text-emerald-500" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
+                              <p className="text-xs font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
+                            </div>
+                          </div>
+                          <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end gap-2">
+                            <div className="text-2xl font-black text-emerald-600">{formatRupiah(bankGroup.total)}</div>
+                            <div className="px-3 py-1 bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase rounded-full border border-emerald-500/20">{bankGroup.count} Transaksi</div>
+                          </div>
+                        </div>
+                        
+                        <CardContent className="p-0">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-[12px] text-left border-collapse">
+                              <thead className="bg-secondary/40 text-muted-foreground uppercase text-xs italic tracking-widest font-black border-b border-border/50">
+                                <tr>
+                                  <th className="px-6 py-4">Tgl TRX</th>
+                                  <th className="px-4 py-4">Faktur / TRX</th>
+                                  <th className="px-4 py-4">Produk & Brand</th>
+                                  <th className="px-4 py-4">Sumber Dana</th>
+                                  <th className="px-4 py-4 text-right">TOTAL CAIR</th>
+                                  <th className="px-6 py-4 text-center">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border/10">
+                                {bankGroup.items.map((tx: any) => (
+                                  <tr key={tx.id} className="hover:bg-emerald-500/[0.02] transition-colors group/row">
+                                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground font-bold">{tx.tanggal}</td>
+                                    <td className="px-4 py-4">
+                                      <div className="font-bold text-foreground">{tx.noFaktur || '-'}</div>
+                                      <div className="text-[10px] font-bold text-muted-foreground/50 font-mono">ID: {tx.kodeTransaksi}</div>
+                                    </td>
+                                    <td className="px-4 py-4">
+                                      <div className="font-bold text-foreground truncate max-w-[200px]">{tx.namaBarang}</div>
+                                      <div className="text-[10px] font-black text-primary uppercase mt-0.5">{tx.brand || '-'} • {tx.kodeBarang}</div>
+                                    </td>
+                                    <td className="px-4 py-4">
+                                      <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">{tx.sumber?.replace('_', ' ')}</span>
+                                      <div className="font-bold text-foreground text-xs">{tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}</div>
+                                    </td>
+                                    <td className="px-4 py-4 text-right font-black text-emerald-600">{formatRupiah(tx.nilai)}</td>
+                                    <td className="px-6 py-4 text-center">
+                                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-sm shadow-emerald-500/5">Lunas</span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* REPORT PREVIEW MODAL */}
@@ -837,8 +1022,7 @@ export default function Laporan() {
                   { label: 'CASH (TUNAI)', data: salesByCategory.cash },
                   { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
                   { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-                  { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit },
-                  { label: 'PENCAIRAN BANK', data: bankTransactions || [], isBankTx: true }
+                  { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
                 ].forEach(cat => {
                   if (cat.data.length > 0) {
                     list.push({ isHeader: true, label: cat.label });
@@ -910,6 +1094,70 @@ export default function Laporan() {
                   </div>
                 ));
               })()}
+
+              {/* PAGE X: HISTORI PENCAIRAN BANK - GROUPS */}
+              {bankReportSummaries.length > 0 && 
+                <div className="report-page break-before-page">
+                   <div className="flex justify-between items-center border-b border-emerald-500/20 pb-2 mb-6">
+                      <h3 className="m-0 border-none p-0 text-emerald-600">V. Histori Pencairan Bank per Hari</h3>
+                      <span className="text-[10px] font-black uppercase text-slate-400 px-3 py-1 bg-slate-100 rounded-full">Report Timeline</span>
+                   </div>
+                   
+                   <div className="space-y-10">
+                      {bankReportSummaries.map((dayGroup, i) => (
+                        <div key={i} className="relative pl-6 border-l-2 border-indigo-100 pb-2">
+                           <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-indigo-500 border-2 border-white shadow-sm" />
+                           
+                           <div className="flex justify-between items-center mb-3">
+                              <span className="text-xs font-black uppercase tracking-widest text-indigo-600 bg-indigo-50/80 px-3 py-1 rounded-lg border border-indigo-100">{formatDateIndo(dayGroup.date)}</span>
+                              <span className="text-[11px] font-black text-emerald-600">{formatRupiah(dayGroup.total)}</span>
+                           </div>
+
+                           <div className="space-y-4">
+                              {dayGroup.banks.map((bank, j) => (
+                                <div key={j} className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                   <div className="bg-slate-50 px-4 py-2 flex justify-between items-center border-b border-slate-200">
+                                      <div className="flex items-center gap-2">
+                                         <Landmark className="w-3.5 h-3.5 text-emerald-500" />
+                                         <span className="text-[10px] font-black uppercase text-slate-700">{bank.bank} • {bank.account}</span>
+                                      </div>
+                                      <span className="text-[10px] font-black text-emerald-700">{formatRupiah(bank.total)} ({bank.count} Trx)</span>
+                                   </div>
+                                   <div className="p-0">
+                                      <table className="w-full text-[9px] leading-tight">
+                                         <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-400 uppercase italic">
+                                            <tr>
+                                               <th className="px-3 py-1 text-left">Faktur</th>
+                                               <th className="px-3 py-1 text-left">Produk</th>
+                                               <th className="px-3 py-1 text-left">Sumber</th>
+                                               <th className="px-3 py-1 text-right">Nilai</th>
+                                            </tr>
+                                         </thead>
+                                         <tbody>
+                                            {bank.items.map((tx: any, txIdx: number) => (
+                                              <tr key={txIdx} className="border-b border-slate-50 last:border-0">
+                                                 <td className="px-3 py-1.5 font-bold">{tx.noFaktur || '-'}</td>
+                                                 <td className="px-3 py-1.5 font-medium opacity-80">{tx.namaBarang}</td>
+                                                 <td className="px-3 py-1.5 text-[8px] uppercase font-black text-slate-400">{tx.sumber?.replace('_', ' ')}</td>
+                                                 <td className="px-3 py-1.5 text-right font-black text-emerald-600">{formatRupiah(tx.nilai)}</td>
+                                              </tr>
+                                            ))}
+                                         </tbody>
+                                      </table>
+                                   </div>
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                   
+                   <div className="mt-auto pt-8 border-t border-slate-100 text-[10px] font-bold text-slate-400 flex justify-between italic">
+                      <p>Halaman Timeline Pencairan</p>
+                      <p>© {new Date().getFullYear()} MAX SPEED • Analytic Insight</p>
+                   </div>
+                </div>
+              }
             </div>
           </div>
         </div>
