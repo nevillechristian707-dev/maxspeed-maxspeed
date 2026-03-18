@@ -313,7 +313,7 @@ export default function Pencairan() {
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Platform / Produk</th>
-                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">Nilai</th>
+                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">TOTAL</th>
                     <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
                   </tr>
                 </thead>
@@ -322,7 +322,7 @@ export default function Pencairan() {
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
                   ) : onlineShopPending.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang online shop.</td></tr>
-                  ) : onlineShopPending.map(item => (
+                  ) : onlineShopPending.map((item: any) => (
                     <tr key={item.id} className={cn(
                       "border-b border-border/20 transition-colors group",
                       markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
@@ -340,13 +340,15 @@ export default function Pencairan() {
                         <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <div className="font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
-                        {item.status === 'partial' && (
-                          <div className="flex flex-col items-end mt-1">
-                            <span className="text-[9px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20">Cicilan</span>
-                            <span className="text-[8px] text-muted-foreground mt-0.5 italic">Sisa dari {formatRupiah((item as any).totalAmount)}</span>
-                          </div>
-                        )}
+                        <div className="font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
+                        <div className="flex flex-col items-end mt-1">
+                          {item.status === 'partial' && (
+                            <>
+                              <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-emerald-500/20 mb-1">Piutang Terbayar</span>
+                              <span className="text-[8px] text-orange-400 font-bold italic">Sisa Piutang: {formatRupiah(item.nilai)}</span>
+                            </>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
@@ -389,7 +391,7 @@ export default function Pencairan() {
                 <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
               ) : onlineShopPending.length === 0 ? (
                 <div className="p-10 text-center text-muted-foreground">Tidak ada data.</div>
-              ) : onlineShopPending.map(item => (
+              ) : onlineShopPending.map((item: any) => (
                 <div key={item.id} className={cn("p-4 mb-3 rounded-xl border transition-all space-y-3", markedIds.has(item.id) ? "bg-primary/10 border-primary/40" : "bg-card/60 border-border/40")}>
                   <div className="flex justify-between items-start">
                     <div className="flex gap-3 items-start">
@@ -407,8 +409,8 @@ export default function Pencairan() {
                   <div className="text-xs text-muted-foreground pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
-                      <div className="text-sm font-black text-emerald-500">{formatRupiah(item.nilai)}</div>
-                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter">Cicilan</div>}
+                      <div className="text-sm font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
+                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
                       {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
@@ -483,7 +485,7 @@ export default function Pencairan() {
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
                     <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Customer / Produk</th>
-                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">Nilai</th>
+                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">TOTAL</th>
                     <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
                   </tr>
                 </thead>
@@ -492,7 +494,7 @@ export default function Pencairan() {
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
                   ) : kreditPending.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang kredit.</td></tr>
-                  ) : kreditPending.map(item => (
+                  ) : kreditPending.map((item: any) => (
                     <tr key={item.id} className={cn(
                       "border-b border-border/20 transition-colors group",
                       markedIds.has(item.id) ? "bg-primary/5" : "hover:bg-secondary/5"
@@ -510,13 +512,15 @@ export default function Pencairan() {
                         <div className="text-xs leading-tight text-muted-foreground">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <div className="font-black text-orange-500">{formatRupiah(item.nilai)}</div>
-                        {item.status === 'partial' && (
-                          <div className="flex flex-col items-end mt-1">
-                            <span className="text-[9px] bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-blue-500/20">Cicilan</span>
-                            <span className="text-[8px] text-muted-foreground mt-0.5 italic">Sisa dari {formatRupiah((item as any).totalAmount)}</span>
-                          </div>
-                        )}
+                        <div className="font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
+                        <div className="flex flex-col items-end mt-1">
+                          {item.status === 'partial' && (
+                            <>
+                              <span className="text-[9px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20 mb-1">Terbayar Sebagian</span>
+                              <span className="text-[8px] text-orange-400 font-bold italic">Sisa: {formatRupiah(item.nilai)}</span>
+                            </>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
@@ -559,7 +563,7 @@ export default function Pencairan() {
                 <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
               ) : kreditPending.length === 0 ? (
                 <div className="p-10 text-center text-muted-foreground">Tidak ada piutang kredit.</div>
-              ) : kreditPending.map(item => (
+              ) : kreditPending.map((item: any) => (
                 <div key={item.id} className={cn("p-4 mb-3 rounded-xl border transition-all space-y-3", markedIds.has(item.id) ? "bg-primary/10 border-primary/40" : "bg-card/60 border-border/40")}>
                   <div className="flex justify-between items-start">
                     <div className="flex gap-3 items-start">
@@ -577,8 +581,8 @@ export default function Pencairan() {
                   <div className="text-xs text-muted-foreground pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
-                      <div className="text-sm font-black text-orange-500">{formatRupiah(item.nilai)}</div>
-                      {item.status === 'partial' && <div className="text-[8px] text-primary font-bold uppercase tracking-tighter">Cicilan</div>}
+                      <div className="text-sm font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
+                      {item.status === 'partial' && <div className="text-[8px] text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
                       {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Lunasi</button>}
@@ -611,22 +615,26 @@ export default function Pencairan() {
             ) : (
               <div className="p-4 space-y-8 bg-secondary/5">
                 {bankSummaries.map((dayGroup, i) => (
-                  <div key={i} className="border-b last:border-0 border-border/20">
+                  <div key={i} className={`${i > 0 ? 'mt-12' : ''} group/day`}>
+                    <div className="h-1 w-24 bg-indigo-500 rounded-full mb-3 opacity-50 group-hover/day:opacity-100 transition-opacity" />
                     {/* Date Header */}
-                    <div className="bg-primary/5 px-4 py-2 rounded-t-xl border-x border-t border-primary/20 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+                    <div className="bg-indigo-500/10 px-4 py-3 rounded-t-2xl border-x border-t border-indigo-500/30 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-xl shadow-sm">
                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Calendar className="w-4 h-4 text-primary" />
+                          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center shadow-inner">
+                            <Calendar className="w-5 h-5 text-indigo-400" />
                           </div>
-                          <span className="text-xs font-black uppercase tracking-[0.15em] text-foreground">{formatDate(dayGroup.date)}</span>
+                          <div>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
+                            <div className="text-[8px] text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter">Riwayat Pencairan Harian</div>
+                          </div>
                        </div>
-                       <div className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-2">
-                          <span className="opacity-50 tracking-widest">Total Cair:</span>
-                          <span className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full border border-emerald-500/20">{formatRupiah(dayGroup.total)}</span>
+                       <div className="text-[10px] font-black text-muted-foreground uppercase flex items-center gap-3">
+                          <span className="opacity-40 tracking-[0.2em] hidden sm:inline">Total Kas Masuk:</span>
+                          <span className="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-xs">{formatRupiah(dayGroup.total)}</span>
                        </div>
                     </div>
 
-                    <div className="space-y-4 p-4 border-x border-b border-border/20 bg-card/30 rounded-b-xl">
+                    <div className="space-y-6 p-5 border-x border-b border-indigo-500/20 bg-gradient-to-b from-indigo-500/[0.03] to-transparent rounded-b-2xl shadow-inner">
                       {dayGroup.banks.map((bankGroup: any, j: number) => (
                         <div key={j} className="overflow-hidden border border-border/20 rounded-xl bg-card shadow-sm hover:shadow-md transition-all duration-300">
                           {/* Bank Header Section */}
@@ -654,7 +662,7 @@ export default function Pencairan() {
                                   <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX</th>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Produk & Brand</th>
                                   <th className="px-4 py-2 font-bold uppercase tracking-widest">Sumber Dana</th>
-                                  <th className="px-4 py-2 text-right font-bold uppercase tracking-widest">Nilai</th>
+                                  <th className="px-4 py-2 text-right font-bold uppercase tracking-widest">TOTAL</th>
                                   <th className="px-4 py-2 text-center font-bold uppercase tracking-widest">Aksi</th>
                                 </tr>
                               </thead>

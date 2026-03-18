@@ -18,7 +18,7 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: summary, isLoading: loadingSummary, isError: isErrorSummary, refetch: refetchSummary } = useGetDashboardSummary(dateParams);
-  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, refetch: refetchChart } = useGetDashboardChart({});
+  const { data: chartData, isLoading: loadingChart, isError: isErrorChart, refetch: refetchChart } = useGetDashboardChart(dateParams);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

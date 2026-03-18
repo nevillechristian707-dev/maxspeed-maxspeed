@@ -328,6 +328,8 @@ export type GetDashboardSummaryParams = {
 
 export type GetDashboardChartParams = {
   period?: GetDashboardChartPeriod;
+  startDate?: string;
+  endDate?: string;
 };
 
 export type GetDashboardChartPeriod =

@@ -80,13 +80,17 @@ router.post("/", async (req, res) => {
     const hargaBeli = parseFloat(String(b.hargaBeli));
     const totalModal = hargaBeli * qtyNum;
 
-    const countResult = await db.select({ cnt: sql<number>`count(*)` })
+    const maxNomorResult = await db.select({ maxNomor: sql<number>`max(${penjualanTable.nomor})` })
       .from(penjualanTable)
       .where(eq(penjualanTable.tanggal, tanggal));
-    const dayCount = Number(countResult[0]?.cnt || 0) + 1;
+    
+    // Fallback if no transactions yet today
+    const currentMax = Number(maxNomorResult[0]?.maxNomor || 0);
+    const dayCount = currentMax + 1;
+    
     const dateStr = tanggal.replace(/-/g, "");
     const nomor = dayCount;
-    const kodeTransaksi = `TRX-${dateStr}-${String(dayCount).padStart(3, "0")}`;
+    const kodeTransaksi = `TRX-${dateStr}-${String(nomor).padStart(3, "0")}`;
 
     const needsCair = paymentMethod === "online_shop" || paymentMethod === "kredit";
 
@@ -102,13 +106,13 @@ router.post("/", async (req, res) => {
       qty: qtyNum,
       total: String(total),
       paymentMethod,
-      nilaiCash: nilaiCash != null ? String(nilaiCash) : null,
-      namaBank: namaBank || null,
-      nilaiBank: nilaiBank != null ? String(nilaiBank) : null,
-      namaOnlineShop: namaOnlineShop || null,
-      nilaiOnlineShop: nilaiOnlineShop != null ? String(nilaiOnlineShop) : String(total),
-      namaCustomer: namaCustomer || null,
-      nilaiKredit: nilaiKredit != null ? String(nilaiKredit) : String(total),
+      nilaiCash: paymentMethod === "cash" ? String(nilaiCash || total) : null,
+      namaBank: paymentMethod === "bank" ? (namaBank || null) : null,
+      nilaiBank: paymentMethod === "bank" ? String(nilaiBank || total) : null,
+      namaOnlineShop: paymentMethod === "online_shop" ? (namaOnlineShop || null) : null,
+      nilaiOnlineShop: paymentMethod === "online_shop" ? String(nilaiOnlineShop || total) : null,
+      namaCustomer: paymentMethod === "kredit" ? (namaCustomer || null) : null,
+      nilaiKredit: paymentMethod === "kredit" ? String(nilaiKredit || total) : null,
       statusCair: needsCair ? "pending" : "cair",
       tanggalCair: null,
       hargaBeli: String(hargaBeli),
@@ -116,9 +120,13 @@ router.post("/", async (req, res) => {
     }).returning();
 
     return res.status(201).json(toDto(inserted[0]));
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal Server Error" });
+  } catch (err: any) {
+    console.error("POST /api/penjualan error:", err);
+    return res.status(500).json({ 
+      error: "Internal Server Error", 
+      message: err.message, 
+      detail: err.detail || err.cause?.message || "Check server logs for details" 
+    });
   }
 });
 

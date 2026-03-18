@@ -55,13 +55,14 @@ router.get("/", async (req, res) => {
     
     const results = rows.map((row: any) => {
         const totalPaid = parseFloat(row.totalPaid);
-        const totalAmount = row.paymentMethod === "online_shop" ? toNumber(row.nilaiOnlineShop) : toNumber(row.nilaiKredit);
+        const totalAmount = toNumber(row.total);
         return {
             id: row.id,
             tanggal: row.tanggal,
             kodeTransaksi: row.kodeTransaksi,
             noFaktur: row.noFaktur,
             namaBarang: row.namaBarang,
+            brand: row.brand,
             paymentMethod: row.paymentMethod,
             namaOnlineShop: row.namaOnlineShop,
             namaCustomer: row.namaCustomer,

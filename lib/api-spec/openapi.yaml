@@ -273,6 +273,14 @@ paths:
             type: string
             enum: [daily, monthly]
             default: monthly
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: Chart data

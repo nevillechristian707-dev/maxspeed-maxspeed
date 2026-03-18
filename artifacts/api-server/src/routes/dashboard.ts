@@ -133,51 +133,32 @@ router.get("/chart", async (req, res) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
+    const { startDate, endDate } = req.query;
     const format = "YYYY-MM-DD";
     
-    // For chart, we need to combine:
-    // 1. Cash/Bank by 'tanggal'
-    // 2. Online/Kredit by 'tanggalCair' (from transaksiBank)
-    
-    const cashData = await db.select({
+    // We want to show TOTAL sales by 'tanggal' (date sold), irrespective of payment status.
+    const conds = [];
+    if (startDate) conds.push(gte(penjualanTable.tanggal, String(startDate)));
+    if (endDate) conds.push(lte(penjualanTable.tanggal, String(endDate)));
+
+    const chartRows = await db.select({
       label: sql<string>`to_char(${penjualanTable.tanggal}::date, ${format})`,
-      val: sql<string>`sum(${penjualanTable.total})`,
-      mod: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
+      penjualan: sql<string>`sum(${penjualanTable.total})`,
+      modal: sql<string>`sum(${penjualanTable.hargaBeli} * ${penjualanTable.qty})`,
     })
     .from(penjualanTable)
-    .where(or(eq(penjualanTable.paymentMethod, 'cash'), eq(penjualanTable.paymentMethod, 'bank')))
-    .groupBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`);
+    .where(conds.length ? and(...conds) : undefined)
+    .groupBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`)
+    .orderBy(sql`to_char(${penjualanTable.tanggal}::date, ${format})`);
 
-    const liquidData = await db.select({
-      label: sql<string>`to_char(${transaksiBank.tanggalCair}::date, ${format})`,
-      val: sql<string>`sum(${transaksiBank.nilai})`,
-      // Modal is tricky for partials in chart, we'll map modal to the final 'cair' date
-    })
-    .from(transaksiBank)
-    .groupBy(sql`to_char(${transaksiBank.tanggalCair}::date, ${format})`);
+    const labels = chartRows.map((r: any) => r.label);
+    const penjualan = chartRows.map((r: any) => n(r.penjualan));
+    const laba = chartRows.map((r: any) => n(r.penjualan) - n(r.modal));
 
-    // Map by date
-    const merged: Record<string, { penjualan: number; laba: number }> = {};
-    
-    cashData.forEach((d: any) => {
-      if (!merged[d.label]) merged[d.label] = { penjualan: 0, laba: 0 };
-      merged[d.label].penjualan += n(d.val);
-      merged[d.label].laba += (n(d.val) - n(d.mod));
-    });
-
-    liquidData.forEach((d: any) => {
-      if (!merged[d.label]) merged[d.label] = { penjualan: 0, laba: 0 };
-      merged[d.label].penjualan += n(d.val);
-      // Simplified laba for credit items in chart: count profit only when liquidated? 
-      // For now, let's keep it consistent with totalPenjualan.
-      merged[d.label].laba += n(d.val); 
-    });
-
-    const labels = Object.keys(merged).sort();
     return res.json({
       labels,
-      penjualan: labels.map(l => merged[l].penjualan),
-      laba: labels.map(l => merged[l].laba),
+      penjualan,
+      laba,
     });
   } catch (err) {
     console.error(err);
