@@ -185,74 +185,54 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
             <div>
-              <CardTitle className="text-lg uppercase font-black tracking-tight">Grafik Harian: Penjualan & Laba</CardTitle>
+              <CardTitle className="text-lg uppercase font-black tracking-tight">Rekapan Harian: Penjualan & Laba</CardTitle>
               <p className="text-[10px] text-muted-foreground mt-1 font-bold uppercase tracking-widest italic opacity-70">Mencakup semua transaksi (Lunas & Tempo)</p>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 pt-6 min-h-[300px] sm:min-h-[400px]">
-            <div className="h-[300px] sm:h-[400px] w-full mt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={formattedChartData} margin={{ top: 10, right: 10, bottom: 5, left: -10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.15)" vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="rgba(255,255,255,0.7)" 
-                    fontSize={11} 
-                    tickLine={false} 
-                    axisLine={false}
-                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.9)' }}
-                  />
-                  <YAxis 
-                    stroke="rgba(255,255,255,0.7)" 
-                    fontSize={11} 
-                    tickLine={false} 
-                    axisLine={false}
-                    tick={{ fontWeight: 'black', fill: 'rgba(255,255,255,0.9)' }}
-                    tickFormatter={(val) => val >= 1000000 ? `${val / 1000000}M` : val >= 1000 ? `${val / 1000}K` : val}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(5,5,5,1)', 
-                      border: '2px solid rgba(255,255,255,0.2)', 
-                      borderRadius: '16px',
-                      boxShadow: '0 20px 50px -10px rgba(0,0,0,1)',
-                      padding: '16px'
-                    }}
-                    labelStyle={{ color: 'hsl(var(--primary))', fontWeight: '900', fontSize: '13px', marginBottom: '12px', textTransform: 'uppercase' }}
-                    labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
-                    formatter={(value: number, name: string) => [
-                      <span className="font-black text-white tabular-nums text-sm">{formatRupiah(value)}</span>, 
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mr-3">{name}</span>
-                    ]}
-                  />
-                  <Legend 
-                    verticalAlign="top" 
-                    align="right" 
-                    iconType="circle" 
-                    iconSize={10}
-                    wrapperStyle={{ paddingTop: '0px', paddingBottom: '50px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                  />
-                  <Line 
-                    name="Penjualan"
-                    type="monotone" 
-                    dataKey="Penjualan" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={6} 
-                    dot={{ r: 6, strokeWidth: 4, fill: 'hsl(var(--background))' }} 
-                    activeDot={{ r: 9, strokeWidth: 0, fill: 'hsl(var(--primary))' }} 
-                  />
-                  <Line 
-                    name="Laba"
-                    type="monotone" 
-                    dataKey="Laba" 
-                    stroke="#00ff88" 
-                    strokeWidth={6} 
-                    dot={{ r: 6, strokeWidth: 4, fill: 'hsl(var(--background))' }} 
-                    activeDot={{ r: 9, strokeWidth: 0, fill: '#00ff88' }} 
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+          <CardContent className="flex-1 p-0 h-[300px] sm:h-[400px] overflow-y-auto">
+            {loadingChart ? (
+              <div className="flex h-full items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : isErrorChart ? (
+              <div className="flex h-full items-center justify-center p-8 text-muted-foreground italic text-xs">Gagal memuat rekapan harian</div>
+            ) : (
+              <table className="w-full text-xs text-left border-collapse sticky-header">
+                <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
+                    <th className="px-4 py-4 text-right font-black tracking-widest">Penjualan (Daily)</th>
+                    <th className="px-6 py-4 text-right font-black tracking-widest text-emerald-500">Laba (Harian)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/10">
+                  {[...formattedChartData].sort((a, b) => {
+                    const dateA = new Date((chartData?.labels || [])[formattedChartData.indexOf(a)]);
+                    const dateB = new Date((chartData?.labels || [])[formattedChartData.indexOf(b)]);
+                    return dateB.getTime() - dateA.getTime();
+                  }).map((item, idx) => (
+                    <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
+                      <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors">
+                        {item.fullDate}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter">
+                        {formatRupiah(item.Penjualan)}
+                      </td>
+                      <td className="px-6 py-3 text-right font-mono font-black tabular-nums tracking-tighter text-emerald-500">
+                        {formatRupiah(item.Laba)}
+                      </td>
+                    </tr>
+                  ))}
+                  {formattedChartData.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
+                        Tidak ada data transaksi di periode ini.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </CardContent>
         </Card>
 
