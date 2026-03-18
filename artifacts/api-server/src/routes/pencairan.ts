@@ -55,7 +55,11 @@ router.get("/", async (req, res) => {
     
     const results = rows.map((row: any) => {
         const totalPaid = parseFloat(row.totalPaid);
-        const totalAmount = toNumber(row.total);
+        // For online_shop and kredit, the 'totalAmount' should be the expected liquidation value
+        const totalAmount = row.paymentMethod === 'online_shop' 
+            ? toNumber(row.nilaiOnlineShop) 
+            : (row.paymentMethod === 'kredit' ? toNumber(row.nilaiKredit) : toNumber(row.total));
+            
         return {
             id: row.id,
             tanggal: row.tanggal,
