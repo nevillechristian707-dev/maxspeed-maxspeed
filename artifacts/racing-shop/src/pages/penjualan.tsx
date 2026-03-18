@@ -164,16 +164,13 @@ export default function Penjualan() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const payload = { ...values };
-      if (values.paymentMethod === 'cash') {
-        payload.nilaiCash = payload.nilaiCash || total;
-      } else if (values.paymentMethod === 'bank') {
-        payload.nilaiBank = payload.nilaiBank || total;
-      } else if (values.paymentMethod === 'online_shop') {
-        payload.nilaiOnlineShop = payload.nilaiOnlineShop || total;
-      } else if (values.paymentMethod === 'kredit') {
-        payload.nilaiKredit = payload.nilaiKredit || total;
-      }
+      const payload = { 
+        ...values,
+        nilaiCash: values.paymentMethod === 'cash' ? total : null,
+        nilaiBank: values.paymentMethod === 'bank' ? total : null,
+        nilaiOnlineShop: values.paymentMethod === 'online_shop' ? total : null,
+        nilaiKredit: values.paymentMethod === 'kredit' ? total : null,
+      };
 
       if (editingId) {
         await updateMutation.mutateAsync({ id: editingId, data: payload as any });
@@ -193,7 +190,10 @@ export default function Penjualan() {
         paymentMethod: "cash",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
@@ -225,7 +225,10 @@ export default function Penjualan() {
       await deleteMutation.mutateAsync({ id });
       toast({ title: "Terhapus", description: "Transaksi berhasil dihapus dari sistem." });
       queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
       setDeleteConfirmId(null);
     } catch (err: any) {
       console.error("Delete error:", err);
