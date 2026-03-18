@@ -109,23 +109,27 @@ export default function Laporan() {
     const doc = new jsPDF('p', 'mm', 'a4');
     const periodStr = getIndonesianPeriodLabel(selectedMonth, selectedYear);
     
+    // Page 1: Strategic Summary
     // Header
     doc.setFontSize(22);
     doc.setTextColor(234, 88, 12); // Orange-600
     doc.text("MAX SPEED RACING SHOP", 105, 20, { align: 'center' });
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text("Laporan Keuangan Strategis", 105, 30, { align: 'center' });
-    doc.setFontSize(10);
-    doc.text(`Periode: ${periodStr}`, 105, 38, { align: 'center' });
-    doc.line(14, 45, 196, 45);
+    doc.text("Laporan Keuangan Strategis & Performa", 105, 28, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(`Periode: ${periodStr}`, 105, 34, { align: 'center' });
+    doc.setDrawColor(234, 88, 12);
+    doc.setLineWidth(0.5);
+    doc.line(14, 40, 196, 40);
 
     // Section 1: Rekap Penjualan
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     doc.setTextColor(0);
-    doc.text("I. REKAP PENJUALAN", 14, 55);
+    doc.setFont('helvetica', 'bold');
+    doc.text("I. RINGKASAN PENJUALAN", 14, 48);
     autoTable(doc, {
-      startY: 60,
+      startY: 52,
       head: [['Keterangan', 'Nilai (IDR)']],
       body: [
         ['Total Omzet (Cair + Pending)', formatRupiah(allStats.omzet)],
@@ -133,7 +137,8 @@ export default function Laporan() {
         ['Potensi Keuntungan', formatRupiah(allStats.profit)],
       ],
       theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59] },
+      headStyles: { fillColor: [30, 41, 59], fontSize: 9 },
+      bodyStyles: { fontSize: 8 },
       columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
       margin: { left: 14, right: 14 }
     });
@@ -142,24 +147,28 @@ export default function Laporan() {
     doc.text("II. LABA RUGI REALITAS (LUNAS)", 14, (doc as any).lastAutoTable.finalY + 10);
     autoTable(doc, {
       startY: (doc as any).lastAutoTable.finalY + 13,
+      head: [['Keterangan Realitas', 'Nilai (IDR)']],
       body: [
         ['Omzet Cair', formatRupiah(profit.totalPenjualan)],
         ['Modal Cair', formatRupiah(profit.totalModal)],
         ['Beban Operasional', formatRupiah(profit.totalBiaya)],
-        ['LABA BERSIH', formatRupiah(profit.laba)],
+        ['LABA BERSIH AKHIR', formatRupiah(profit.laba)],
         ['Alokasi Laba (10%)', formatRupiah(profit.labaShared)],
       ],
       theme: 'grid',
+      headStyles: { fillColor: [30, 41, 59], fontSize: 9 },
+      bodyStyles: { fontSize: 8 },
       columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } },
       margin: { left: 14, right: 14 },
       didParseCell: function(data) {
         if (data.row.index === 3) {
           data.cell.styles.fillColor = [234, 88, 12];
           data.cell.styles.textColor = [255, 255, 255];
+          data.cell.styles.fontSize = 10;
         }
         if (data.row.index === 4) {
-          data.cell.styles.fillColor = [240, 240, 240];
-          data.cell.styles.textColor = [0, 0, 0];
+          data.cell.styles.fillColor = [241, 245, 249];
+          data.cell.styles.textColor = [71, 85, 105];
           data.cell.styles.fontStyle = 'italic';
         }
       }
@@ -177,37 +186,49 @@ export default function Laporan() {
         formatRupiah(p.totalPenjualan)
       ]),
       theme: 'striped',
-      headStyles: { fillColor: [30, 41, 59] },
-      columnStyles: { 3: { halign: 'right', fontStyle: 'bold' } },
+      headStyles: { fillColor: [30, 41, 59], fontSize: 9 },
+      bodyStyles: { fontSize: 8 },
+      columnStyles: { 0: { halign: 'center' }, 3: { halign: 'right', fontStyle: 'bold' } },
       margin: { left: 14, right: 14 }
     });
+
+    // Page Footer for Page 1
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Dicetak otomatis oleh Sistem Dashboard Max Speed", 14, 285);
+    doc.text("Halaman 1", 196, 285, { align: 'right' });
 
     // PAGE BREAK - NEW PAGE FOR DETAILS
     doc.addPage();
     doc.setFontSize(12);
+    doc.setTextColor(30, 41, 59);
+    doc.setFont('helvetica', 'bold');
     doc.text("IV. RINCIAN PENJUALAN PER METODE BAYAR", 14, 20);
+    doc.setDrawColor(234, 88, 12);
+    doc.line(14, 22, 196, 22);
     
-    let currentY = 25;
+    let currentY = 30;
     const categories = [
-      { label: 'CASH', data: salesByCategory.cash },
-      { label: 'BANK', data: salesByCategory.bank },
+      { label: 'CASH (TUNAI)', data: salesByCategory.cash },
+      { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
       { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-      { label: 'KREDIT', data: salesByCategory.kredit }
+      { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
     ];
 
     categories.forEach((cat) => {
       if (cat.data.length > 0) {
-        if (currentY > 240) {
+        if (currentY > 250) {
           doc.addPage();
           currentY = 20;
         }
         
         doc.setFontSize(10);
+        doc.setTextColor(234, 88, 12);
         doc.text(`Kategori: ${cat.label}`, 14, currentY);
         
         autoTable(doc, {
           startY: currentY + 3,
-          head: [['Tanggal', 'No Faktur', 'Produk', 'Qty', 'Modal Pokok', 'Harga Jual', 'Laba/Rugi', 'Status']],
+          head: [['TGL', 'Faktur', 'Produk', 'Qty', 'Modal', 'Jual', 'Laba', 'Status']],
           body: cat.data.map(s => [
             s.tanggal,
             s.noFaktur || '-',
@@ -216,23 +237,29 @@ export default function Laporan() {
             formatRupiah((s.hargaBeli || 0) * (s.qty || 0)),
             formatRupiah(s.total),
             formatRupiah((s.total || 0) - ((s.hargaBeli || 0) * (s.qty || 0))),
-            s.statusCair === 'cair' ? 'LUNAS' : 'PENDING'
+            s.statusCair === 'cair' ? 'LUNAS' : 'PEND'
           ]),
-          styles: { fontSize: 7 },
-          headStyles: { fillColor: [234, 88, 12] },
+          styles: { fontSize: 6.5, cellPadding: 2 },
+          headStyles: { fillColor: [30, 41, 59] },
           columnStyles: { 
             4: { halign: 'right' },
             5: { halign: 'right' },
-            6: { halign: 'right' }
+            6: { halign: 'right', fontStyle: 'bold' },
+            7: { halign: 'center' }
           },
-          margin: { left: 14, right: 14 }
+          margin: { left: 14, right: 14 },
+          didDrawPage: (data) => {
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text(`Halaman ${doc.getNumberOfPages()}`, 196, 285, { align: 'right' });
+          }
         });
         
-        currentY = (doc as any).lastAutoTable.finalY + 12;
+        currentY = (doc as any).lastAutoTable.finalY + 15;
       }
     });
 
-    const filename = `Laporan_MaxSpeed_Lengkap_${selectedMonth}_${selectedYear}.pdf`;
+    const filename = `Laporan_MaxSpeed_Keuangan_${selectedMonth}_${selectedYear}.pdf`;
     doc.save(filename);
   };
 
@@ -255,45 +282,82 @@ export default function Laporan() {
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
-          #preview-content, #preview-content * { visibility: visible !important; }
-          #preview-content { 
-            position: absolute !important; 
+          #preview-overlay, #preview-overlay * { visibility: visible !important; }
+          #preview-overlay { 
+            position: fixed !important; 
             left: 0 !important; 
             top: 0 !important; 
             width: 100% !important; 
+            height: auto !important;
+            overflow: visible !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
-            color: black !important;
           }
           .no-print { display: none !important; }
-          .page-break { page-break-after: always; }
-          @page { margin: 1cm; size: auto; }
-          .card { border: 1px solid #000 !important; break-inside: avoid; background: white !important; color: black !important; }
-          table { width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important; }
-          th, td { border: 1px solid #000 !important; color: black !important; padding: 4px 8px !important; }
+          .page-break { page-break-after: always; display: block; height: 0; }
+          @page { margin: 10mm; size: A4; }
+          .report-paper { 
+            box-shadow: none !important; 
+            margin: 0 !important; 
+            width: 100% !important; 
+            padding: 0 !important;
+          }
+          .report-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            margin: 0 auto;
+            background: white !important;
+            page-break-after: always;
+            box-sizing: border-box;
+          }
+          .report-page:last-child { page-break-after: auto; }
+          table { width: 100% !important; border-collapse: collapse !important; font-size: 8pt; }
+          th, td { border: 1px solid #94a3b8 !important; padding: 4px !important; }
           .bg-primary { background-color: #ea580c !important; -webkit-print-color-adjust: exact; color: white !important; }
-          .text-primary { color: #ea580c !important; }
-          .text-emerald-500 { color: #059669 !important; }
-          .text-rose-500 { color: #e11d48 !important; }
-          .text-muted-foreground { color: #666 !important; }
         }
 
         .report-paper {
+          background: #334155;
+          padding: 40px 0;
+          display: flex;
+          flex-direction: column;
+          gap: 40px;
+          align-items: center;
+        }
+        
+        .report-page {
           background: white;
           color: black;
           width: 210mm;
           min-height: 297mm;
           padding: 20mm;
-          margin: 0 auto;
-          box-shadow: 0 0 20px rgba(0,0,0,0.2);
-          font-family: 'Inter', sans-serif;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+          position: relative;
+        }
+
+        .report-page h3 {
+          color: #ea580c;
+          border-bottom: 2px solid #ea580c;
+          padding-bottom: 4px;
+          margin-bottom: 16px;
+          font-weight: 900;
+          text-transform: uppercase;
+          font-size: 11px;
+        }
+
+        .report-page table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 24px;
+          font-size: 10px;
         }
         
-        .report-paper table { border: 1px solid #e2e8f0; }
-        .report-paper th { background: #f8fafc; color: #475569; }
-        .report-paper .card { background: white; border: 1px solid #e2e8f0; }
-        .report-paper .bg-primary { background: #ea580c !important; color: white !important; }
+        .report-page th { background: #1e293b; color: white; padding: 8px; text-align: left; }
+        .report-page td { border: 1px solid #e2e8f0; padding: 8px; }
       `}</style>
       
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 no-print">
@@ -559,183 +623,180 @@ export default function Laporan() {
 
       {/* REPORT PREVIEW MODAL */}
       {isPreview && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in duration-300 no-preview-print">
+        <div id="preview-overlay" className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-xl flex flex-col overflow-hidden animate-in fade-in duration-300 no-preview-print">
           <div className="flex items-center justify-between p-4 bg-slate-900 border-b border-white/10 no-print">
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => setIsPreview(false)} className="text-white border-white/20 hover:bg-white/10">
                 TUTUP PREVIEW
               </Button>
               <div className="h-4 w-[1px] bg-white/20" />
-              <p className="text-xs font-black uppercase text-white tracking-widest">Preview Laporan Layar</p>
+              <p className="text-xs font-black uppercase text-white tracking-widest">Preview Laporan Layar (A4 Layout)</p>
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" onClick={exportPDF} className="bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-2">
-                <FileText className="w-4 h-4" /> UNDUH PDF
+                <DownloadCloud className="w-4 h-4" /> UNDUH PDF
               </Button>
               <Button size="sm" onClick={() => window.print()} className="bg-primary hover:bg-primary/90 text-white font-bold flex items-center gap-2">
-                <Printer className="w-4 h-4" /> CETAK SEKARANG
+                <Printer className="w-4 h-4" /> CETAK / SIMPAN
               </Button>
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 md:p-12 bg-slate-800/50 flex justify-center">
-            <div id="preview-content" className="report-paper scale-90 md:scale-100 origin-top">
-              {/* HEADER LAPORAN */}
-              <div className="text-center border-b-2 border-slate-900 mb-8 pb-6">
-                <h1 className="text-4xl font-black text-rose-600 mb-1">MAX SPEED RACING SHOP</h1>
-                <p className="text-slate-500 uppercase tracking-[0.3em] font-medium text-xs">Laporan Keuangan Strategis & Performa</p>
-                <div className="mt-4 flex justify-center gap-3">
-                   <span className="px-4 py-1 bg-slate-100 rounded-full text-[10px] font-black uppercase tracking-widest">Periode: {getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
+          <div className="flex-1 overflow-y-auto p-4 md:p-12 bg-slate-800/20">
+            <div className="report-paper">
+              {/* PAGE 1: STRATEGIC SUMMARY */}
+              <div className="report-page">
+                <div className="text-center border-b-2 border-slate-900 mb-6 pb-6">
+                  <h1 className="text-4xl font-black text-rose-600 mb-1">MAX SPEED RACING SHOP</h1>
+                  <p className="text-slate-500 uppercase tracking-[0.2em] font-medium text-[10px]">Laporan Keuangan Strategis & Performa Perusahaan</p>
+                  <div className="mt-4 flex justify-center gap-3">
+                     <span className="px-4 py-1 bg-slate-100 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-700">Periode: {getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <section>
+                    <h3>I. Ringkasan Penjualan</h3>
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 text-left">Keterangan Aktivitas</th>
+                          <th className="px-4 py-2 text-right">Nilai (IDR)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Total Omzet (Cair + Pending)</td>
+                          <td className="text-right font-bold">{formatRupiah(allStats.omzet)}</td>
+                        </tr>
+                        <tr>
+                          <td>Total Modal Pokok</td>
+                          <td className="text-right font-bold">{formatRupiah(allStats.modal)}</td>
+                        </tr>
+                        <tr className="bg-emerald-50">
+                          <td className="font-bold text-emerald-700">Potensi Keuntungan</td>
+                          <td className="text-right font-black text-emerald-600 border-l-2 border-emerald-200">{formatRupiah(allStats.profit)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </section>
+
+                  <section>
+                    <h3>II. Laba Rugi Realitas (LUNAS)</h3>
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-2 text-left">Keterangan Realitas</th>
+                          <th className="px-4 py-2 text-right">Nilai (IDR)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Omzet Cair</td>
+                          <td className="text-right font-bold">{formatRupiah(profit?.totalPenjualan)}</td>
+                        </tr>
+                        <tr>
+                          <td>Modal Cair</td>
+                          <td className="text-right font-bold">{formatRupiah(profit?.totalModal)}</td>
+                        </tr>
+                        <tr>
+                          <td>Beban Operasional</td>
+                          <td className="text-right font-bold">{formatRupiah(profit?.totalBiaya)}</td>
+                        </tr>
+                        <tr className="bg-primary text-white">
+                          <td className="font-black uppercase tracking-widest italic">Laba Bersih Akhir</td>
+                          <td className="text-right font-black text-lg">{formatRupiah(profit?.laba)}</td>
+                        </tr>
+                        <tr className="bg-slate-50 italic">
+                          <td className="font-bold text-slate-500">Alokasi Laba (10%)</td>
+                          <td className="text-right font-black text-slate-700">{formatRupiah(profit?.labaShared)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </section>
+
+                  <section>
+                    <h3>III. Top Performance (Peringkat Produk)</h3>
+                    <table className="w-full text-[9px]">
+                      <thead>
+                        <tr>
+                          <th className="w-12 text-center">Rank</th>
+                          <th>Nama Produk / Brand</th>
+                          <th className="text-right">Total Penjualan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {topProducts?.slice(0, 10).map((p, i) => (
+                          <tr key={p.kodeBarang}>
+                            <td className="text-center font-bold">{i + 1}</td>
+                            <td>
+                               <div className="font-bold">{p.namaBarang}</div>
+                               <div className="text-[7px] text-slate-500 uppercase">{p.brand}</div>
+                            </td>
+                            <td className="text-right font-bold">{formatRupiah(p.totalPenjualan)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </section>
+                </div>
+
+                <div className="mt-auto pt-8 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
+                   <p>Halaman 1/2 - Strategic Recap</p>
+                   <p>Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
                 </div>
               </div>
 
-              {/* TABLES SECTION */}
-              <div className="space-y-12">
-                {/* 1. Ringkasan */}
-                <section>
-                  <h3 className="text-sm font-black uppercase mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">I. Ringkasan Penjualan</h3>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-3 text-left border">Keterangan</th>
-                        <th className="px-4 py-3 text-right border">Nilai (IDR)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-4 py-2 border">Total Omzet (Cair + Pending)</td>
-                        <td className="px-4 py-2 border text-right font-bold">{formatRupiah(allStats.omzet)}</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border">Total Modal Pokok</td>
-                        <td className="px-4 py-2 border text-right font-bold">{formatRupiah(allStats.modal)}</td>
-                      </tr>
-                      <tr className="bg-emerald-50">
-                        <td className="px-4 py-2 border font-bold">Potensi Keuntungan</td>
-                        <td className="px-4 py-2 border text-right font-black text-emerald-600">{formatRupiah(allStats.profit)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </section>
-
-                {/* 2. Laba Rugi Realitas */}
-                <section>
-                  <h3 className="text-sm font-black uppercase mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">II. Laba Rugi Realitas (LUNAS)</h3>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-3 text-left border">Keterangan</th>
-                        <th className="px-4 py-3 text-right border">Nilai (IDR)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="px-4 py-2 border">Omzet Cair</td>
-                        <td className="px-4 py-2 border text-right font-bold">{formatRupiah(profit?.totalPenjualan)}</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border">Modal Cair</td>
-                        <td className="px-4 py-2 border text-right font-bold">{formatRupiah(profit?.totalModal)}</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-2 border">Beban Operasional</td>
-                        <td className="px-4 py-2 border text-right font-bold">{formatRupiah(profit?.totalBiaya)}</td>
-                      </tr>
-                      <tr className="bg-primary text-white">
-                        <td className="px-4 py-2 border font-black uppercase tracking-widest italic">Laba Bersih Akhir</td>
-                        <td className="px-4 py-2 border text-right font-black text-lg">{formatRupiah(profit?.laba)}</td>
-                      </tr>
-                      <tr className="bg-secondary/20 italic">
-                        <td className="px-4 py-2 border font-bold text-muted-foreground">Alokasi Laba (10%)</td>
-                        <td className="px-4 py-2 border text-right font-black">{formatRupiah(profit?.labaShared)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </section>
-
-                {/* 3. Top Products */}
-                <section className="page-break">
-                  <h3 className="text-sm font-black uppercase mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">III. Top Performance (Peringkat Produk)</h3>
-                  <table className="w-full text-[10px]">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 text-left border bg-slate-50">Rank</th>
-                        <th className="px-4 py-2 text-left border bg-slate-50">Nama Produk / Brand</th>
-                        <th className="px-4 py-2 text-right border bg-slate-50">Total Penjualan</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topProducts?.slice(0, 10).map((p, i) => (
-                        <tr key={p.kodeBarang}>
-                          <td className="px-4 py-2 border text-center font-bold">{i + 1}</td>
-                          <td className="px-4 py-2 border">
-                             <div className="font-bold">{p.namaBarang}</div>
-                             <div className="text-[8px] text-slate-500 uppercase tracking-tighter">{p.brand}</div>
-                          </td>
-                          <td className="px-4 py-2 border text-right font-bold">{formatRupiah(p.totalPenjualan)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </section>
-
-                {/* 4. Rincian Penjualan */}
-                <section>
-                  <h3 className="text-sm font-black uppercase mb-4 flex items-center gap-2 border-l-4 border-primary pl-3">IV. Rincian Penjualan per Metode Bayar</h3>
-                  <div className="space-y-8">
-                    {[
-                      { label: 'CASH', data: salesByCategory.cash },
-                      { label: 'BANK', data: salesByCategory.bank },
-                      { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-                      { label: 'KREDIT', data: salesByCategory.kredit }
-                    ].map((cat) => ( cat.data.length > 0 && 
-                      <div key={cat.label} className="break-inside-avoid shadow-sm rounded-lg overflow-hidden border border-slate-200">
-                        <div className="bg-slate-900 text-white px-4 py-2 text-[10px] font-black flex justify-between items-center">
-                           <span className="tracking-widest capitalize">METODE: {cat.label}</span>
-                           <span className="opacity-60">{cat.data.length} TRANSAKSI</span>
-                        </div>
-                        <table className="w-full text-[8px]">
-                          <thead>
-                            <tr className="bg-slate-50">
-                              <th className="px-2 py-2 border text-left">TGL</th>
-                              <th className="px-2 py-2 border text-left">FAKTUR</th>
-                              <th className="px-2 py-2 border text-left">PRODUK</th>
-                              <th className="px-2 py-2 border text-center">QTY</th>
-                              <th className="px-2 py-2 border text-right">HARGA JUAL</th>
-                              <th className="px-2 py-2 border text-right">LABA</th>
-                              <th className="px-2 py-2 border text-center">STATUS</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {cat.data.map((s: any) => (
-                              <tr key={s.id}>
-                                <td className="px-2 py-2 border whitespace-nowrap">{s.tanggal}</td>
-                                <td className="px-2 py-2 border font-bold">{s.noFaktur || '-'}</td>
-                                <td className="px-2 py-2 border">{s.namaBarang}</td>
-                                <td className="px-2 py-2 border text-center">{s.qty}</td>
-                                <td className="px-2 py-2 border text-right font-bold">{formatRupiah(s.total)}</td>
-                                <td className="px-2 py-2 border text-right font-black text-emerald-600">
-                                  {formatRupiah((s.total || 0) - ((s.hargaBeli || 0) * (s.qty || 0)))}
-                                </td>
-                                <td className="px-2 py-2 border text-center">
-                                   <span className={`px-2 py-0.5 rounded-full text-[6px] font-black uppercase ${s.statusCair === 'cair' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
-                                      {s.statusCair === 'cair' ? 'LUNAS' : 'PENDING'}
-                                   </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+              {/* PAGE 2+: DETAILED BREAKDOWN */}
+              <div className="report-page">
+                <h3>IV. Rincian Penjualan per Metode Bayar</h3>
+                <div className="space-y-8">
+                  {[
+                    { label: 'CASH (TUNAI)', data: salesByCategory.cash },
+                    { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
+                    { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
+                    { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
+                  ].map((cat) => ( cat.data.length > 0 && 
+                    <div key={cat.label} className="border border-slate-200 rounded overflow-hidden">
+                      <div className="bg-slate-100 px-3 py-1.5 text-[9px] font-black border-b border-slate-200 flex justify-between">
+                         <span>KATEGORI: {cat.label}</span>
+                         <span>{cat.data.length} Transaksi</span>
                       </div>
-                    ))}
-                  </div>
-                </section>
-              </div>
-
-              {/* FOOTER LAPORAN */}
-              <div className="mt-16 pt-8 border-t border-slate-200 text-[10px] text-slate-400 flex justify-between italic">
-                 <p>Sistem Dashboard Max Speed - Laporan Digital Otomatis</p>
-                 <p>Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
+                      <table className="w-full text-[7px] mb-0">
+                        <thead>
+                          <tr className="bg-white">
+                            <th className="p-1 border text-slate-600">TGL</th>
+                            <th className="p-1 border text-slate-600">FAKTUR</th>
+                            <th className="p-1 border text-slate-600">PRODUK</th>
+                            <th className="p-1 border text-slate-600 text-center">QTY</th>
+                            <th className="p-1 border text-slate-600 text-right">JUAL</th>
+                            <th className="p-1 border text-slate-600 text-right">LABA</th>
+                            <th className="p-1 border text-slate-600 text-center">STATUS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cat.data.map((s: any) => (
+                            <tr key={s.id}>
+                              <td className="p-1 border">{s.tanggal}</td>
+                              <td className="p-1 border font-bold">{s.noFaktur || '-'}</td>
+                              <td className="p-1 border truncate max-w-[120px]">{s.namaBarang}</td>
+                              <td className="p-1 border text-center">{s.qty}</td>
+                              <td className="p-1 border text-right font-bold">{formatRupiah(s.total)}</td>
+                              <td className="p-1 border text-right font-black text-emerald-600">
+                                {formatRupiah((s.total || 0) - ((s.hargaBeli || 0) * (s.qty || 0)))}
+                              </td>
+                              <td className="p-1 border text-center text-[6px] font-black">{s.statusCair === 'cair' ? 'LUNAS' : 'PEND'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-auto pt-8 border-t border-slate-100 text-[8px] text-slate-400 flex justify-between italic">
+                   <p>Halaman 2/2 - Detailed breakdown</p>
+                   <p>Max Speed Dashboard System</p>
+                </div>
               </div>
             </div>
           </div>
