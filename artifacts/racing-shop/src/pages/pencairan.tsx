@@ -761,22 +761,22 @@ export default function Pencairan() {
                           <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center shadow-inner">
                             <Calendar className="w-5 h-5 text-indigo-400" />
                           </div>
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
+                          <div className="flex flex-col min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs sm:text-sm font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] text-indigo-100 whitespace-nowrap">{formatDate(dayGroup.date)}</span>
                               {dayGroup.kodePencairan && (
-                                <span className="px-3 py-1 rounded-lg bg-indigo-500/40 border-2 border-indigo-400/60 text-2xl font-black font-mono text-white shadow-lg shadow-indigo-500/20">
+                                <span className="px-1.5 py-0.5 sm:px-3 sm:py-1 rounded-md sm:rounded-lg bg-indigo-500/40 border sm:border-2 border-indigo-400/60 text-xs sm:text-2xl font-black font-mono text-white shadow-lg shadow-indigo-500/20 whitespace-nowrap">
                                   {dayGroup.kodePencairan}
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs font-bold text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter">Riwayat Pencairan Harian</div>
+                            <div className="text-[10px] sm:text-xs font-bold text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter truncate">Riwayat Pencairan Harian</div>
                           </div>
                        </div>
-                       <div className="text-xs font-black text-muted-foreground uppercase flex items-center gap-3">
-                          <span className="opacity-40 tracking-[0.2em] hidden sm:inline">Total Kas Masuk:</span>
-                          <span className="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-sm">{formatRupiah(dayGroup.total)}</span>
-                       </div>
+                        <div className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase flex items-center gap-2 sm:gap-3 shrink-0">
+                          <span className="opacity-40 tracking-[0.1em] sm:tracking-[0.2em] hidden xs:inline">Total:</span>
+                          <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-[11px] sm:text-sm whitespace-nowrap">{formatRupiah(dayGroup.total)}</span>
+                        </div>
                     </div>
 
                     <div className="space-y-6 p-5 border-x border-b border-indigo-500/20 bg-gradient-to-b from-indigo-500/[0.03] to-transparent rounded-b-2xl shadow-inner">
@@ -803,39 +803,39 @@ export default function Pencairan() {
                           <div className="overflow-x-auto">
                             <table className="w-full text-[11px] text-left">
                               <thead className="text-xs font-medium text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
-                                <tr>
-                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Tgl Faktur</th>
-                                  <th className="px-6 py-2 font-bold uppercase tracking-widest">Faktur / TRX</th>
-                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Produk & Brand</th>
-                                  <th className="px-4 py-2 font-bold uppercase tracking-widest">Sumber Dana</th>
-                                  <th className="px-4 py-2 text-right font-bold uppercase tracking-widest">TOTAL</th>
-                                  <th className="px-4 py-2 text-center font-bold uppercase tracking-widest">Aksi</th>
-                                </tr>
+                                  <tr>
+                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Tgl Faktur</th>
+                                    <th className="px-3 sm:px-6 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Faktur / TRX</th>
+                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Produk & Brand</th>
+                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Sumber Dana</th>
+                                    <th className="px-2 sm:px-4 py-2 text-right font-bold uppercase tracking-widest whitespace-nowrap">TOTAL</th>
+                                    <th className="px-2 sm:px-4 py-2 text-center font-bold uppercase tracking-widest whitespace-nowrap">Aksi</th>
+                                  </tr>
                               </thead>
                               <tbody className="divide-y divide-border/10">
                                 {bankGroup.items.map((tx: any) => (
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
-                                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground font-bold">
+                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-[10px] sm:text-xs text-muted-foreground font-bold">
                                       {formatDate(tx.tanggal)}
                                     </td>
-                                      <td className="px-6 py-3">
-                                      <span className="font-bold text-foreground text-xs">{tx.noFaktur || "-"}</span>
-                                      <div className="text-xs font-bold text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
+                                      <td className="px-3 sm:px-6 py-3">
+                                      <span className="font-bold text-foreground text-[10px] sm:text-xs">{tx.noFaktur || "-"}</span>
+                                      <div className="text-[9px] sm:text-xs font-bold text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
                                     </td>
-                                    <td className="px-4 py-3">
-                                      <div className="font-bold text-foreground text-xs">{tx.namaBarang}</div>
-                                      <div className="text-xs font-bold text-primary font-black uppercase mt-1 tracking-widest">{tx.brand || '-'} • {tx.kodeBarang}</div>
+                                    <td className="px-2 sm:px-4 py-3">
+                                      <div className="font-bold text-foreground text-[10px] sm:text-xs line-clamp-2">{tx.namaBarang}</div>
+                                      <div className="text-[9px] sm:text-xs font-bold text-primary font-black uppercase mt-1 tracking-widest truncate">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
-                                    <td className="px-4 py-3">
-                                      <span className="px-2 py-0.5 bg-secondary/50 rounded-lg font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 text-xs font-medium block mb-1 w-fit">
+                                    <td className="px-2 sm:px-4 py-3">
+                                      <span className="px-1.5 py-0.5 bg-secondary/50 rounded text-[8px] sm:text-xs font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 font-medium block mb-1 w-fit">
                                         {tx.sumber.replace('_', ' ')}
                                       </span>
-                                      <div className="text-xs font-bold text-foreground">
+                                      <div className="text-[9px] sm:text-xs font-bold text-foreground truncate">
                                         {tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}
                                       </div>
                                     </td>
-                                    <td className="px-4 py-3 text-right font-black text-emerald-500/80 text-xs">{formatRupiah(tx.nilai)}</td>
-                                    <td className="px-4 py-3 text-center">
+                                    <td className="px-2 sm:px-4 py-3 text-right font-black text-emerald-500/80 text-[10px] sm:text-xs whitespace-nowrap">{formatRupiah(tx.nilai)}</td>
+                                    <td className="px-2 sm:px-4 py-3 text-center">
                                       {canEdit && (
                                         <button
                                           onClick={() => {
