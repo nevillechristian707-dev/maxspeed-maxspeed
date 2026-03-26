@@ -8,23 +8,19 @@ function n(val: unknown): number {
   return parseFloat(String(val ?? "0")) || 0;
 }
 
+// Alias to avoid any name collision
+const tbTable = transaksiBank;
+
 router.get("/summary", async (req, res) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { startDate, endDate } = req.query;
-    
-    // Core logic: 
-    // - For Cash/Bank: Use 'tanggal'.
-    // - For Online Shop/Kredit: Total Penjualan only counts if 'tanggalCair' is in period.
-    // - Outstanding stats: Items sold 'tanggal' <= endDate AND (pending/partial).
 
     const s = String(startDate || "0000-01-01");
     const e = String(endDate || "9999-12-31");
 
-    // We fetch all relevant items: 
-    // 1. Sold in period (regardless of status, for "total activity" or "pending" detection)
-    // 2. Liquidated in period (regardless of when sold, for "Total Penjualan" recap)
+    // Fetch items sold or settled in this period
     const pRows = await db.select({
       id: penjualanTable.id,
       tanggal: penjualanTable.tanggal,
@@ -34,13 +30,15 @@ router.get("/summary", async (req, res) => {
       paymentMethod: penjualanTable.paymentMethod,
       statusCair: penjualanTable.statusCair,
       tanggalCair: penjualanTable.tanggalCair,
-      totalPaidInRange: sql<string>`(select coalesce(sum(${transaksiBank.nilai}), 0) from ${transaksiBank} where ${transaksiBank.penjualanId} = ${penjualanTable.id} and ${transaksiBank.tanggalCair} >= ${s} and ${transaksiBank.tanggalCair} <= ${e})`,
-      totalPaidAllTime: sql<string>`(select coalesce(sum(${transaksiBank.nilai}), 0) from ${transaksiBank} where ${transaksiBank.penjualanId} = ${penjualanTable.id})`
+      totalPaidInRange: sql<string>`coalesce(sum(case when ${tbTable.tanggalCair} >= ${s} and ${tbTable.tanggalCair} <= ${e} then ${tbTable.nilai} else 0 end), 0)`,
+      totalPaidAllTime: sql<string>`coalesce(sum(${tbTable.nilai}), 0)`
     }).from(penjualanTable)
+    .leftJoin(tbTable, eq(penjualanTable.id, tbTable.penjualanId))
     .where(or(
       and(gte(penjualanTable.tanggal, s), lte(penjualanTable.tanggal, e)),
       and(gte(penjualanTable.tanggalCair, s), lte(penjualanTable.tanggalCair, e))
-    ));
+    ))
+    .groupBy(penjualanTable.id);
 
     let totalPenjualan = 0;
     let totalModal = 0;
@@ -49,15 +47,12 @@ router.get("/summary", async (req, res) => {
     let bankTotal = 0;
     let onlineShopTotal = 0;
     let kreditTotal = 0;
-    let onlineShopBelumCair = 0;
-    let kreditBelumCair = 0;
 
     pRows.forEach((row: any) => {
       const val = n(row.total);
       const modalVal = n(row.hargaBeli) * n(row.qty);
       const isCashOrBank = row.paymentMethod === 'cash' || row.paymentMethod === 'bank';
-      
-      // 1. Total Penjualan Recap (Hanya yang cair/masuk di bulan ini)
+
       if (isCashOrBank) {
         if (row.tanggal >= s && row.tanggal <= e) {
           totalPenjualan += val;
@@ -67,12 +62,9 @@ router.get("/summary", async (req, res) => {
           if (row.paymentMethod === 'bank') bankTotal += val;
         }
       } else {
-        // Online Shop / Kredit: Only count the amount LIQUIDATED in this period
         const paidInPeriod = n(row.totalPaidInRange);
         if (paidInPeriod > 0) {
           totalPenjualan += paidInPeriod;
-          // For modal, we approximate: if it's fully liquidated in this period, count full modal
-          // Or if it's the first payment? Let's keep it simple: if it's finalized (cair) in this range, count modal.
           if (row.statusCair === 'cair' && row.tanggalCair && row.tanggalCair >= s && row.tanggalCair <= e) {
              totalModal += modalVal;
           }
@@ -80,17 +72,34 @@ router.get("/summary", async (req, res) => {
           if (row.paymentMethod === 'kredit') kreditTotal += paidInPeriod;
         }
       }
-
-      // 2. Belum Cair Recap (Outstanding as of end of period)
-      // Any item sold up to 'e' that is not yet fully paid
-      if (!isCashOrBank && row.tanggal <= e) {
-        const remaining = val - n(row.totalPaidAllTime);
-        if (remaining > 0) {
-          if (row.paymentMethod === 'online_shop') onlineShopBelumCair += remaining;
-          if (row.paymentMethod === 'kredit') kreditBelumCair += remaining;
-        }
-      }
     });
+
+    // Use raw SQL to avoid ORM table resolution issues
+    const pendingResult = await db.execute(sql`
+      SELECT p.payment_method, 
+             SUM(p.total::numeric - COALESCE(tb_sum.total_paid, 0)) as remaining
+      FROM penjualan p
+      LEFT JOIN (
+        SELECT penjualan_id, SUM(nilai::numeric) as total_paid 
+        FROM transaksi_bank 
+        GROUP BY penjualan_id
+      ) tb_sum ON p.id = tb_sum.penjualan_id
+      WHERE p.tanggal <= ${e}
+        AND p.status_cair IN ('pending', 'partial')
+        AND p.payment_method IN ('online_shop', 'kredit')
+        AND (p.total::numeric - COALESCE(tb_sum.total_paid, 0)) > 0
+      GROUP BY p.payment_method
+    `);
+
+    let onlineShopBelumCair = 0;
+    let kreditBelumCair = 0;
+    if (pendingResult && pendingResult.rows) {
+      pendingResult.rows.forEach((row: any) => {
+        if (row.payment_method === 'online_shop') onlineShopBelumCair = n(row.remaining);
+        if (row.payment_method === 'kredit') kreditBelumCair = n(row.remaining);
+      });
+    }
+
 
     const bConds: any[] = [];
     if (startDate) bConds.push(gte(biayaTable.tanggal, String(startDate)));
@@ -134,7 +143,6 @@ router.get("/chart", async (req, res) => {
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { startDate, endDate } = req.query;
-    // We want to show TOTAL sales by 'tanggal' (date sold), irrespective of payment status.
     const conds = [];
     if (startDate) conds.push(gte(penjualanTable.tanggal, String(startDate)));
     if (endDate) conds.push(lte(penjualanTable.tanggal, String(endDate)));

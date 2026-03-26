@@ -1,0 +1,226 @@
+[
+  {
+    "id": 18,
+    "tanggal": "2026-03-02",
+    "total": 164032,
+    "paid": 0,
+    "remaining": 164032,
+    "status": "pending"
+  },
+  {
+    "id": 58,
+    "tanggal": "2026-03-07",
+    "total": 89000,
+    "paid": 0,
+    "remaining": 89000,
+    "status": "pending"
+  },
+  {
+    "id": 60,
+    "tanggal": "2026-03-09",
+    "total": 93580,
+    "paid": 0,
+    "remaining": 93580,
+    "status": "pending"
+  },
+  {
+    "id": 71,
+    "tanggal": "2026-03-10",
+    "total": 297000,
+    "paid": 0,
+    "remaining": 297000,
+    "status": "pending"
+  },
+  {
+    "id": 72,
+    "tanggal": "2026-03-10",
+    "total": 34000,
+    "paid": 0,
+    "remaining": 34000,
+    "status": "pending"
+  },
+  {
+    "id": 82,
+    "tanggal": "2026-03-11",
+    "total": 1651735,
+    "paid": 0,
+    "remaining": 1651735,
+    "status": "pending"
+  },
+  {
+    "id": 94,
+    "tanggal": "2026-03-12",
+    "total": 88850,
+    "paid": 0,
+    "remaining": 88850,
+    "status": "pending"
+  },
+  {
+    "id": 95,
+    "tanggal": "2026-03-12",
+    "total": 38688,
+    "paid": 0,
+    "remaining": 38688,
+    "status": "pending"
+  },
+  {
+    "id": 96,
+    "tanggal": "2026-03-12",
+    "total": 137471,
+    "paid": 0,
+    "remaining": 137471,
+    "status": "pending"
+  },
+  {
+    "id": 117,
+    "tanggal": "2026-03-16",
+    "total": 120557,
+    "paid": 0,
+    "remaining": 120557,
+    "status": "pending"
+  },
+  {
+    "id": 118,
+    "tanggal": "2026-03-16",
+    "total": 276700,
+    "paid": 0,
+    "remaining": 276700,
+    "status": "pending"
+  },
+  {
+    "id": 116,
+    "tanggal": "2026-03-16",
+    "total": 20005,
+    "paid": 0,
+    "remaining": 20005,
+    "status": "pending"
+  },
+  {
+    "id": 119,
+    "tanggal": "2026-03-16",
+    "total": 25237,
+    "paid": 0,
+    "remaining": 25237,
+    "status": "pending"
+  },
+  {
+    "id": 120,
+    "tanggal": "2026-03-16",
+    "total": 53522,
+    "paid": 0,
+    "remaining": 53522,
+    "status": "pending"
+  },
+  {
+    "id": 121,
+    "tanggal": "2026-03-16",
+    "total": 103390,
+    "paid": 0,
+    "remaining": 103390,
+    "status": "pending"
+  },
+  {
+    "id": 128,
+    "tanggal": "2026-03-16",
+    "total": 90403,
+    "paid": 0,
+    "remaining": 90403,
+    "status": "pending"
+  },
+  {
+    "id": 129,
+    "tanggal": "2026-03-16",
+    "total": 193654,
+    "paid": 0,
+    "remaining": 193654,
+    "status": "pending"
+  },
+  {
+    "id": 130,
+    "tanggal": "2026-03-16",
+    "total": 122845,
+    "paid": 0,
+    "remaining": 122845,
+    "status": "pending"
+  },
+  {
+    "id": 131,
+    "tanggal": "2026-03-16",
+    "total": 130965,
+    "paid": 0,
+    "remaining": 130965,
+    "status": "pending"
+  },
+  {
+    "id": 132,
+    "tanggal": "2026-03-16",
+    "total": 91944,
+    "paid": 0,
+    "remaining": 91944,
+    "status": "pending"
+  },
+  {
+    "id": 188,
+    "tanggal": "2026-03-17",
+    "total": 130965,
+    "paid": 0,
+    "remaining": 130965,
+    "status": "pending"
+  },
+  {
+    "id": 189,
+    "tanggal": "2026-03-17",
+    "total": 91944,
+    "paid": 0,
+    "remaining": 91944,
+    "status": "pending"
+  },
+  {
+    "id": 191,
+    "tanggal": "2026-03-18",
+    "total": 260350,
+    "paid": 0,
+    "remaining": 260350,
+    "status": "pending"
+  },
+  {
+    "id": 114,
+    "tanggal": "2026-03-16",
+    "total": 185428,
+    "paid": 0,
+    "remaining": 185428,
+    "status": "pending"
+  },
+  {
+    "id": 192,
+    "tanggal": "2026-03-18",
+    "total": 22048,
+    "paid": 0,
+    "remaining": 22048,
+    "status": "pending"
+  },
+  {
+    "id": 193,
+    "tanggal": "2026-03-18",
+    "total": 41000,
+    "paid": 0,
+    "remaining": 41000,
+    "status": "pending"
+  },
+  {
+    "id": 187,
+    "tanggal": "2026-03-17",
+    "total": 122845,
+    "paid": 0,
+    "remaining": 122845,
+    "status": "pending"
+  },
+  {
+    "id": 194,
+    "tanggal": "2026-03-18",
+    "total": 101755,
+    "paid": 0,
+    "remaining": 101755,
+    "status": "pending"
+  }
+]

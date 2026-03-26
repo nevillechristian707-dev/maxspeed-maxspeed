@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useListPencairan, useMarkSettled, useListMasterBank, useListTransaksiBank, useDeletePenjualan, useGetMe } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
+import { CetakPencairanModal } from "@/components/cetak-pencairan-modal";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard, Calendar } from "lucide-react";
+import { Wallet, CheckCircle, Search, Hash, Building2, Landmark, History, PlusCircle, XCircle, Store, CreditCard, Calendar, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -92,6 +93,7 @@ export default function Pencairan() {
   const [itemToSettle, setItemToSettle] = useState<number | null>(null);
   const [isBulkSettle, setIsBulkSettle] = useState(false);
   const [nilaiPembayaran, setNilaiPembayaran] = useState<string>("");
+  const [isCetakModalOpen, setIsCetakModalOpen] = useState(false);
 
   const selectedBankInfo = useMemo(() => {
     return banks?.find(b => b.id.toString() === selectedBankId);
@@ -252,6 +254,14 @@ export default function Pencairan() {
     }, 0);
   }, [markedIds, allKreditItems]);
 
+  const totalAllOnlineShop = useMemo(() => {
+    return onlineShopPending.reduce((sum, item) => sum + (item.nilai || 0), 0);
+  }, [onlineShopPending]);
+
+  const totalAllKredit = useMemo(() => {
+    return kreditPending.reduce((sum, item) => sum + (item.nilai || 0), 0);
+  }, [kreditPending]);
+
   const bankSummaries = useMemo(() => {
     if (!bankTransactions) return [];
     
@@ -273,24 +283,26 @@ export default function Pencairan() {
     }
 
     // Group by Date first
-    const dailyGroups: Record<string, { date: string; banks: Record<string, any>; total: number }> = {};
+    const dailyGroups: Record<string, { date: string; kodePencairan: string | null; banks: Record<string, any>; total: number }> = {};
     
     filteredTransactions.forEach(tx => {
       const dateKey = tx.tanggalCair || "Unknown";
-      if (!dailyGroups[dateKey]) {
-        dailyGroups[dateKey] = { date: dateKey, banks: {}, total: 0 };
+      const groupKey = `${dateKey}_${tx.kodePencairan || "manual"}`;
+      
+      if (!dailyGroups[groupKey]) {
+        dailyGroups[groupKey] = { date: dateKey, kodePencairan: tx.kodePencairan || null, banks: {}, total: 0 };
       }
       
       const bankKey = `${tx.namaBank}-${tx.rekeningBank}`;
-      if (!dailyGroups[dateKey].banks[bankKey]) {
-        dailyGroups[dateKey].banks[bankKey] = { bank: tx.namaBank, account: tx.rekeningBank, total: 0, count: 0, items: [] };
+      if (!dailyGroups[groupKey].banks[bankKey]) {
+        dailyGroups[groupKey].banks[bankKey] = { bank: tx.namaBank, account: tx.rekeningBank, total: 0, count: 0, items: [] };
       }
       
       const amount = Number(tx.nilai);
-      dailyGroups[dateKey].banks[bankKey].total += amount;
-      dailyGroups[dateKey].banks[bankKey].count += 1;
-      dailyGroups[dateKey].banks[bankKey].items.push(tx);
-      dailyGroups[dateKey].total += amount;
+      dailyGroups[groupKey].banks[bankKey].total += amount;
+      dailyGroups[groupKey].banks[bankKey].count += 1;
+      dailyGroups[groupKey].banks[bankKey].items.push(tx);
+      dailyGroups[groupKey].total += amount;
     });
 
     return Object.values(dailyGroups)
@@ -316,21 +328,43 @@ export default function Pencairan() {
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-2xl border border-border/50">
-             <span className="text-xs font-black text-muted-foreground uppercase tracking-widest px-2">Periode Aktif:</span>
-             <span className="text-sm font-black text-primary uppercase">{periodLabel}</span>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsCetakModalOpen(true)}
+              className="gap-2 border-indigo-500/30 text-indigo-600 hover:bg-indigo-500/10 font-bold"
+            >
+              <Printer className="w-4 h-4" />
+              Cetak Laporan
+            </Button>
+            <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-2xl border border-border/50">
+               <span className="text-xs font-black text-muted-foreground uppercase tracking-widest px-2">Periode Aktif:</span>
+               <span className="text-sm font-black text-primary uppercase">{periodLabel}</span>
+            </div>
           </div>
         </div>
+
+      <CetakPencairanModal 
+        open={isCetakModalOpen} 
+        onOpenChange={setIsCetakModalOpen}
+        dateParams={dateParams}
+      />
 
       <div className="grid grid-cols-1 gap-8">
         {/* Online Shop Section */}
         <Card className="border-purple-500/20 shadow-lg shadow-purple-500/5">
           <CardHeader className="border-b border-border/50 flex flex-col xl:flex-row xl:items-center justify-between gap-4 py-4">
             <div className="flex flex-col gap-1">
-              <CardTitle className="text-purple-400 flex items-center gap-2 uppercase tracking-tighter decoration-purple-500/30 underline-offset-4 underline">
-                <Store className="w-5 h-5 text-purple-500" /> Piutang Online Shop
+              <CardTitle className="text-purple-400 flex items-center gap-3 uppercase tracking-tighter decoration-purple-500/30 underline-offset-4 underline">
+                <Store className="w-5 h-5 text-purple-500" /> 
+                <span>Piutang Online Shop</span>
+                {totalAllOnlineShop > 0 && (
+                  <span className="ml-3 px-3 py-1 bg-purple-500/20 border border-purple-500/40 rounded-full text-sm font-black text-purple-300 no-underline tracking-normal shadow-lg shadow-purple-500/10">
+                    {formatRupiah(totalAllOnlineShop)}
+                  </span>
+                )}
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Dana marketplace belum cair</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-8">Dana marketplace belum cair</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
               <div className="relative w-full sm:w-64">
@@ -516,10 +550,16 @@ export default function Pencairan() {
         <Card className="border-orange-500/20 shadow-lg shadow-orange-500/5">
           <CardHeader className="border-b border-border/50 flex flex-col xl:flex-row xl:items-center justify-between gap-4 py-4">
             <div className="flex flex-col gap-1">
-              <CardTitle className="text-orange-400 flex items-center gap-2 uppercase tracking-tighter decoration-orange-500/30 underline-offset-4 underline">
-                <CreditCard className="w-5 h-5 text-orange-500" /> Piutang Penjualan Kredit
+              <CardTitle className="text-orange-400 flex items-center gap-3 uppercase tracking-tighter decoration-orange-500/30 underline-offset-4 underline">
+                <CreditCard className="w-5 h-5 text-orange-500" /> 
+                <span>Piutang Penjualan Kredit</span>
+                {totalAllKredit > 0 && (
+                  <span className="ml-3 px-3 py-1 bg-orange-500/20 border border-orange-500/40 rounded-full text-sm font-black text-orange-300 no-underline tracking-normal shadow-lg shadow-orange-500/10">
+                    {formatRupiah(totalAllKredit)}
+                  </span>
+                )}
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Tagihan jatuh tempo customer</p>
+              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-8">Tagihan jatuh tempo customer</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
               <div className="relative w-full sm:w-64">
@@ -721,8 +761,15 @@ export default function Pencairan() {
                           <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center shadow-inner">
                             <Calendar className="w-5 h-5 text-indigo-400" />
                           </div>
-                          <div>
-                            <span className="text-sm font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-black uppercase tracking-[0.2em] text-indigo-100">{formatDate(dayGroup.date)}</span>
+                              {dayGroup.kodePencairan && (
+                                <span className="px-3 py-1 rounded-lg bg-indigo-500/40 border-2 border-indigo-400/60 text-2xl font-black font-mono text-white shadow-lg shadow-indigo-500/20">
+                                  {dayGroup.kodePencairan}
+                                </span>
+                              )}
+                            </div>
                             <div className="text-xs font-bold text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter">Riwayat Pencairan Harian</div>
                           </div>
                        </div>
@@ -771,7 +818,7 @@ export default function Pencairan() {
                                     <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground font-bold">
                                       {formatDate(tx.tanggal)}
                                     </td>
-                                    <td className="px-6 py-3">
+                                      <td className="px-6 py-3">
                                       <span className="font-bold text-foreground text-xs">{tx.noFaktur || "-"}</span>
                                       <div className="text-xs font-bold text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
                                     </td>

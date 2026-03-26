@@ -27,11 +27,12 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (err: any) {
-    console.error(err);
+    console.error("Login Error:", err);
     return res.status(500).json({ 
       error: "Internal Server Error", 
       message: "Login failed",
-      detail: err.message 
+      detail: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined
     });
   }
 });

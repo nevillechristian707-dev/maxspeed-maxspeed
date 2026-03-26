@@ -190,8 +190,10 @@ export interface PencairanItem {
   namaCustomer?: string | null;
   nilai: number;
   totalPaid: number;
+  totalAmount: number;
   status: PencairanItemStatus;
   tanggalCair?: string | null;
+  kodePencairan?: string | null;
 }
 
 export interface MarkSettledRequest {
@@ -199,10 +201,12 @@ export interface MarkSettledRequest {
   namaBank: string;
   rekeningBank: string;
   nilai: number;
+  kodePencairan?: string;
 }
 
 export interface TransaksiBank {
   id: number;
+  kodePencairan?: string | null;
   tanggalCair: string;
   noFaktur?: string | null;
   nilai: number;
@@ -210,6 +214,22 @@ export interface TransaksiBank {
   namaBank: string;
   rekeningBank: string;
   penjualanId: number;
+  namaBarang?: string;
+  kodeBarang?: string;
+  brand?: string;
+  kodeTransaksi?: string;
+  namaOnlineShop?: string | null;
+  namaCustomer?: string | null;
+  tanggal?: string;
+}
+
+export interface KodePencairanSummary {
+  kodePencairan: string;
+  tanggalCair: string;
+  totalNilai: number;
+  jumlahItem: number;
+  namaBank: string;
+  rekeningBank: string;
 }
 
 export interface CreateBiayaRequest {
@@ -354,6 +374,7 @@ export type ListPencairanParams = {
 export type ListTransaksiBankParams = {
   startDate?: string;
   endDate?: string;
+  kodePencairan?: string;
 };
 
 export type ListBiayaParams = {

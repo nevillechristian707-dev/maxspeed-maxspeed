@@ -62,9 +62,9 @@ const sessionConfig: any = {
   proxy: true,
   name: "maxspeed.sid",
   cookie: {
-    secure: true, // Always true for Railway/Vercel HTTPS
+    secure: process.env.NODE_ENV === "production", // Only true for production HTTPS
     httpOnly: true,
-    sameSite: "none" as const, // Required for cross-domain cookies
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Lax for localhost
     maxAge: 24 * 60 * 60 * 1000,
   },
 };

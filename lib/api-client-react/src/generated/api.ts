@@ -41,6 +41,7 @@ import type {
   ListPencairanParams,
   ListPenjualanParams,
   ListTransaksiBankParams,
+  KodePencairanSummary,
   LoginRequest,
   LoginResponse,
   MarkSettledRequest,
@@ -1846,6 +1847,103 @@ export function useListTransaksiBank<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List distinct kode pencairan
+ */
+export const getListKodePencairanUrl = (params?: { startDate?: string; endDate?: string }) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/pencairan/kode-pencairan-list?${stringifiedParams}`
+    : `/api/pencairan/kode-pencairan-list`;
+};
+
+export const listKodePencairan = async (
+  params?: { startDate?: string; endDate?: string },
+  options?: RequestInit,
+): Promise<KodePencairanSummary[]> => {
+  return customFetch<KodePencairanSummary[]>(getListKodePencairanUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListKodePencairanQueryKey = (
+  params?: { startDate?: string; endDate?: string },
+) => {
+  return [
+    `/api/pencairan/kode-pencairan-list`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getListKodePencairanQueryOptions = <
+  TData = Awaited<ReturnType<typeof listKodePencairan>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: { startDate?: string; endDate?: string },
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listKodePencairan>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListKodePencairanQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listKodePencairan>>
+  > = ({ signal }) => listKodePencairan(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listKodePencairan>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListKodePencairanQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listKodePencairan>>
+>;
+export type ListKodePencairanQueryError = ErrorType<unknown>;
+
+export function useListKodePencairan<
+  TData = Awaited<ReturnType<typeof listKodePencairan>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: { startDate?: string; endDate?: string },
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listKodePencairan>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListKodePencairanQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 
 /**
  * @summary Mark transaction as settled and record to bank

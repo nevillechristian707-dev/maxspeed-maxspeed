@@ -12,6 +12,8 @@ import { useMonthYear } from "@/context/month-year-context";
 import { useState, useMemo, useEffect, useRef } from "react";
 
 export default function Laporan() {
+  const n = (val: any) => parseFloat(String(val || "0")) || 0;
+
   const formatDateIndo = (d: string) => {
     if (!d) return "-";
     const date = new Date(d);
@@ -51,12 +53,21 @@ export default function Laporan() {
   })();
 
   const salesByCategory = useMemo(() => {
-    if (!allSales) return { cash: [], bank: [], online_shop: [], kredit: [] };
+    if (!allSales) return { 
+      cash: [], 
+      bank: [], 
+      online_shop_pending: [], 
+      online_shop_lunas: [],
+      kredit_pending: [],
+      kredit_lunas: []
+    };
     return {
       cash: allSales.filter(s => s.paymentMethod === 'cash'),
       bank: allSales.filter(s => s.paymentMethod === 'bank'),
-      online_shop: allSales.filter(s => s.paymentMethod === 'online_shop'),
-      kredit: allSales.filter(s => s.paymentMethod === 'kredit'),
+      online_shop_pending: allSales.filter(s => s.paymentMethod === 'online_shop' && s.statusCair !== 'cair'),
+      online_shop_lunas: allSales.filter(s => s.paymentMethod === 'online_shop' && s.statusCair === 'cair'),
+      kredit_pending: allSales.filter(s => s.paymentMethod === 'kredit' && s.statusCair !== 'cair'),
+      kredit_lunas: allSales.filter(s => s.paymentMethod === 'kredit' && s.statusCair === 'cair'),
     };
   }, [allSales]);
 
@@ -148,10 +159,13 @@ export default function Laporan() {
         'Modal Total': (s.hargaBeli || 0) * (s.qty || 0),
         'Harga Jual': s.total,
         'Laba/Rugi': (s.total || 0) - ((s.hargaBeli || 0) * (s.qty || 0)),
+        'Sudah Bayar': s.totalPaid || 0,
+        'Sisa Hutang': (s.total || 0) - (s.totalPaid || 0),
         'Status': s.statusCair === 'cair' ? 'LUNAS' : 'PENDING'
       })));
       XLSX.utils.book_append_sheet(wb, wsDetails, "Rincian Transaksi");
     }
+
 
     const filename = `Laporan_MaxSpeed_${selectedMonth}_${selectedYear}.xlsx`;
     XLSX.writeFile(wb, filename);
@@ -264,8 +278,10 @@ export default function Laporan() {
     const categories = [
       { label: 'CASH (TUNAI)', data: salesByCategory.cash },
       { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
-      { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-      { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
+      { label: 'ONLINE SHOP (PENDING)', data: salesByCategory.online_shop_pending },
+      { label: 'ONLINE SHOP (LUNAS)', data: salesByCategory.online_shop_lunas },
+      { label: 'KREDIT (TEMPO) (PENDING)', data: salesByCategory.kredit_pending },
+      { label: 'KREDIT (TEMPO) (LUNAS)', data: salesByCategory.kredit_lunas }
     ];
 
     categories.forEach((cat) => {
@@ -279,36 +295,45 @@ export default function Laporan() {
         doc.setTextColor(234, 88, 12);
         doc.text(`Kategori: ${cat.label}`, 14, currentY);
         
+        const isPending = cat.label.includes('PENDING');
+        const head = isPending 
+          ? [['TGL', 'Faktur', 'Keterangan', 'Qty', 'Total', 'Bayar', 'Sisa', 'Status']]
+          : [['TGL', 'Faktur', 'Keterangan', 'Qty', 'Modal', 'Jual', 'Laba', 'Status']];
+
         const body = cat.data.map((item: any) => {
            const s = item as any;
            const m = (s.hargaBeli || 0) * (s.qty || 0);
            const j = (cat as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
+           const paid = s.totalPaid || 0;
+           const sisa = j - paid;
            const l = (cat as any).isBankTx ? 0 : (j - m);
+
            return [
             s.tanggal || s.tanggalCair,
             s.noFaktur || '-',
             cat.label.includes('KREDIT') ? `${s.namaCustomer || 'Umum'} / ${s.namaBarang}` : ((cat as any).isBankTx ? `${s.namaBank} / ${s.namaBarang}` : s.namaBarang),
             (cat as any).isBankTx ? 1 : s.qty,
-            formatRupiah(m),
-            formatRupiah(j),
-            formatRupiah(l),
+            formatRupiah(isPending ? j : m),
+            formatRupiah(isPending ? paid : j),
+            formatRupiah(isPending ? sisa : l),
             s.statusCair === 'cair' || (cat as any).isBankTx ? 'LUNAS' : 'PEND'
           ];
         });
 
-        // Add Total Row to Body
         const totalQty = cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? 1 : (s.qty || 0)), 0);
-        const totalModal = cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0);
-        const totalJual = cat.data.reduce((acc: number, s: any) => acc + ((cat as any).isBankTx ? (Number((s as any).nilai) || 0) : (s.total || 0)), 0);
-        const totalLaba = totalJual - totalModal;
+        const totalModalOrHutang = cat.data.reduce((acc: number, s: any) => acc + (isPending ? (s.total || 0) : ((s.hargaBeli || 0) * (s.qty || 0))), 0);
+        const totalJualOrBayar = cat.data.reduce((acc: number, s: any) => acc + (isPending ? (s.totalPaid || 0) : ((cat as any).isBankTx ? (Number((s as any).nilai) || 0) : (s.total || 0))), 0);
+        const totalLabaOrSisa = isPending 
+          ? cat.data.reduce((acc: number, s: any) => acc + (n(s.total) - n(s.totalPaid)), 0)
+          : (totalJualOrBayar - totalModalOrHutang);
 
         body.push([
-           '', 'TOTAL', '', totalQty.toString(), formatRupiah(totalModal), formatRupiah(totalJual), (cat as any).isBankTx ? '-' : formatRupiah(totalLaba), ''
+           '', 'TOTAL', '', totalQty.toString(), formatRupiah(totalModalOrHutang), formatRupiah(totalJualOrBayar), isPending ? formatRupiah(totalLabaOrSisa) : ((cat as any).isBankTx ? '-' : formatRupiah(totalLabaOrSisa)), ''
         ]);
         
         autoTable(doc, {
           startY: currentY + 3,
-          head: [['TGL', 'Faktur', 'Keterangan / Produk', 'Qty', 'Modal', 'Jual', 'Laba', 'Status']],
+          head: head,
           body: body,
           styles: { fontSize: 6.5, cellPadding: 2 },
           headStyles: { fillColor: [30, 41, 59] },
@@ -326,6 +351,7 @@ export default function Laporan() {
             }
           },
           margin: { left: 14, right: 14 },
+
           didDrawPage: (data) => {
             doc.setFontSize(8);
             doc.setTextColor(150);
@@ -650,8 +676,10 @@ export default function Laporan() {
             {[
               { id: 'cash', label: 'Penjualan Tunai / Cash', icon: DollarSign, color: 'emerald', data: salesByCategory.cash },
               { id: 'bank', label: 'Transfer Bank / Debit', icon: Landmark, color: 'blue', data: salesByCategory.bank },
-              { id: 'online_shop', label: 'Online Shop / Marketplace', icon: Store, color: 'purple', data: salesByCategory.online_shop },
-              { id: 'kredit', label: 'Penjualan Kredit / Tempo', icon: CreditCard, color: 'orange', data: salesByCategory.kredit }
+              { id: 'online_shop_pending', label: 'Online Shop (PENDING)', icon: Store, color: 'orange', data: salesByCategory.online_shop_pending },
+              { id: 'online_shop_lunas', label: 'Online Shop (LUNAS)', icon: Store, color: 'emerald', data: salesByCategory.online_shop_lunas },
+              { id: 'kredit_pending', label: 'Penjualan Kredit (PENDING)', icon: CreditCard, color: 'rose', data: salesByCategory.kredit_pending },
+              { id: 'kredit_lunas', label: 'Penjualan Kredit (LUNAS)', icon: CreditCard, color: 'emerald', data: salesByCategory.kredit_lunas }
             ].map((cat) => ( cat.data.length > 0 && 
               <Card key={cat.id} className="border-border/40 shadow-2xl overflow-hidden bg-card/40 backdrop-blur-md transition-all hover:border-primary/20 card">
                 <CardHeader className="bg-secondary/10 border-b border-border/50 py-4">
@@ -671,35 +699,43 @@ export default function Laporan() {
                         <tr>
                           <th className="px-6 py-4">Tanggal</th>
                           <th className="px-4 py-4">No. Faktur</th>
-                          <th className="px-4 py-4">{cat.id === 'kredit' ? 'Customer / Produk' : 'Nama Produk'}</th>
+                          <th className="px-4 py-4">{cat.id.startsWith('kredit') ? 'Customer / Produk' : 'Nama Produk'}</th>
                           <th className="px-4 py-4 text-center">Qty</th>
-                          <th className="px-4 py-4 text-right">Modal Pokok</th>
-                          <th className="px-4 py-4 text-right">Harga Jual</th>
-                          <th className="px-4 py-4 text-right">Margin/Laba</th>
+                          <th className="px-4 py-4 text-right">{cat.id.includes('_pending') ? 'Total Hutang' : 'Modal Pokok'}</th>
+                          <th className="px-4 py-4 text-right">{cat.id.includes('_pending') ? 'Sudah Bayar' : 'Harga Jual'}</th>
+                          <th className="px-4 py-4 text-right">{cat.id.includes('_pending') ? 'Sisa Hutang' : 'Margin/Laba'}</th>
                           <th className="px-6 py-4 text-center">Status</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/10">
                         {cat.data.map((s: any) => {
+                          const isPending = cat.id.includes('_pending');
                           const m = (s.hargaBeli || 0) * (s.qty || 0);
                           const j = (s as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
+                          const paid = s.totalPaid || 0;
+                          const sisa = j - paid;
                           const l = (s as any).isBankTx ? 0 : (j - m);
+                          // For pending: col4=Total Hutang, col5=Sudah Bayar, col6=Sisa Hutang
+                          // For others: col4=Modal, col5=Harga Jual, col6=Margin
+                          const col4 = isPending ? j : m;
+                          const col5 = isPending ? paid : j;
+                          const col6 = isPending ? sisa : l;
                           return (
                             <tr key={s.id} className="hover:bg-primary/[0.03] transition-colors group/row">
                               <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{s.tanggal || s.tanggalCair}</td>
                               <td className="px-4 py-4 font-black text-foreground tracking-tighter">{s.noFaktur || '-'}</td>
                               <td className="px-4 py-4 min-w-[200px]">
-                                {cat.id === 'kredit' && <div className="text-[10px] font-black uppercase text-orange-500 mb-0.5">{s.namaCustomer || 'Umum'}</div>}
+                                {cat.id.startsWith('kredit') && <div className="text-[10px] font-black uppercase text-orange-500 mb-0.5">{s.namaCustomer || 'Umum'}</div>}
                                 {(s as any).isBankTx && <div className="text-[10px] font-black uppercase text-emerald-600 mb-0.5">{s.namaBank} - {s.rekeningBank}</div>}
                                 <div className="font-bold text-foreground leading-snug group-hover/row:text-primary transition-colors">{s.namaBarang}</div>
                                 <div className="text-xs italic tracking-tighter text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
                               </td>
                               <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{(s as any).isBankTx ? 1 : s.qty}</td>
-                              <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(m)}</td>
-                              <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(j)}</td>
-                              <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(col4)}</td>
+                              <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(col5)}</td>
+                              <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${isPending ? (col6 > 0 ? 'text-rose-500' : 'text-emerald-500') : (col6 >= 0 ? 'text-emerald-500' : 'text-rose-500')}`}>
                                 <span className="flex items-center justify-end gap-1">
-                                  {l >= 0 ? '+' : ''}{formatRupiah(l)}
+                                  {isPending ? '' : (col6 >= 0 ? '+' : '')}{formatRupiah(col6)}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
@@ -716,14 +752,27 @@ export default function Laporan() {
                         <tr>
                           <td colSpan={3} className="px-6 py-4 text-right uppercase tracking-widest text-xs">Total {cat.label}</td>
                           <td className="px-4 py-4 text-center tabular-nums">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</td>
-                          <td className="px-4 py-4 text-right tabular-nums">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0))}</td>
-                          <td className="px-4 py-4 text-right tabular-nums text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</td>
-                          <td className="px-4 py-4 text-right tabular-nums text-emerald-500">
-                            {formatRupiah(cat.data.reduce((acc: number, s: any) => {
-                              const j = s.total || 0;
-                              const m = (s.hargaBeli || 0) * (s.qty || 0);
-                              return acc + (j - m);
-                            }, 0))}
+                          <td className="px-4 py-4 text-right tabular-nums">
+                            {formatRupiah(cat.id.includes('_pending')
+                              ? cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0)
+                              : cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0)
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-right tabular-nums text-primary">
+                            {formatRupiah(cat.id.includes('_pending')
+                              ? cat.data.reduce((acc: number, s: any) => acc + (s.totalPaid || 0), 0)
+                              : cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0)
+                            )}
+                          </td>
+                          <td className={`px-4 py-4 text-right tabular-nums ${cat.id.includes('_pending') ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            {formatRupiah(cat.id.includes('_pending')
+                              ? cat.data.reduce((acc: number, s: any) => acc + ((s.total || 0) - (s.totalPaid || 0)), 0)
+                              : cat.data.reduce((acc: number, s: any) => {
+                                  const j = s.total || 0;
+                                  const m = (s.hargaBeli || 0) * (s.qty || 0);
+                                  return acc + (j - m);
+                                }, 0)
+                            )}
                           </td>
                           <td className="px-6 py-4"></td>
                         </tr>
@@ -731,70 +780,85 @@ export default function Laporan() {
                     </table>
                   </div>
 
-                  {/* Mobile View */}
-                  <div className="md:hidden divide-y divide-border/20 p-2">
-                    {cat.data.map((s: any) => {
-                      const m = (s.hargaBeli || 0) * (s.qty || 0);
-                      const j = s.total || 0;
-                      const l = j - m;
-                      return (
-                        <div key={s.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-3">
-                          <div className="flex justify-between items-start">
-                             <div>
-                               <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{s.tanggal}</div>
-                               <div className="text-sm font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
-                             </div>
-                             <span className={`px-2 py-0.5 rounded text-xs font-bold leading-none font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
-                                {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
-                             </span>
-                          </div>
-                          <div className="space-y-1">
-                             {cat.id === 'kredit' && <div className="text-[10px] font-black uppercase text-orange-500">{s.namaCustomer || 'Umum'}</div>}
-                             <div className="text-sm font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
-                          </div>
-                          <div className="flex justify-between items-end pt-1">
-                             <div className="space-y-1">
-                               <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {s.qty} • Jual: {formatRupiah(j)}</div>
-                               <div className="text-xs italic tracking-tighter text-muted-foreground italic">Modal: {formatRupiah(m)}</div>
-                             </div>
-                             <div className="text-right">
-                               <div className="text-xs italic tracking-tighter uppercase font-black text-muted-foreground tracking-tighter">Profit</div>
-                               <div className={`text-sm font-black ${l >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{(l >= 0) ? '+' : ''}{formatRupiah(l)}</div>
-                             </div>
-                          </div>
+                   {/* Mobile View */}
+                   <div className="md:hidden divide-y divide-border/20 p-2">
+                     {cat.data.map((s: any) => {
+                       const isPending = cat.id.includes('_pending');
+                       const m = (s.hargaBeli || 0) * (s.qty || 0);
+                       const j = (s as any).isBankTx ? (Number(s.nilai) || 0) : (s.total || 0);
+                       const paid = s.totalPaid || 0;
+                       const sisa = j - paid;
+                       const l = (s as any).isBankTx ? 0 : (j - m);
+
+                       return (
+                         <div key={s.id} className="p-4 bg-card/60 my-2 rounded-xl border border-border/20 space-y-3">
+                           <div className="flex justify-between items-start">
+                              <div>
+                                <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{s.tanggal || s.tanggalCair}</div>
+                                <div className="text-sm font-black text-foreground mt-0.5">{s.noFaktur || '-'}</div>
+                              </div>
+                              <span className={`px-2 py-0.5 rounded text-xs font-bold leading-none font-black uppercase tracking-widest border ${s.statusCair === 'cair' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                                 {s.statusCair === 'cair' ? 'Lunas' : 'Pending'}
+                              </span>
+                           </div>
+                           <div className="space-y-1">
+                              {cat.id.startsWith('kredit') && <div className="text-[10px] font-black uppercase text-orange-500">{s.namaCustomer || 'Umum'}</div>}
+                              <div className="text-sm font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
+                           </div>
+                           <div className="flex justify-between items-end pt-1">
+                              <div className="space-y-1">
+                                <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {s.qty} • {isPending ? 'Total' : 'Jual'}: {formatRupiah(j)}</div>
+                                <div className="text-xs italic tracking-tighter text-muted-foreground italic">{isPending ? `Bayar: ${formatRupiah(paid)}` : `Modal: ${formatRupiah(m)}`}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs italic tracking-tighter uppercase font-black text-muted-foreground tracking-tighter">{isPending ? 'Sisa' : 'Profit'}</div>
+                                <div className={`text-sm font-black ${isPending ? (sisa > 0 ? 'text-rose-500' : 'text-emerald-500') : (l >= 0 ? 'text-emerald-500' : 'text-rose-500')}`}>
+                                  {isPending ? '' : (l >= 0 ? '+' : '')}{formatRupiah(isPending ? sisa : l)}
+                                </div>
+                              </div>
+                           </div>
+                         </div>
+                       );
+                     })}
+                     
+                     {/* Mobile Grand Total card */}
+                     <div className="mt-4 p-4 bg-secondary/30 rounded-2xl border-2 border-dashed border-border/50">
+                        <div className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">Ringkasan {cat.label}</div>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="flex flex-col">
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Qty</span>
+                              <span className="font-black">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</span>
+                           </div>
+                           <div className="flex flex-col items-end">
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Hutang' : 'Total Jual'}</span>
+                              <span className="font-black text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</span>
+                           </div>
+                           <div className="flex flex-col">
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Bayar' : 'Total Modal'}</span>
+                              <span className="font-black">
+                                {formatRupiah(cat.id.includes('_pending')
+                                  ? cat.data.reduce((acc: number, s: any) => acc + (s.totalPaid || 0), 0)
+                                  : cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0)
+                                )}
+                              </span>
+                           </div>
+                           <div className="flex flex-col items-end">
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Sisa' : 'Total Profit'}</span>
+                              <span className={`font-black ${cat.id.includes('_pending') ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                {formatRupiah(cat.id.includes('_pending')
+                                  ? cat.data.reduce((acc: number, s: any) => acc + ((s.total || 0) - (s.totalPaid || 0)), 0)
+                                  : cat.data.reduce((acc: number, s: any) => {
+                                      const jj = s.total || 0;
+                                      const mm = (s.hargaBeli || 0) * (s.qty || 0);
+                                      return acc + (jj - mm);
+                                    }, 0)
+                                )}
+                              </span>
+                           </div>
                         </div>
-                      );
-                    })}
-                    
-                    {/* Mobile Grand Total card */}
-                    <div className="mt-4 p-4 bg-secondary/30 rounded-2xl border-2 border-dashed border-border/50">
-                       <div className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">Ringkasan {cat.label}</div>
-                       <div className="grid grid-cols-2 gap-4">
-                          <div className="flex flex-col">
-                             <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Qty</span>
-                             <span className="font-black">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                             <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Jual</span>
-                             <span className="font-black text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</span>
-                          </div>
-                          <div className="flex flex-col">
-                             <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Modal</span>
-                             <span className="font-black">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + ((s.hargaBeli || 0) * (s.qty || 0)), 0))}</span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                             <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Profit</span>
-                             <span className="font-black text-emerald-500">
-                                {formatRupiah(cat.data.reduce((acc: number, s: any) => {
-                                  const jj = s.total || 0;
-                                  const mm = (s.hargaBeli || 0) * (s.qty || 0);
-                                  return acc + (jj - mm);
-                                }, 0))}
-                             </span>
-                          </div>
-                       </div>
-                    </div>
-                  </div>
+                     </div>
+                   </div>
+
                 </CardContent>
               </Card>
             ))}

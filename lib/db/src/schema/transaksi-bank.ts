@@ -2,6 +2,7 @@ import { pgTable, serial, varchar, date, numeric, integer, index } from "drizzle
 
 export const transaksiBank = pgTable("transaksi_bank", {
   id: serial("id").primaryKey(),
+  kodePencairan: varchar("kode_pencairan", { length: 50 }),
   tanggalCair: date("tanggal_cair").notNull(),
   noFaktur: varchar("no_faktur", { length: 255 }),
   nilai: numeric("nilai", { precision: 20, scale: 2 }).notNull(),
@@ -13,5 +14,7 @@ export const transaksiBank = pgTable("transaksi_bank", {
   return [
     index("idx_transaksi_bank_penjualan_id").on(table.penjualanId),
     index("idx_transaksi_bank_tanggal_cair").on(table.tanggalCair),
+    index("idx_transaksi_bank_kode_pencairan").on(table.kodePencairan),
   ];
 });
+
