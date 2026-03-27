@@ -134,11 +134,15 @@ router.post("/", async (req, res) => {
     
             const isUniqueViolation = 
               errCode === '23505' || 
+              err?.cause?.code === '23505' ||
               errStr.toLowerCase().includes('unique') ||
               errStr.toLowerCase().includes('duplicate') ||
               errDetail.toLowerCase().includes('exists') ||
               errStack.toLowerCase().includes('unique') ||
-              errStack.toLowerCase().includes('duplicate');
+              errStack.toLowerCase().includes('duplicate') ||
+              // Check for PG primary key or unique index names which are usually in the message
+              errStr.includes('_unique') ||
+              errStr.includes('_pkey');
             
             if (isUniqueViolation) {
               retryCount++;
@@ -147,6 +151,7 @@ router.post("/", async (req, res) => {
               await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
+            console.error("[CRITICAL-SAVE-ERROR] Full Error Keys:", Object.keys(err));
             throw err;
           }
         }
@@ -158,10 +163,14 @@ router.post("/", async (req, res) => {
         return res.status(201).json(toDto(insertedRows[0]));
     } catch (err: any) {
         console.error("POST /api/penjualan error:", err);
+        const originalMessage = err.message || "No message";
+        const detailMessage = err.detail || "";
+        const errorCode = err.code || "unknown";
+        
         return res.status(500).json({ 
           error: "Internal Server Error", 
-          message: `[V4-FAILED] ${err.message}`, 
-          detail: err.detail || `Diag-V4: Code=${err.code}, Const=${err.constraint}, Tried=${retryCount}, FullMsg=${String(err.message).substring(0, 50)}`
+          message: `[V4-FAILED] ${originalMessage}`, 
+          detail: `Diag-V4-DEBUG: Code=${errorCode}, Detail=${detailMessage}, Msg=${originalMessage}`
         });
     }
 });
