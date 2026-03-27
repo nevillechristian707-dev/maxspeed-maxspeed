@@ -80,46 +80,69 @@ router.post("/", async (req, res) => {
     const hargaBeli = parseFloat(String(b.hargaBeli));
     const totalModal = hargaBeli * qtyNum;
 
-    const maxNomorResult = await db.select({ maxNomor: sql<number>`max(${penjualanTable.nomor})` })
-      .from(penjualanTable)
-      .where(eq(penjualanTable.tanggal, tanggal));
-    
-    // Fallback if no transactions yet today
-    const currentMax = Number(maxNomorResult[0]?.maxNomor || 0);
-    const dayCount = currentMax + 1;
-    
-    const dateStr = tanggal.replace(/-/g, "");
-    const nomor = dayCount;
-    const kodeTransaksi = `TRX-${dateStr}-${String(nomor).padStart(3, "0")}`;
+    let insertedRows: any[] = [];
+    let retryCount = 0;
+    const maxRetries = 5;
 
-    const needsCair = paymentMethod === "online_shop" || paymentMethod === "kredit";
+    while (retryCount < maxRetries) {
+      const maxNomorResult = await db.select({ maxNomor: sql<number>`max(${penjualanTable.nomor})` })
+        .from(penjualanTable)
+        .where(eq(penjualanTable.tanggal, tanggal));
+      
+      const currentMax = Number(maxNomorResult[0]?.maxNomor || 0);
+      const nomor = currentMax + 1;
+      
+      const dateStr = tanggal.replace(/-/g, "");
+      const kodeTransaksi = `TRX-${dateStr}-${String(nomor).padStart(3, "0")}`;
 
-    const inserted = await db.insert(penjualanTable).values({
-      tanggal,
-      nomor,
-      kodeTransaksi,
-      noFaktur: noFaktur || null,
-      kodeBarang,
-      namaBarang: b.namaBarang,
-      brand: b.brand,
-      harga: String(hargaNum),
-      qty: qtyNum,
-      total: String(total),
-      paymentMethod,
-      nilaiCash: paymentMethod === "cash" ? String(nilaiCash || total) : null,
-      namaBank: paymentMethod === "bank" ? (namaBank || null) : null,
-      nilaiBank: paymentMethod === "bank" ? String(nilaiBank || total) : null,
-      namaOnlineShop: paymentMethod === "online_shop" ? (namaOnlineShop || null) : null,
-      nilaiOnlineShop: paymentMethod === "online_shop" ? String(nilaiOnlineShop || total) : null,
-      namaCustomer: paymentMethod === "kredit" ? (namaCustomer || null) : null,
-      nilaiKredit: paymentMethod === "kredit" ? String(nilaiKredit || total) : null,
-      statusCair: needsCair ? "pending" : "cair",
-      tanggalCair: null,
-      hargaBeli: String(hargaBeli),
-      totalModal: String(totalModal),
-    }).returning();
+      const needsCair = paymentMethod === "online_shop" || paymentMethod === "kredit";
 
-    return res.status(201).json(toDto(inserted[0]));
+      try {
+        insertedRows = await db.insert(penjualanTable).values({
+          tanggal,
+          nomor,
+          kodeTransaksi,
+          noFaktur: noFaktur || null,
+          kodeBarang,
+          namaBarang: b.namaBarang,
+          brand: b.brand,
+          harga: String(hargaNum),
+          qty: qtyNum,
+          total: String(total),
+          paymentMethod,
+          nilaiCash: paymentMethod === "cash" ? String(nilaiCash || total) : null,
+          namaBank: paymentMethod === "bank" ? (namaBank || null) : null,
+          nilaiBank: paymentMethod === "bank" ? String(nilaiBank || total) : null,
+          namaOnlineShop: paymentMethod === "online_shop" ? (namaOnlineShop || null) : null,
+          nilaiOnlineShop: paymentMethod === "online_shop" ? String(nilaiOnlineShop || total) : null,
+          namaCustomer: paymentMethod === "kredit" ? (namaCustomer || null) : null,
+          nilaiKredit: paymentMethod === "kredit" ? String(nilaiKredit || total) : null,
+          statusCair: needsCair ? "pending" : "cair",
+          tanggalCair: null,
+          hargaBeli: String(hargaBeli),
+          totalModal: String(totalModal),
+        }).returning();
+        
+        // If we reached here, insertion was successful
+        break;
+      } catch (err: any) {
+        // If it's a unique constraint violation on kode_transaksi, retry
+        if (err.code === '23505' && (err.constraint === 'penjualan_kode_transaksi_unique' || err.message?.includes('kode_transaksi'))) {
+          retryCount++;
+          if (retryCount >= maxRetries) throw err;
+          // Wait a tiny bit to let the other transaction finish
+          await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (!insertedRows.length) {
+      throw new Error("Failed to insert record after multiple retries due to ID collision.");
+    }
+
+    return res.status(201).json(toDto(insertedRows[0]));
   } catch (err: any) {
     console.error("POST /api/penjualan error:", err);
     return res.status(500).json({ 
