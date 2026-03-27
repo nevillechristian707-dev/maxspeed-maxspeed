@@ -30,6 +30,10 @@ router.post("/", requireAdmin, async (req, res) => {
   try {
     const { name, permissions } = req.body;
     
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: "Role name is required" });
+    }
+    
     // Prevent creating duplicate roles
     const existing = await db.select().from(rolesTable).where(eq(rolesTable.name, name));
     if (existing.length) return res.status(400).json({ error: "Role already exists" });

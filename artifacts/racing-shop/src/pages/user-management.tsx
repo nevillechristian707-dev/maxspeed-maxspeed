@@ -91,7 +91,13 @@ export default function UserManagement() {
   // --- Handlers for Users ---
   const handleSaveUser = async () => {
     try {
-      if (!userForm.username || !userForm.name || !userForm.role) {
+      const trimmedForm = {
+        ...userForm,
+        username: userForm.username.trim(),
+        name: userForm.name.trim(),
+      };
+
+      if (!trimmedForm.username || !trimmedForm.name || !userForm.role) {
         toast({ title: "Validation Error", description: "Username, name, and role are required", variant: "destructive" });
         return;
       }
@@ -100,14 +106,14 @@ export default function UserManagement() {
         return;
       }
       if (editingUserId) {
-        await updateUser.mutateAsync({ id: editingUserId, data: userForm });
+        await updateUser.mutateAsync({ id: editingUserId, data: trimmedForm });
         toast({ title: "Success", description: "User updated successfully." });
       } else {
         if (!userForm.password) {
             toast({ title: "Validation Error", description: "Password is required for new users", variant: "destructive" });
             return;
         }
-        await createUser.mutateAsync({ data: userForm });
+        await createUser.mutateAsync({ data: trimmedForm });
         toast({ title: "Success", description: "User created successfully." });
       }
       setEditingUserId(null);
@@ -181,15 +187,17 @@ export default function UserManagement() {
 
   const handleSaveRole = async () => {
     try {
-      if (!roleForm.name) {
+      const trimmedName = roleForm.name.trim();
+      if (!trimmedName) {
         toast({ title: "Validation Error", description: "Role name is required", variant: "destructive" });
         return;
       }
+      const payload = { ...roleForm, name: trimmedName };
       if (editingRoleId) {
-        await updateRole.mutateAsync({ id: editingRoleId, data: roleForm });
+        await updateRole.mutateAsync({ id: editingRoleId, data: payload });
         toast({ title: "Success", description: "Role updated successfully." });
       } else {
-        await createRole.mutateAsync({ data: roleForm });
+        await createRole.mutateAsync({ data: payload });
         toast({ title: "Success", description: "Role created successfully." });
       }
       setEditingRoleId(null);
@@ -314,7 +322,16 @@ export default function UserManagement() {
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest pl-1">Nama Role</label>
-                  <input value={roleForm.name} onChange={e => setRoleForm({...roleForm, name: e.target.value})} className="w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none font-bold" placeholder="Kasir" />
+                  <input 
+                    value={roleForm.name} 
+                    onChange={e => setRoleForm(prev => ({...prev, name: e.target.value}))} 
+                    className={cn(
+                      "w-full bg-background border border-border/50 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none font-bold",
+                      !roleForm.name.trim() && "border-rose-500/30"
+                    )} 
+                    placeholder="Contoh: Kasir, Admin Toko, dll" 
+                    autoComplete="off"
+                  />
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between px-1">
