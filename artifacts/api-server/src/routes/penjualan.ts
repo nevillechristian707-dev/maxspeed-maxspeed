@@ -134,15 +134,22 @@ router.post("/", async (req, res) => {
         
         break;
       } catch (err: any) {
-        // Log collision for debugging
-        console.warn(`[Collision] Code: ${kodeTransaksi}, Retry: ${retryCount + 1}/${maxRetries}, Error: ${err.message}`);
+        // Log collision detail for debugging
+        const errType = typeof err;
+        const errMsg = err.message || String(err);
+        const errCode = err.code || "no-code";
+        const errConstraint = err.constraint || "no-constraint";
+        
+        console.warn(`[POST-COLLISION] Code: ${kodeTransaksi}, Retry: ${retryCount + 1}/${maxRetries}`);
+        console.warn(`Error Trace: Type=${errType}, Code=${errCode}, Constraint=${errConstraint}, Message=${errMsg}`);
 
         // Handle unique constraint violation (PG code 23505)
         const isUniqueViolation = 
-          err.code === '23505' || 
-          err.constraint === 'penjualan_kode_transaksi_unique' ||
-          err.message?.toLowerCase().includes('unique constraint') ||
-          err.message?.toLowerCase().includes('duplicate key');
+          errCode === '23505' || 
+          errConstraint === 'penjualan_kode_transaksi_unique' ||
+          errMsg.toLowerCase().includes('unique constraint') ||
+          errMsg.toLowerCase().includes('duplicate key') ||
+          errMsg.toLowerCase().includes('violates unique');
         
         if (isUniqueViolation) {
           retryCount++;
@@ -169,7 +176,7 @@ router.post("/", async (req, res) => {
     return res.status(500).json({ 
       error: "Internal Server Error", 
       message: err.message, 
-      detail: err.detail || err.cause?.message || "Check server logs for details" 
+      detail: err.detail || err.cause?.message || "Unique ID Collision failure - check server logs" 
     });
   }
 });
