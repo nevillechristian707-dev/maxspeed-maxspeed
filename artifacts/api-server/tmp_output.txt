@@ -1,21 +1,155 @@
-{
-  "index": "OK",
-  "sequences": [
-    {
-      "table": "penjualan",
-      "maxId": 194,
-      "seqVal": "200"
+[
+  {
+    "id": 1,
+    "name": "admin supervisor",
+    "permissions": {
+      "Biaya": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Modal": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Laporan": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Customer": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Dashboard": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Pencairan": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Penjualan": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Master Bank": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Master Barang": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Manajemen Pengguna": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ],
+      "Master Online Shop": [
+        "view",
+        "add",
+        "edit",
+        "export"
+      ]
     },
-    {
-      "table": "transaksi_bank",
-      "maxId": 231,
-      "seqVal": "231"
+    "createdAt": "2026-03-17T09:28:36.588Z"
+  },
+  {
+    "id": 2,
+    "name": "admin input",
+    "permissions": {
+      "Biaya": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Modal": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Laporan": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Customer": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Dashboard": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Pencairan": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Penjualan": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Master Bank": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Master Barang": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ],
+      "Manajemen Pengguna": [],
+      "Master Online Shop": [
+        "view",
+        "add",
+        "edit",
+        "delete",
+        "export"
+      ]
     },
-    {
-      "table": "master_barang",
-      "maxId": 3155,
-      "seqVal": "3155"
-    }
-  ],
-  "analyze": "OK"
-}
+    "createdAt": "2026-03-27T10:34:48.386Z"
+  }
+]

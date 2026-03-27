@@ -10,8 +10,8 @@ const requireAdmin = async (req: any, res: any, next: any) => {
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
   
   const user = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-  const userRole = user[0]?.role?.toLowerCase();
-  if (!user.length || (userRole !== "admin" && userRole !== "superadmin")) {
+  const userRole = (user[0]?.role || "").toLowerCase();
+  if (!user.length || (!userRole.includes("admin") && !userRole.includes("superadmin"))) {
     return res.status(403).json({ error: "Forbidden", message: "Admin access required" });
   }
   next();
