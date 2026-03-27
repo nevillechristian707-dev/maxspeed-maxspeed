@@ -21,7 +21,7 @@ export const getDb = () => {
       ? { rejectUnauthorized: false }
       : undefined,
   });
-  _db = drizzle(_pool, { schema, logger: true });
+  _db = drizzle(_pool, { schema, logger: process.env.DATABASE_LOGGER === 'true' });
   return _db;
 };
 

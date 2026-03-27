@@ -1,1 +1,21 @@
-SUCCESS
+{
+  "index": "OK",
+  "sequences": [
+    {
+      "table": "penjualan",
+      "maxId": 194,
+      "seqVal": "200"
+    },
+    {
+      "table": "transaksi_bank",
+      "maxId": 231,
+      "seqVal": "231"
+    },
+    {
+      "table": "master_barang",
+      "maxId": 3155,
+      "seqVal": "3155"
+    }
+  ],
+  "analyze": "OK"
+}
