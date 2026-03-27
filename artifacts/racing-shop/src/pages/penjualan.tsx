@@ -195,7 +195,11 @@ export default function Penjualan() {
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ 
+        title: "Error", 
+        description: err.detail || err.message, 
+        variant: "destructive" 
+      });
     }
   };
 
