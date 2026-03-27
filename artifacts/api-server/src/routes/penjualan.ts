@@ -82,18 +82,27 @@ router.post("/", async (req, res) => {
 
     let insertedRows: any[] = [];
     let retryCount = 0;
-    const maxRetries = 5;
+    const maxRetries = 15;
 
     while (retryCount < maxRetries) {
-      const maxNomorResult = await db.select({ maxNomor: sql<number>`max(${penjualanTable.nomor})` })
+      // Re-query max nomor every time to get the latest state
+      const maxNomorResult = await db.select({ maxNomor: sql<string>`max(${penjualanTable.nomor})` })
         .from(penjualanTable)
         .where(eq(penjualanTable.tanggal, tanggal));
       
       const currentMax = Number(maxNomorResult[0]?.maxNomor || 0);
       const nomor = currentMax + 1;
-      
       const dateStr = tanggal.replace(/-/g, "");
-      const kodeTransaksi = `TRX-${dateStr}-${String(nomor).padStart(3, "0")}`;
+      
+      // Standard format first
+      let kodeTransaksi = `TRX-${dateStr}-${String(nomor).padStart(3, "0")}`;
+      
+      // IMPROVEMENT: If this is a retry, add a suffix IMMEDIATELY to guarantee uniqueness
+      // and avoid pounding the same code multiple times.
+      if (retryCount > 0) {
+        const suffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+        kodeTransaksi = `${kodeTransaksi}-${suffix}`;
+      }
 
       const needsCair = paymentMethod === "online_shop" || paymentMethod === "kredit";
 
@@ -123,15 +132,27 @@ router.post("/", async (req, res) => {
           totalModal: String(totalModal),
         }).returning();
         
-        // If we reached here, insertion was successful
         break;
       } catch (err: any) {
-        // If it's a unique constraint violation on kode_transaksi, retry
-        if (err.code === '23505' && (err.constraint === 'penjualan_kode_transaksi_unique' || err.message?.includes('kode_transaksi'))) {
+        // Log collision for debugging
+        console.warn(`[Collision] Code: ${kodeTransaksi}, Retry: ${retryCount + 1}/${maxRetries}, Error: ${err.message}`);
+
+        // Handle unique constraint violation (PG code 23505)
+        const isUniqueViolation = 
+          err.code === '23505' || 
+          err.constraint === 'penjualan_kode_transaksi_unique' ||
+          err.message?.toLowerCase().includes('unique constraint') ||
+          err.message?.toLowerCase().includes('duplicate key');
+        
+        if (isUniqueViolation) {
           retryCount++;
-          if (retryCount >= maxRetries) throw err;
-          // Wait a tiny bit to let the other transaction finish
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+          if (retryCount >= maxRetries) {
+             console.error(`Exhausted ${maxRetries} retries for ${kodeTransaksi}`);
+             throw err;
+          }
+          // Exponential backoff with jitter
+          const delay = Math.min(50 * Math.pow(2, Math.min(retryCount, 3)), 500) + Math.random() * 50;
+          await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
         throw err;
@@ -199,9 +220,9 @@ router.put("/:id", async (req, res) => {
 
     if (!updated.length) return res.status(404).json({ error: "Not found" });
     return res.json(toDto(updated[0]));
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal Server Error" });
+  } catch (err: any) {
+    console.error("PUT /api/penjualan error:", err);
+    return res.status(500).json({ error: "Internal Server Error", message: err.message, detail: err.detail });
   }
 });
 
