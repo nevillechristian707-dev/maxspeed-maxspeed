@@ -64,25 +64,26 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
     const db = getDb();
     if (!db) return res.status(500).json({ error: "Database not initialized" });
-  try {
-    const { tanggal, kodeBarang, harga, qty, paymentMethod, noFaktur,
-      nilaiCash, namaBank, nilaiBank, namaOnlineShop, nilaiOnlineShop,
-      namaCustomer, nilaiKredit } = req.body;
-
-    const barang = await db.select().from(masterBarangTable)
-      .where(eq(masterBarangTable.kodeBarang, kodeBarang));
-    if (!barang.length) return res.status(400).json({ error: "Barang not found" });
-
-    const b = barang[0];
-    const hargaNum = parseFloat(String(harga));
-    const qtyNum = parseInt(String(qty));
-    const total = hargaNum * qtyNum;
-    const hargaBeli = parseFloat(String(b.hargaBeli));
-    const totalModal = hargaBeli * qtyNum;
-
-    let insertedRows: any[] = [];
     let retryCount = 0;
     const maxRetries = 15;
+    let insertedRows: any[] = [];
+
+    try {
+      const { tanggal, kodeBarang, harga, qty, paymentMethod, noFaktur,
+        nilaiCash, namaBank, nilaiBank, namaOnlineShop, nilaiOnlineShop,
+        namaCustomer, nilaiKredit } = req.body;
+  
+      const barang = await db.select().from(masterBarangTable)
+        .where(eq(masterBarangTable.kodeBarang, kodeBarang));
+      if (!barang.length) return res.status(400).json({ error: "Barang not found" });
+  
+      const b = barang[0];
+      const hargaNum = parseFloat(String(harga));
+      const qtyNum = parseInt(String(qty));
+      const total = hargaNum * qtyNum;
+      const hargaBeli = parseFloat(String(b.hargaBeli));
+      const totalModal = hargaBeli * qtyNum;
+  
 
     while (retryCount < maxRetries) {
       // Re-query max nomor every time to get the latest state
@@ -175,8 +176,8 @@ router.post("/", async (req, res) => {
     console.error("POST /api/penjualan error:", err);
     return res.status(500).json({ 
       error: "Internal Server Error", 
-      message: err.message, 
-      detail: err.detail || err.cause?.message || "Unique ID Collision failure - check server logs" 
+      message: `[POST-FAILED] ${err.message}`, 
+      detail: err.detail || `Diagnostic: Code=${err.code}, Constraint=${err.constraint}, Tried=${retryCount} times`
     });
   }
 });
