@@ -124,19 +124,21 @@ router.post("/", async (req, res) => {
             
             break;
           } catch (err: any) {
-            const errMsg = err.message || String(err);
-            const errCode = String(err.code || "");
+            // Broadest possible match for unique constraint violations - V4
+            const errStr = String(err);
+            const errStack = String(err.stack || "");
             const errDetail = String(err.detail || "");
-            const errConstraint = String(err.constraint || "");
+            const errCode = String(err.code || "");
             
-            console.error(`[COLLISION-V3] Retry ${retryCount}: Code=${errCode}, Msg=${errMsg}`);
+            console.error(`[COLLISION-V4] Tried=${retryCount}, Code=${errCode}, Msg=${errStr}`);
     
             const isUniqueViolation = 
               errCode === '23505' || 
-              errConstraint.toLowerCase().includes('unique') ||
-              errMsg.toLowerCase().includes('unique') ||
-              errMsg.toLowerCase().includes('duplicate') ||
-              errDetail.toLowerCase().includes('exists');
+              errStr.toLowerCase().includes('unique') ||
+              errStr.toLowerCase().includes('duplicate') ||
+              errDetail.toLowerCase().includes('exists') ||
+              errStack.toLowerCase().includes('unique') ||
+              errStack.toLowerCase().includes('duplicate');
             
             if (isUniqueViolation) {
               retryCount++;
@@ -158,8 +160,8 @@ router.post("/", async (req, res) => {
         console.error("POST /api/penjualan error:", err);
         return res.status(500).json({ 
           error: "Internal Server Error", 
-          message: `[V3-FAILED] ${err.message}`, 
-          detail: err.detail || `Diag: Code=${err.code}, Const=${err.constraint}, Tried=${retryCount}, Msg=${String(err.message).substring(0, 30)}`
+          message: `[V4-FAILED] ${err.message}`, 
+          detail: err.detail || `Diag-V4: Code=${err.code}, Const=${err.constraint}, Tried=${retryCount}, FullMsg=${String(err.message).substring(0, 50)}`
         });
     }
 });
