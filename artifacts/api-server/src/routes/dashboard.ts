@@ -19,60 +19,51 @@ router.get("/summary", async (req, res) => {
     const s = String(startDate || "0000-01-01");
     const e = String(endDate || "9999-12-31");
 
-    // Gunakan 1 query aggregate untuk performa maksimal
-    // Logika: Cash/Bank dihitung dari tanggal transaksi, Online/Kredit dihitung dari range pencairan (nilai cair)
-    const summaryQuery = await db.execute(sql`
-      WITH filtered_sales AS (
-        SELECT 
-          id, total, harga_beli, qty, payment_method, status_cair, tanggal, tanggal_cair
-        FROM penjualan
-        WHERE 
-          (payment_method IN ('cash', 'bank') AND tanggal >= ${s} AND tanggal <= ${e})
-          OR (payment_method IN ('online_shop', 'kredit') AND (
-            (tanggal_cair >= ${s} AND tanggal_cair <= ${e})
-            OR EXISTS (
-              SELECT 1 FROM transaksi_bank tb 
-              WHERE tb.penjualan_id = penjualan.id 
-              AND tb.tanggal_cair >= ${s} AND tb.tanggal_cair <= ${e}
-            )
-          ))
-      ),
-      payment_stats AS (
-        SELECT 
-          id,
-          CASE 
-            WHEN payment_method IN ('cash', 'bank') THEN total::numeric
-            ELSE (SELECT coalesce(sum(nilai::numeric), 0) FROM transaksi_bank WHERE penjualan_id = filtered_sales.id AND tanggal_cair >= ${s} AND tanggal_cair <= ${e})
-          END as amount_in_period,
-          harga_beli::numeric * qty as modal_total
-        FROM filtered_sales
-      )
+    // Gunakan query yang lebih sederhana untuk kestabilan
+    const salesRowsRes = await db.execute(sql`
       SELECT 
-        coalesce(sum(amount_in_period), 0) as total_penjualan,
-        (SELECT coalesce(sum(harga_beli::numeric * qty), 0) FROM filtered_sales 
-         WHERE (payment_method IN ('cash', 'bank')) OR (payment_method IN ('online_shop', 'kredit') AND status_cair = 'cair' AND tanggal_cair >= ${s} AND tanggal_cair <= ${e})) as total_modal,
-        count(distinct id) as total_transaksi,
-        coalesce(sum(CASE WHEN payment_method = 'cash' THEN amount_in_period ELSE 0 END), 0) as cash_total,
-        coalesce(sum(CASE WHEN payment_method = 'bank' THEN amount_in_period ELSE 0 END), 0) as bank_total,
-        coalesce(sum(CASE WHEN payment_method = 'online_shop' THEN amount_in_period ELSE 0 END), 0) as os_total,
-        coalesce(sum(CASE WHEN payment_method = 'kredit' THEN amount_in_period ELSE 0 END), 0) as kredit_total
-      FROM filtered_sales
-      LEFT JOIN payment_stats ON filtered_sales.id = payment_stats.id
+        p.id, p.total, p.harga_beli, p.qty, p.payment_method, p.status_cair, p.tanggal, p.tanggal_cair,
+        (SELECT coalesce(sum(nilai::numeric), 0) FROM transaksi_bank tb WHERE tb.penjualan_id = p.id AND tb.tanggal_cair >= ${s} AND tb.tanggal_cair <= ${e}) as paid_in_period
+      FROM penjualan p
+      WHERE 
+        (p.payment_method IN ('cash', 'bank') AND p.tanggal >= ${s} AND p.tanggal <= ${e})
+        OR (p.payment_method IN ('online_shop', 'kredit') AND (
+          (p.tanggal_cair >= ${s} AND p.tanggal_cair <= ${e})
+          OR EXISTS (
+            SELECT 1 FROM transaksi_bank tb 
+            WHERE tb.penjualan_id = p.id 
+            AND tb.tanggal_cair >= ${s} AND tb.tanggal_cair <= ${e}
+          )
+        ))
     `);
 
-    const result = (summaryQuery.rows && summaryQuery.rows.length > 0) ? (summaryQuery.rows[0] as any) : {
-      total_penjualan: 0,
-      total_modal: 0,
-      total_transaksi: 0,
-      cash_total: 0,
-      bank_total: 0,
-      os_total: 0,
-      kredit_total: 0
-    };
-    const totalPenjualan = n(result.total_penjualan);
-    const totalModal = n(result.total_modal);
+    const salesRows = salesRowsRes.rows as any[];
     
-    // Ambil Pending data (Belum Cair) - Sudah cepat
+    let totalPenjualan = 0;
+    let totalModal = 0;
+    let totalTransaksi = salesRows.length;
+    let cashTotal = 0;
+    let bankTotal = 0;
+    let osTotal = 0;
+    let kreditTotal = 0;
+
+    salesRows.forEach(row => {
+      const amount = (row.payment_method === 'cash' || row.payment_method === 'bank') ? n(row.total) : n(row.paid_in_period);
+      totalPenjualan += amount;
+      
+      if (row.payment_method === 'cash') cashTotal += amount;
+      else if (row.payment_method === 'bank') bankTotal += amount;
+      else if (row.payment_method === 'online_shop') osTotal += amount;
+      else if (row.payment_method === 'kredit') kreditTotal += amount;
+
+      // Modal dihitung hanya jika cair atau cash/bank
+      const isCairInPeriod = (row.payment_method === 'online_shop' || row.payment_method === 'kredit') ? (row.status_cair === 'cair' && String(row.tanggal_cair) >= s && String(row.tanggal_cair) <= e) : true;
+      if (isCairInPeriod) {
+        totalModal += n(row.harga_beli) * n(row.qty);
+      }
+    });
+
+    // Ambil Pending data (Belum Cair)
     const pendingResult = await db.execute(sql`
       SELECT p.payment_method, 
              SUM(p.total::numeric - COALESCE(tb_sum.total_paid, 0)) as remaining
@@ -111,11 +102,11 @@ router.get("/summary", async (req, res) => {
       totalBiaya,
       laba,
       labaShared,
-      totalTransaksi: n(result.total_transaksi),
-      cashTotal: n(result.cash_total),
-      bankTotal: n(result.bank_total),
-      onlineShopTotal: n(result.os_total),
-      kreditTotal: n(result.kredit_total),
+      totalTransaksi,
+      cashTotal,
+      bankTotal,
+      onlineShopTotal: osTotal,
+      kreditTotal,
       kreditBelumCair,
       onlineShopBelumCair,
       biayaItems: bRows.map((r: any) => ({
