@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wo
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NightlyReportPopup } from "@/components/nightly-report-popup";
 
 // Lazy load semua halaman - split bundle per halaman
 const Login = lazy(() => import("./pages/login"));
@@ -177,6 +178,7 @@ function App() {
             <Router />
           </WouterRouter>
           <Toaster />
+          <NightlyReportPopup />
         </TooltipProvider>
       </MonthYearProvider>
     </QueryClientProvider>

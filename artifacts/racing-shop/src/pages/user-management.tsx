@@ -29,7 +29,8 @@ const MENU_LIST = [
   "Customer",
   "Modal",
   "Laporan",
-  "Manajemen Pengguna"
+  "Manajemen Pengguna",
+  "Laporan Malam"
 ];
 
 const PERMISSION_ACTIONS = ["view", "add", "edit", "delete", "export"];
