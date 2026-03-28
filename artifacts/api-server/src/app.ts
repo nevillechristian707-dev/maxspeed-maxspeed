@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import compression from "compression";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
@@ -14,6 +15,16 @@ const PgStore = connectPg(session);
 
 const app: Express = express();
 app.set('trust proxy', 1);
+
+// Enable gzip/brotli compression for all responses (~70% size reduction)
+app.use(compression({
+  level: 6, // Good balance between speed and compression ratio
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
+}));
 
 app.get("/api/ping", (req, res) => res.send("pong"));
 app.get("/api/debug-db", (req, res) => {
@@ -39,8 +50,8 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 }));
-app.use(express.json({ limit: "500mb" }));
-app.use(express.urlencoded({ limit: "500mb", extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
 
 // Middleware Bypass Cookie (Untuk Vercel <-> Railway)
@@ -101,6 +112,15 @@ if (process.env.DATABASE_URL) {
 
 app.use(session(sessionConfig));
 
+// Performance: Add cache headers for GET API responses
+app.use("/api", (req, res, next) => {
+  if (req.method === "GET" && !req.path.includes("/auth/")) {
+    // Cache GET responses for 30 seconds, allow stale for 60s while revalidating
+    res.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60');
+  }
+  next();
+});
+
 // Mount API router strictly under /api prefix
 app.use("/api", router);
 
@@ -109,7 +129,12 @@ const frontendPath = process.env.NODE_ENV === "production"
   ? path.join(__dirname, "public")
   : path.resolve(__dirname, "../../racing-shop/dist/public");
 
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, {
+  maxAge: '7d', // Cache static assets for 7 days
+  etag: true,
+  lastModified: true,
+  immutable: true // Assets with hash in filename never change
+}));
 
 // Fallback for SPA (Handle direct navigation & refresh)
 app.use((req, res, next) => {

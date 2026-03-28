@@ -9,6 +9,44 @@ import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Line
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useMonthYear } from "@/context/month-year-context";
+import { memo, useMemo } from "react";
+
+// Memoize StatCard agar tidak re-render kecuali props berubah
+const StatCard = memo(({ title, value, icon: Icon, colorClass, subtitle }: any) => (
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+    <Card className="overflow-hidden relative group border-border/40 hover:border-primary/50 transition-colors h-full">
+      <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${colorClass} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform`} />
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardTitle className="text-xs font-medium tracking-tight font-black text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
+        <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass} bg-opacity-20`}>
+          <Icon className="w-4 h-4 text-white" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-xl sm:text-2xl font-display font-black tracking-tight">{value}</div>
+        {subtitle && <p className="text-xs italic tracking-tighter text-muted-foreground mt-1 font-bold uppercase tracking-tight">{subtitle}</p>}
+      </CardContent>
+    </Card>
+  </motion.div>
+));
+StatCard.displayName = 'StatCard';
+
+// Sub-komponen untuk state error - diletakkan di luar Dashboard agar tidak re-created
+const ErrorState = ({ message, onRetry }: { message: string, onRetry: () => void }) => (
+  <div className="flex flex-col items-center justify-center p-8 bg-card/40 rounded-3xl border border-dashed border-rose-500/20 text-center gap-3">
+     <Activity className="w-8 h-8 text-rose-500/50 animate-pulse" />
+     <div>
+       <p className="text-rose-500 font-black uppercase tracking-widest text-xs font-medium tracking-tight mb-1">Gagal Memuat Data</p>
+       <p className="text-muted-foreground text-xs font-medium tracking-tight leading-relaxed max-w-[200px] mx-auto">{message}</p>
+     </div>
+     <button 
+       onClick={onRetry} 
+       className="px-4 py-2 rounded-xl bg-secondary border border-border text-xs italic tracking-tighter font-black uppercase hover:bg-secondary/80 transition-all active:scale-95"
+     >
+       Coba Lagi
+     </button>
+  </div>
+);
 
 export default function Dashboard() {
   const { selectedYear, selectedMonth, setSelectedYear, setSelectedMonth, dateParams } = useMonthYear();
@@ -20,28 +58,38 @@ export default function Dashboard() {
   const { data: summary, isLoading: loadingSummary, isError: isErrorSummary, refetch: refetchSummary } = useGetDashboardSummary(dateParams);
   const { data: chartData, isLoading: loadingChart, isError: isErrorChart, error: chartError, refetch: refetchChart } = useGetDashboardChart(dateParams);
 
+  // Memoize chart data formatting & sorting - HARUS DI ATAS sebelum conditional return
+  const sortedChartData = useMemo(() => {
+    if (!chartData?.labels) return [];
+    
+    const d = chartData as any;
+    const formatted = chartData.labels.map((label, i) => {
+      const date = new Date(label);
+      const compactDate = !isNaN(date.getTime()) ? `${date.getDate()}/${date.getMonth() + 1}` : label;
+      return {
+        name: compactDate,
+        fullDate: formatDate(label),
+        rawDate: label,
+        Penjualan: Number(d?.penjualan?.[i] || 0),
+        Laba: Number(d?.laba?.[i] || 0),
+        Transaksi: Number(d?.counts?.[i] || 0),
+        Cash: Number(d?.cash?.[i] || 0),
+        Bank: Number(d?.bank?.[i] || 0),
+        OnlineShop: Number(d?.onlineShop?.[i] || 0),
+        Kredit: Number(d?.kredit?.[i] || 0)
+      };
+    });
+
+    return formatted.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime());
+  }, [chartData]);
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([refetchSummary(), refetchChart()]);
     setIsRefreshing(false);
   };
 
-  const ErrorState = ({ message, onRetry }: { message: string, onRetry: () => void }) => (
-    <div className="flex flex-col items-center justify-center p-8 bg-card/40 rounded-3xl border border-dashed border-rose-500/20 text-center gap-3">
-       <Activity className="w-8 h-8 text-rose-500/50 animate-pulse" />
-       <div>
-         <p className="text-rose-500 font-black uppercase tracking-widest text-xs font-medium tracking-tight mb-1">Gagal Memuat Data</p>
-         <p className="text-muted-foreground text-xs font-medium tracking-tight leading-relaxed max-w-[200px] mx-auto">{message}</p>
-       </div>
-       <button 
-         onClick={onRetry} 
-         className="px-4 py-2 rounded-xl bg-secondary border border-border text-xs italic tracking-tighter font-black uppercase hover:bg-secondary/80 transition-all active:scale-95"
-       >
-         Coba Lagi
-       </button>
-    </div>
-  );
-
+  // Loading state harus setelah semua hook didefinisikan secara berurutan
   if (loadingSummary && !summary) {
     return (
       <Layout>
@@ -53,42 +101,9 @@ export default function Dashboard() {
     );
   }
 
-  // Safe formatting for chart data
-  const formattedChartData = (chartData?.labels || []).map((label, i) => {
-    const date = new Date(label);
-    const compactDate = !isNaN(date.getTime()) ? `${date.getDate()}/${date.getMonth() + 1}` : label;
-    const d = chartData as any;
-    return {
-      name: compactDate,
-      fullDate: formatDate(label),
-      rawDate: label,
-      Penjualan: Number(d?.penjualan?.[i] || 0),
-      Laba: Number(d?.laba?.[i] || 0),
-      Transaksi: Number(d?.counts?.[i] || 0),
-      Cash: Number(d?.cash?.[i] || 0),
-      Bank: Number(d?.bank?.[i] || 0),
-      OnlineShop: Number(d?.onlineShop?.[i] || 0),
-      Kredit: Number(d?.kredit?.[i] || 0)
-    };
-  });
 
-  const StatCard = ({ title, value, icon: Icon, colorClass, subtitle }: any) => (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="overflow-hidden relative group border-border/40 hover:border-primary/50 transition-colors h-full">
-        <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${colorClass} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform`} />
-        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-xs font-medium tracking-tight font-black text-muted-foreground uppercase tracking-widest">{title}</CardTitle>
-          <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass} bg-opacity-20`}>
-            <Icon className="w-4 h-4 text-white" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl sm:text-2xl font-display font-black tracking-tight">{value}</div>
-          {subtitle && <p className="text-xs italic tracking-tighter text-muted-foreground mt-1 font-bold uppercase tracking-tight">{subtitle}</p>}
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+
+
 
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
   const months = [
@@ -222,9 +237,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/10">
-                    {[...formattedChartData].sort((a, b) => {
-                      return new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime();
-                    }).map((item, idx) => (
+                    {sortedChartData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
                         <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors sticky left-0 bg-background/50 backdrop-blur-sm z-10">
                           {item.fullDate}
@@ -252,7 +265,7 @@ export default function Dashboard() {
                         </td>
                       </tr>
                     ))}
-                    {formattedChartData.length === 0 && (
+                    {sortedChartData.length === 0 && (
                       <tr>
                         <td colSpan={8} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
                           Tidak ada data transaksi di periode ini.

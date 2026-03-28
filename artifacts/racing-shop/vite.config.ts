@@ -49,6 +49,25 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist", "public"),
     emptyOutDir: true,
+    target: 'esnext',
+    minify: 'esbuild',
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu'
+          ],
+          'vendor-charts': ['recharts'],
+          'vendor-utils': ['xlsx', 'jspdf', 'date-fns']
+        }
+      }
+    }
   },
   server: {
     port,
