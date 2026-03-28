@@ -60,7 +60,15 @@ router.get("/summary", async (req, res) => {
       LEFT JOIN payment_stats ON filtered_sales.id = payment_stats.id
     `);
 
-    const result = summaryQuery.rows[0] as any;
+    const result = (summaryQuery.rows && summaryQuery.rows.length > 0) ? (summaryQuery.rows[0] as any) : {
+      total_penjualan: 0,
+      total_modal: 0,
+      total_transaksi: 0,
+      cash_total: 0,
+      bank_total: 0,
+      os_total: 0,
+      kredit_total: 0
+    };
     const totalPenjualan = n(result.total_penjualan);
     const totalModal = n(result.total_modal);
     
@@ -93,7 +101,7 @@ router.get("/summary", async (req, res) => {
     const bRows = await db.select().from(biayaTable)
       .where(and(gte(biayaTable.tanggal, s), lte(biayaTable.tanggal, e)));
 
-    const totalBiaya = bRows.reduce((sum, r) => sum + n(r.nilai), 0);
+    const totalBiaya = bRows.reduce((sum: number, r: any) => sum + n(r.nilai), 0);
     const laba = totalPenjualan - totalModal - totalBiaya;
     const labaShared = laba * 0.1;
 
