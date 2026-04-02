@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   useListPenjualan, 
@@ -56,7 +56,129 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const MemoizedTableRow = memo(({ item, handleEdit, handleDelete, canEdit, canDelete }: any) => {
+  return (
+    <tr className="hover:bg-primary/[0.02] transition-colors group/row border-b border-border/20">
+      <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
+      <td className="px-3 py-4 font-black text-primary tracking-tighter text-xs font-bold">{item.kodeBarang}</td>
+      <td className="px-4 py-4">
+        <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
+        <div className="font-mono text-[10px] italic text-muted-foreground/60 mt-1 uppercase">{item.kodeTransaksi}</div>
+      </td>
+      <td className="px-4 py-4">
+        <div className="font-bold text-foreground line-clamp-1">{item.namaBarang}</div>
+        <div className="text-[10px] italic text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
+      </td>
+      <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
+      <td className="px-4 py-4 text-center font-black">{item.qty}</td>
+      <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
+      <td className="px-4 py-4">
+        <span className={cn(
+          "inline-flex px-2 py-0.5 text-[10px] font-black uppercase rounded border",
+          item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 
+            item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' : 
+            item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600 border-purple-500/20' : 
+            'bg-orange-500/10 text-orange-600 border-orange-500/20'
+        )}>
+          {item.paymentMethod.replace('_', ' ')}
+        </span>
+        {item.statusCair === 'pending' && <div className="text-[10px] italic text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
+        {item.statusCair === 'partial' && (
+          <div className="mt-1">
+            <div className="text-[10px] italic text-orange-500 font-black uppercase">Cicilan</div>
+            <div className="text-[10px] font-bold text-muted-foreground">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
+          </div>
+        )}
+        {item.statusCair === 'cair' && <div className="text-[10px] italic text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
+      </td>
+      <td className="px-5 py-3 text-center">
+        <div className="flex items-center justify-center gap-2">
+          {canEdit && (
+            <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg border border-blue-500/20 transition-all active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
+          )}
+          {canDelete && (
+            <button 
+              onClick={() => handleDelete(item.id)} 
+              className={cn(
+                "p-1.5 rounded-lg border transition-all active:scale-95",
+                (item.totalPaid || 0) > 0
+                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed"
+                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
+              )}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+});
+MemoizedTableRow.displayName = 'MemoizedTableRow';
+
 import { useMonthYear } from "@/context/month-year-context";
+
+const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, canEdit, canDelete }: any) => {
+  return (
+    <div className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
+      <div className="flex justify-between items-start mb-4">
+        <div className="space-y-1">
+          <div className="text-xs font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
+          <div className="text-sm font-black text-foreground tracking-tight">{item.noFaktur || '-'}</div>
+          <div className="text-[10px] italic font-mono text-muted-foreground/60 uppercase">{item.kodeTransaksi}</div>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <span className={cn(
+            "px-2.5 py-1 text-[10px] font-black uppercase rounded-lg border",
+            item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+              item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+              item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
+              'bg-orange-500/10 text-orange-500 border-orange-500/20'
+          )}>
+            {item.paymentMethod.replace('_', ' ')}
+          </span>
+          {item.statusCair === 'pending' && <span className="text-[10px] bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase border border-rose-500/20">Pending</span>}
+          {item.statusCair === 'partial' && <span className="text-[10px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase border border-orange-500/20">Cicilan</span>}
+          {item.statusCair === 'cair' && <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase border border-emerald-500/20">Selesai</span>}
+        </div>
+      </div>
+      
+      <div className="py-3 px-4 bg-secondary/30 rounded-xl border border-border/10 mb-4">
+        <div className="text-sm font-black text-foreground mb-1">{item.namaBarang}</div>
+        <div className="flex justify-between items-center">
+          <span className="text-[10px] italic font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
+          <span className="text-sm font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-[10px]">PCS</span></span>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div className="space-y-0.5">
+          <div className="text-[10px] font-black text-muted-foreground uppercase">Total</div>
+          <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
+        </div>
+        <div className="flex gap-2">
+           {canEdit && (
+             <button onClick={() => handleEdit(item)} className="p-2.5 text-blue-400 bg-blue-500/5 rounded-xl border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
+           )}
+           {canDelete && (
+             <button 
+               onClick={() => handleDelete(item.id as number)}
+               className={cn(
+                 "p-2.5 rounded-xl border active:scale-90",
+                 (item.totalPaid || 0) > 0
+                   ? "text-muted-foreground/30 border-muted-foreground/10"
+                   : "text-rose-400 bg-rose-500/5 border-rose-500/20"
+               )}
+             >
+               <Trash2 className="w-4 h-4" />
+             </button>
+           )}
+        </div>
+      </div>
+    </div>
+  );
+});
+MemoizedMobileCard.displayName = 'MemoizedMobileCard';
 
 export default function Penjualan() {
   const { selectedYear, selectedMonth, dateParams } = useMonthYear();
@@ -68,7 +190,15 @@ export default function Penjualan() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  
+  // Debounced search for smooth typing on mobile
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchTerm(searchInput), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   
   const { data: user } = useGetMe();
 
@@ -111,9 +241,68 @@ export default function Penjualan() {
   const { data: osData } = useListMasterOnlineShop();
   const { data: customerData } = useListCustomer();
   
-  const createMutation = useCreatePenjualan();
-  const updateMutation = useUpdatePenjualan();
-  const deleteMutation = useDeletePenjualan();
+  const createMutation = useCreatePenjualan({
+    mutation: {
+      onMutate: async (newRecord) => {
+        await queryClient.cancelQueries({ queryKey: ["/api/penjualan", dateParams] });
+        const previousData = queryClient.getQueryData(["/api/penjualan", dateParams]);
+        
+        // Optimistic update
+        queryClient.setQueryData(["/api/penjualan", dateParams], (old: any) => {
+          const newItem = { 
+            id: Math.random(), // Temporary ID
+            ...newRecord.data,
+            statusCair: 'pending',
+            total: (newRecord.data.harga || 0) * (newRecord.data.qty || 0),
+            kodeTransaksi: "MENUNGGU...",
+            namaBarang: barangData?.find(b => b.kodeBarang === newRecord.data.kodeBarang)?.namaBarang || "",
+            brand: barangData?.find(b => b.kodeBarang === newRecord.data.kodeBarang)?.brand || "",
+          };
+          return [newItem, ...(old || [])];
+        });
+        
+        return { previousData };
+      },
+      onError: (err, newRecord, context: any) => {
+        queryClient.setQueryData(["/api/penjualan", dateParams], context.previousData);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      }
+    }
+  });
+
+  const updateMutation = useUpdatePenjualan({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      }
+    }
+  });
+
+  const deleteMutation = useDeletePenjualan({
+    mutation: {
+      onMutate: async ({ id }) => {
+        await queryClient.cancelQueries({ queryKey: ["/api/penjualan", dateParams] });
+        const previousData = queryClient.getQueryData(["/api/penjualan", dateParams]);
+        
+        queryClient.setQueryData(["/api/penjualan", dateParams], (old: any) => 
+          (old || []).filter((item: any) => item.id !== id)
+        );
+        
+        return { previousData };
+      },
+      onError: (err, variables, context: any) => {
+        queryClient.setQueryData(["/api/penjualan", dateParams], context.previousData);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      }
+    }
+  });
 
   const checkPermission = (action: string) => {
     const role = String(user?.role || '').toLowerCase();
@@ -174,11 +363,11 @@ export default function Penjualan() {
 
       if (editingId) {
         await updateMutation.mutateAsync({ id: editingId, data: payload as any });
-        toast({ title: "Success", description: "Transaction updated." });
+        toast({ title: "Berhasil", description: "Transaksi diperbarui." });
         setEditingId(null);
       } else {
         await createMutation.mutateAsync({ data: payload as any });
-        toast({ title: "Success", description: "Transaction saved." });
+        toast({ title: "Berhasil", description: "Transaksi disimpan." });
       }
 
       form.reset({
@@ -189,11 +378,6 @@ export default function Penjualan() {
         noFaktur: "",
         paymentMethod: "cash",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
     } catch (err: any) {
       toast({ 
         title: "Error", 
@@ -224,19 +408,12 @@ export default function Penjualan() {
   };
 
   const handleDelete = async (id: number) => {
-    console.log("Attempting to delete ID:", id);
     try {
       await deleteMutation.mutateAsync({ id });
-      toast({ title: "Terhapus", description: "Transaksi berhasil dihapus dari sistem." });
-      queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+      toast({ title: "Terhapus", description: "Transaksi berhasil dihapus." });
       setDeleteConfirmId(null);
     } catch (err: any) {
-      console.error("Delete error:", err);
-      toast({ title: "Gagal Hapus", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
   };
 
@@ -553,13 +730,14 @@ export default function Penjualan() {
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{getIndonesianPeriodLabel(selectedMonth, selectedYear)}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Cari transaksi..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-border/50 text-sm"
+              <div className="relative group flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Cari faktur, barang, atau brand..." 
+                  className="w-full bg-secondary/40 border border-border/50 rounded-2xl pl-11 pr-4 py-3 text-sm outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all font-medium"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                 />
               </div>
               <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-2 py-1 shadow-sm h-9">
@@ -610,71 +788,20 @@ export default function Penjualan() {
                   ) : filteredListData?.length === 0 ? (
                     <tr><td colSpan={9} className="text-center py-20 text-muted-foreground font-bold italic">Tidak ada transaksi dengan status ini.</td></tr>
                   ) : filteredListData?.map((item) => (
-                    <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors group/row">
-                      <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
-                      <td className="px-3 py-4 font-black text-primary tracking-tighter text-xs font-medium tracking-tight">{item.kodeBarang}</td>
-                      <td className="px-4 py-4">
-                        <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-xs italic tracking-tighter text-muted-foreground/60 leading-none mt-1 tracking-tighter">{item.kodeTransaksi}</div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-foreground">{item.namaBarang}</div>
-                        <div className="text-xs italic tracking-tighter text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
-                      </td>
-                      <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
-                      <td className="px-4 py-4 text-center font-black">{item.qty}</td>
-                      <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
-                      <td className="px-4 py-4">
-                        <span className={cn(
-                          "inline-flex px-2 py-0.5 text-xs italic tracking-tighter font-black uppercase rounded tracking-tighter",
-                          item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600' : 
-                            item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600' : 
-                            item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600' : 
-                            'bg-orange-500/10 text-orange-600'
-                        )}>
-                          {item.paymentMethod.replace('_', ' ')}
-                        </span>
-                        {item.statusCair === 'pending' && <div className="text-xs italic tracking-tighter text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
-                        {item.statusCair === 'partial' && (
-                          <div className="mt-1">
-                            <div className="text-xs italic tracking-tighter text-orange-500 font-black uppercase">Cicilan</div>
-                            <div className="text-xs font-bold leading-none text-muted-foreground font-bold">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
-                          </div>
-                        )}
-                        {item.statusCair === 'cair' && <div className="text-xs italic tracking-tighter text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
-                      </td>
-                      <td className="px-5 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {canEdit && (
-                            <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors border border-blue-500/20 shadow-sm"><Pencil className="w-3.5 h-3.5" /></button>
-                          )}
-                          {canDelete && (
-                            <button 
-                              onClick={() => {
-                                if ((item.totalPaid || 0) > 0) {
-                                  toast({
-                                    title: "Tindakan Ditolak",
-                                    description: `Transaksi ini sudah masuk di Pencairan Perbank (${formatRupiah(item.totalPaid)}). Silakan batalkan pencairan terlebih dahulu.`,
-                                    variant: "destructive"
-                                  });
-                                } else {
-                                  setDeleteConfirmId(item.id);
-                                }
-                              }} 
-                              className={cn(
-                                "p-1.5 rounded-lg transition-colors border shadow-sm",
-                                (item.totalPaid || 0) > 0
-                                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed"
-                                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
-                              )}
-                              title={(item.totalPaid || 0) > 0 ? "Sudah masuk pencairan" : "Hapus Transaksi"}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                    <MemoizedTableRow 
+                      key={item.id} 
+                      item={item} 
+                      handleEdit={handleEdit} 
+                      handleDelete={(id: number) => {
+                        if ((item.totalPaid || 0) > 0) {
+                          toast({ title: "Tindakan Ditolak", description: `Transaksi ini sudah masuk di Pencairan Perbank.`, variant: "destructive" });
+                        } else {
+                          setDeleteConfirmId(id);
+                        }
+                      }}
+                      canEdit={canEdit}
+                      canDelete={canDelete}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -692,77 +819,20 @@ export default function Penjualan() {
                   Belum ada data.
                 </div>
               ) : filteredListData?.map((item) => (
-                <div key={item.id} className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="space-y-1">
-                      <div className="text-xs font-medium tracking-tight font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
-                      <div className="text-sm font-black text-foreground tracking-tight">{item.noFaktur || '-'}</div>
-                      <div className="text-xs italic tracking-tighter font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className={cn(
-                        "px-2.5 py-1 text-xs italic tracking-tighter font-black uppercase rounded-lg tracking-wider border",
-                        item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                          item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
-                          item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
-                          'bg-orange-500/10 text-orange-500 border-orange-500/20'
-                      )}>
-                        {item.paymentMethod.replace('_', ' ')}
-                      </span>
-                      {item.statusCair === 'pending' && <span className="text-xs font-bold leading-none bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-rose-500/20">Pending</span>}
-                      {item.statusCair === 'partial' && <span className="text-xs font-bold leading-none bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-orange-500/20">Cicilan</span>}
-                      {item.statusCair === 'cair' && <span className="text-xs font-bold leading-none bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase tracking-widest border border-emerald-500/20">Selesai</span>}
-                    </div>
-                  </div>
-                  
-                  <div className="py-3 px-4 bg-secondary/30 rounded-xl border border-border/10 mb-4">
-                    <div className="text-sm font-black text-foreground mb-1">{item.namaBarang}</div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs italic tracking-tighter font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
-                      <span className="text-sm font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-xs font-bold leading-none">PKT/PCS</span></span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold leading-none font-black text-muted-foreground uppercase tracking-wider">Total Transaksi</div>
-                      <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
-                    </div>
-                    <div className="flex gap-2">
-                       {canEdit && (
-                         <button 
-                           onClick={() => handleEdit(item)} 
-                           className="p-2.5 text-blue-400 hover:text-blue-300 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl border border-blue-500/20 transition-colors shadow-sm active:scale-90"
-                         >
-                           <Pencil className="w-4 h-4" />
-                         </button>
-                       )}
-                       {canDelete && (
-                         <button 
-                           onClick={() => {
-                            if ((item.totalPaid || 0) > 0) {
-                              toast({
-                                title: "Ditolak",
-                                description: "Sudah masuk pencairan. Batalkan di menu Pencairan.",
-                                variant: "destructive"
-                              });
-                            } else {
-                              setDeleteConfirmId(item.id);
-                            }
-                           }} 
-                           className={cn(
-                             "p-2.5 rounded-xl border transition-colors shadow-sm active:scale-90",
-                             (item.totalPaid || 0) > 0
-                               ? "text-muted-foreground/30 border-muted-foreground/10"
-                               : "text-rose-400 hover:text-rose-300 bg-rose-500/5 hover:bg-rose-500/10 border-rose-500/20"
-                           )}
-                         >
-                           <Trash2 className="w-4 h-4" />
-                         </button>
-                       )}
-                    </div>
-                  </div>
-                </div>
+                <MemoizedMobileCard 
+                  key={item.id} 
+                  item={item} 
+                  handleEdit={handleEdit} 
+                  handleDelete={(id: number) => {
+                    if ((item.totalPaid || 0) > 0) {
+                      toast({ title: "Tindakan Ditolak", description: "Transaksi ini sudah masuk di Pencairan Perbank.", variant: "destructive" });
+                    } else {
+                      setDeleteConfirmId(id);
+                    }
+                  }}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
+                />
               ))}
             </div>
           </CardContent>

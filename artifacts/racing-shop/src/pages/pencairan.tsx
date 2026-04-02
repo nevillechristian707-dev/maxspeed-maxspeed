@@ -102,14 +102,18 @@ export default function Pencairan() {
   const handleOpenBankModal = (item: any | null, isBulk: boolean = false) => {
     if (isBulk) {
       setItemToSettle(null);
-      setNilaiPembayaran(""); // Nilai taken from selection sum
+      setNilaiPembayaran(""); 
+      setCustomKodePencairan(""); // Reset custom code
     } else {
       setItemToSettle(item.id);
       setNilaiPembayaran(item.nilai.toString());
+      setCustomKodePencairan(""); // Reset custom code
     }
     setIsBulkSettle(isBulk);
     setIsBankModalOpen(true);
   };
+
+  const [customKodePencairan, setCustomKodePencairan] = useState("");
 
   const handleConfirmSettle = async () => {
     try {
@@ -117,32 +121,47 @@ export default function Pencairan() {
         tanggalCair: selectedDate,
         namaBank: selectedBankId === "cash" ? "CASH" : selectedBankInfo?.namaBank,
         rekeningBank: selectedBankId === "cash" ? "KAS TUNAI" : selectedBankInfo?.nomorRekening,
+        kodePencairan: customKodePencairan || undefined,
       };
-
       if (selectedBankId !== "cash" && !selectedBankInfo) {
         toast({ title: "Error", description: "Silakan pilih bank terlebih dahulu.", variant: "destructive" });
         return;
       }
 
       if (isBulkSettle) {
-        let successCount = 0;
-        const idsToProcess = Array.from(markedIds);
-        for (const id of idsToProcess) {
-          const item = data?.find(x => x.id === id);
-          if (item) {
-            // Force Number conversion and set a default if NaN
-            const amountToPay = Number(item.nilai) || 0;
-            if (amountToPay > 0) {
-              await markSettledMutation.mutateAsync({ 
-                id, 
-                data: { ...baseSettleData, nilai: amountToPay } as any 
-              });
-              successCount++;
-            }
+        const payload = {
+          ids: Array.from(markedIds),
+          tanggalCair: selectedDate,
+          namaBank: selectedBankId === "cash" ? "CASH" : selectedBankInfo?.namaBank,
+          rekeningBank: selectedBankId === "cash" ? "KAS TUNAI" : selectedBankInfo?.nomorRekening,
+          kodePencairan: customKodePencairan || undefined,
+        };
+
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pencairan/bulk-settle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error("Gagal melakukan pencairan massal di server.");
           }
+
+          const result = await response.json();
+          toast({ 
+            title: "Berhasil", 
+            description: `${result.count} transaksi berhasil dicairkan dengan kode: ${result.kodePencairan}` 
+          });
+          
+          setMarkedIds(new Set());
+          setIsBankModalOpen(false);
+          queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+        } catch (err: any) {
+          toast({ title: "Gagal", description: err.message, variant: "destructive" });
         }
-        toast({ title: "Berhasil", description: `${successCount} transaksi berhasil dicairkan.` });
-        setMarkedIds(new Set());
       } else if (itemToSettle !== null) {
         const amountToPay = parseFloat(nilaiPembayaran) || 0;
         if (amountToPay <= 0) {
@@ -161,6 +180,7 @@ export default function Pencairan() {
       queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
       setIsBankModalOpen(false);
       setItemToSettle(null);
+      setCustomKodePencairan("");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
@@ -904,6 +924,18 @@ export default function Pencairan() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="kode_pencairan" className="text-sm font-bold uppercase text-muted-foreground">Kode Pencairan / Ref (Opsional)</Label>
+              <Input 
+                id="kode_pencairan"
+                placeholder="Contoh: REF-MAR-28 atau No. Resi"
+                value={customKodePencairan}
+                onChange={(e) => setCustomKodePencairan(e.target.value)}
+                className="font-mono font-bold border-indigo-500/20 bg-indigo-500/5 focus:border-indigo-500"
+              />
+              <p className="text-[10px] text-muted-foreground italic">Gunakan kode yang sama untuk merekap data menjadi satu nilai gabungan.</p>
+            </div>
+
             {currentInstallments.length > 0 && (
               <div className="space-y-2">
                 <Label className="text-xs font-black uppercase text-muted-foreground tracking-widest">Riwayat Pembayaran Sebelumnya</Label>
@@ -987,12 +1019,31 @@ export default function Pencairan() {
             )}
 
             {isBulkSettle && (
-              <div className="mt-2 p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
-                <p className="text-sm text-center font-bold text-emerald-600">
-                  Total Dana Cair (Bulk): {formatRupiah(totalMarked)}
-                </p>
+              <div className="mt-2 p-4 bg-emerald-600/10 rounded-2xl border-2 border-emerald-600/30 shadow-lg shadow-emerald-600/5 animate-in zoom-in-95 duration-200">
+                <div className="flex flex-col items-center gap-1.5 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600/70">Estimasi Dana Cair Masuk:</span>
+                  <div className="text-2xl font-black text-emerald-600 font-mono tracking-tighter drop-shadow-sm">
+                    {formatRupiah(totalMarked)}
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-600/20 rounded-full text-[10px] font-black text-emerald-700 uppercase tracking-tight border border-emerald-600/20">
+                    {totalOnlineShopMarkedNum + totalKreditMarkedNum} Item Akan Direkap
+                  </span>
+                </div>
               </div>
             )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="custom-kode">Kode Pencairan (Opsional / Manual)</Label>
+              <Input
+                id="custom-kode"
+                placeholder="Contoh: TRANSFER-SHOPEE-28MAR"
+                value={customKodePencairan}
+                onChange={(e) => setCustomKodePencairan(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground italic">
+                *Kosongkan jika ingin sistem membuat kode PC-XXXXXX otomatis.
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setIsBankModalOpen(false)}>Batal</Button>

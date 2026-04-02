@@ -124,25 +124,8 @@ router.post("/", async (req, res) => {
             
             break;
           } catch (err: any) {
-            // Broadest possible match for unique constraint violations - V4
-            const errStr = String(err);
-            const errStack = String(err.stack || "");
-            const errDetail = String(err.detail || "");
             const errCode = String(err.code || "");
-            
-            console.error(`[COLLISION-V4] Tried=${retryCount}, Code=${errCode}, Msg=${errStr}`);
-    
-            const isUniqueViolation = 
-              errCode === '23505' || 
-              err?.cause?.code === '23505' ||
-              errStr.toLowerCase().includes('unique') ||
-              errStr.toLowerCase().includes('duplicate') ||
-              errDetail.toLowerCase().includes('exists') ||
-              errStack.toLowerCase().includes('unique') ||
-              errStack.toLowerCase().includes('duplicate') ||
-              // Check for PG primary key or unique index names which are usually in the message
-              errStr.includes('_unique') ||
-              errStr.includes('_pkey');
+            const isUniqueViolation = errCode === '23505' || String(err).toLowerCase().includes('unique');
             
             if (isUniqueViolation) {
               retryCount++;
@@ -151,26 +134,20 @@ router.post("/", async (req, res) => {
               await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
-            console.error("[CRITICAL-SAVE-ERROR] Full Error Keys:", Object.keys(err));
             throw err;
           }
         }
     
         if (!insertedRows.length) {
-          throw new Error("Failed to insert record after multiple retries due to ID collision.");
+          throw new Error("Failed to insert record after multiple retries.");
         }
     
         return res.status(201).json(toDto(insertedRows[0]));
     } catch (err: any) {
-        console.error("POST /api/penjualan error:", err);
-        const originalMessage = err.message || "No message";
-        const detailMessage = err.detail || "";
-        const errorCode = err.code || "unknown";
-        
+        console.error("POST /api/penjualan error:", err.message);
         return res.status(500).json({ 
           error: "Internal Server Error", 
-          message: `[V4-FAILED] ${originalMessage}`, 
-          detail: `Diag-V4-DEBUG: Code=${errorCode}, Detail=${detailMessage}, Msg=${originalMessage}`
+          message: err.message
         });
     }
 });

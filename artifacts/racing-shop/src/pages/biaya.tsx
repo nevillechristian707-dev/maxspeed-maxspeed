@@ -16,8 +16,53 @@ export default function Biaya() {
   const { toast } = useToast();
   
   const { data, isLoading } = useListBiaya(dateParams);
-  const createMutation = useCreateBiaya();
-  const deleteMutation = useDeleteBiaya();
+  const createMutation = useCreateBiaya({
+    mutation: {
+      onMutate: async (newBiaya) => {
+        await queryClient.cancelQueries({ queryKey: ["/api/biaya", dateParams] });
+        const previousData = queryClient.getQueryData(["/api/biaya", dateParams]);
+        
+        queryClient.setQueryData(["/api/biaya", dateParams], (old: any) => {
+          const newItem = { 
+            id: Math.random(),
+            ...newBiaya.data,
+          };
+          return [newItem, ...(old || [])];
+        });
+        
+        return { previousData };
+      },
+      onError: (err, newBiaya, context: any) => {
+        queryClient.setQueryData(["/api/biaya", dateParams], context.previousData);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      }
+    }
+  });
+
+  const deleteMutation = useDeleteBiaya({
+    mutation: {
+      onMutate: async ({ id }) => {
+        await queryClient.cancelQueries({ queryKey: ["/api/biaya", dateParams] });
+        const previousData = queryClient.getQueryData(["/api/biaya", dateParams]);
+        
+        queryClient.setQueryData(["/api/biaya", dateParams], (old: any) => 
+          (old || []).filter((item: any) => item.id !== id)
+        );
+        
+        return { previousData };
+      },
+      onError: (err, variables, context: any) => {
+        queryClient.setQueryData(["/api/biaya", dateParams], context.previousData);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      }
+    }
+  });
   
   const { data: user } = useGetMe();
   const checkPermission = (action: string) => {
@@ -47,10 +92,8 @@ export default function Biaya() {
           nilai: Number(form.nilai)
         }
       });
-      toast({ title: "Success", description: "Expense recorded." });
+      toast({ title: "Berhasil", description: "Biaya operasional dicatat." });
       setForm(prev => ({ ...prev, keterangan: "", nilai: "" }));
-      queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
@@ -58,10 +101,12 @@ export default function Biaya() {
 
   const handleDelete = async (id: number) => {
     if (confirm("Hapus biaya ini?")) {
-      await deleteMutation.mutateAsync({ id });
-      queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      toast({ title: "Berhasil dihapus" });
+      try {
+        await deleteMutation.mutateAsync({ id });
+        toast({ title: "Berhasil", description: "Catatan biaya dihapus." });
+      } catch (err: any) {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      }
     }
   };
 

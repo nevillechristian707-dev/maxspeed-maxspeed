@@ -147,6 +147,61 @@ router.post("/:id/mark-settled", async (req, res) => {
   }
 });
 
+router.post("/bulk-settle", async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
+  try {
+    const { ids, tanggalCair, namaBank, rekeningBank, kodePencairan: existingKode } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "No IDs provided" });
+    }
+
+    const kodePencairan = existingKode || await generateKodePencairan(db, tanggalCair);
+
+    const results = await db.transaction(async (tx) => {
+      const updatedRows = [];
+      for (const id of ids) {
+        const rows = await tx.select().from(penjualanTable).where(eq(penjualanTable.id, id));
+        if (!rows.length) continue;
+        const p = rows[0];
+
+        const totalTarget = p.paymentMethod === 'online_shop' 
+            ? toNumber(p.nilaiOnlineShop) 
+            : (p.paymentMethod === 'kredit' ? toNumber(p.nilaiKredit) : toNumber(p.total));
+
+        // Insert bank transaction
+        await tx.insert(transaksiBank).values({
+          kodePencairan,
+          tanggalCair,
+          noFaktur: p.noFaktur,
+          nilai: String(totalTarget), // For bulk, we assume full settlement
+          sumber: p.paymentMethod === 'online_shop' ? 'online_shop' : 'kredit',
+          namaBank,
+          rekeningBank,
+          penjualanId: id
+        });
+
+        // Update status to 'cair'
+        const updated = await tx.update(penjualanTable)
+          .set({ 
+            statusCair: "cair", 
+            tanggalCair: tanggalCair 
+          })
+          .where(eq(penjualanTable.id, id))
+          .returning();
+        
+        updatedRows.push(updated[0]);
+      }
+      return updatedRows;
+    });
+
+    return res.json({ success: true, count: results.length, kodePencairan });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.get("/transaksi-bank", async (req, res) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });

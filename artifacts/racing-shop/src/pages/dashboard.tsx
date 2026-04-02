@@ -48,6 +48,63 @@ const ErrorState = ({ message, onRetry }: { message: string, onRetry: () => void
   </div>
 );
 
+const DailySummaryTable = memo(({ data }: { data: any[] }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm text-left border-collapse sticky-header min-w-[800px]">
+      <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
+        <tr>
+          <th className="px-6 py-4 font-black tracking-widest sticky left-0 bg-secondary/40 z-20">Tanggal</th>
+          <th className="px-4 py-4 text-center font-black tracking-widest border-l border-border/10">TRX</th>
+          <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500/80">Cash</th>
+          <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-blue-500/80">Bank</th>
+          <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-purple-500/80">OS</th>
+          <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-orange-500/80">KRD</th>
+          <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10">Total</th>
+          <th className="px-6 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500">Laba</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-border/10">
+        {data.map((item, idx) => (
+          <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
+            <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors sticky left-0 bg-background/50 backdrop-blur-sm z-10">
+              {item.fullDate}
+            </td>
+            <td className="px-4 py-3 text-center font-black text-muted-foreground/60 border-l border-border/5">
+              {item.Transaksi}
+            </td>
+            <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-emerald-500/80">
+              {formatRupiah(item.Cash)}
+            </td>
+            <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-blue-500/80">
+              {formatRupiah(item.Bank)}
+            </td>
+            <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-purple-500/80">
+              {formatRupiah(item.OnlineShop)}
+            </td>
+            <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-orange-500/80">
+              {formatRupiah(item.Kredit)}
+            </td>
+            <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/10">
+              {formatRupiah(item.Penjualan)}
+            </td>
+            <td className="px-6 py-3 text-right font-mono font-black tabular-nums tracking-tighter text-emerald-500 border-l border-border/5">
+              {formatRupiah(item.Laba)}
+            </td>
+          </tr>
+        ))}
+        {data.length === 0 && (
+          <tr>
+            <td colSpan={8} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
+              Tidak ada data transaksi di periode ini.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+));
+DailySummaryTable.displayName = 'DailySummaryTable';
+
 export default function Dashboard() {
   const { selectedYear, selectedMonth, setSelectedYear, setSelectedMonth, dateParams } = useMonthYear();
   const currentYear = new Date().getFullYear();
@@ -222,59 +279,7 @@ export default function Dashboard() {
                 <p className="text-muted-foreground text-xs font-medium tracking-tight italic opacity-70">{(chartError as any)?.message || "Internal Server Error"}</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left border-collapse sticky-header min-w-[800px]">
-                  <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-6 py-4 font-black tracking-widest sticky left-0 bg-secondary/40 z-20">Tanggal</th>
-                      <th className="px-4 py-4 text-center font-black tracking-widest border-l border-border/10">TRX</th>
-                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500/80">Cash</th>
-                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-blue-500/80">Bank</th>
-                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-purple-500/80">OS</th>
-                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10 text-orange-500/80">KRD</th>
-                      <th className="px-4 py-4 text-right font-black tracking-widest border-l border-border/10">Total</th>
-                      <th className="px-6 py-4 text-right font-black tracking-widest border-l border-border/10 text-emerald-500">Laba</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/10">
-                    {sortedChartData.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group/row">
-                        <td className="px-6 py-3 whitespace-nowrap font-bold text-muted-foreground group-hover/row:text-foreground transition-colors sticky left-0 bg-background/50 backdrop-blur-sm z-10">
-                          {item.fullDate}
-                        </td>
-                        <td className="px-4 py-3 text-center font-black text-muted-foreground/60 border-l border-border/5">
-                          {item.Transaksi}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-emerald-500/80">
-                          {formatRupiah(item.Cash)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-blue-500/80">
-                          {formatRupiah(item.Bank)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-purple-500/80">
-                          {formatRupiah(item.OnlineShop)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/5 text-orange-500/80">
-                          {formatRupiah(item.Kredit)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-black tabular-nums tracking-tighter border-l border-border/10">
-                          {formatRupiah(item.Penjualan)}
-                        </td>
-                        <td className="px-6 py-3 text-right font-mono font-black tabular-nums tracking-tighter text-emerald-500 border-l border-border/5">
-                          {formatRupiah(item.Laba)}
-                        </td>
-                      </tr>
-                    ))}
-                    {sortedChartData.length === 0 && (
-                      <tr>
-                        <td colSpan={8} className="text-center py-20 text-muted-foreground italic font-medium opacity-50">
-                          Tidak ada data transaksi di periode ini.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <DailySummaryTable data={sortedChartData} />
             )}
           </CardContent>
         </Card>
