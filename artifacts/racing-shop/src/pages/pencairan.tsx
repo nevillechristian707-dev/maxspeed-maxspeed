@@ -138,14 +138,16 @@ export default function Pencairan() {
         };
 
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pencairan/bulk-settle`, {
+          const response = await fetch(`/api/pencairan/bulk-settle`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify(payload),
           });
 
           if (!response.ok) {
-            throw new Error("Gagal melakukan pencairan massal di server.");
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || "Gagal melakukan pencairan massal di server.");
           }
 
           const result = await response.json();
