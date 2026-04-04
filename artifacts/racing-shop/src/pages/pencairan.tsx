@@ -32,9 +32,9 @@ export default function Pencairan() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  const { data, isLoading } = useListPencairan(dateParams);
+  const { data, isLoading, isFetching } = useListPencairan(dateParams);
   const { data: banks } = useListMasterBank();
-  const { data: bankTransactions, isLoading: isLoadingHistory } = useListTransaksiBank(dateParams);
+  const { data: bankTransactions, isLoading: isLoadingHistory, isFetching: isFetchingHistory } = useListTransaksiBank(dateParams);
   const markSettledMutation = useMarkSettled();
   const deleteMutation = useDeletePenjualan();
 
@@ -50,12 +50,14 @@ export default function Pencairan() {
       }
       return resp.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ title: "Berhasil", description: "Pencairan berhasil dibatalkan." });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] })
+      ]);
     },
     onError: (err: any) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -66,10 +68,12 @@ export default function Pencairan() {
     try {
       await deleteMutation.mutateAsync({ id });
       toast({ title: "Terhapus", description: "Data transaksi berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] })
+      ]);
       setDeleteConfirmId(null);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -158,9 +162,11 @@ export default function Pencairan() {
           
           setMarkedIds(new Set());
           setIsBankModalOpen(false);
-          queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] })
+          ]);
         } catch (err: any) {
           toast({ title: "Gagal", description: err.message, variant: "destructive" });
         }
@@ -177,9 +183,11 @@ export default function Pencairan() {
         toast({ title: "Berhasil", description: `Transaksi berhasil dicairkan.` });
       }
 
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] })
+      ]);
       setIsBankModalOpen(false);
       setItemToSettle(null);
       setCustomKodePencairan("");
@@ -441,8 +449,13 @@ export default function Pencairan() {
                   </tr>
                 </thead>
                 <tbody>
-                  {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
+                  {isLoading || isFetching ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        Memuat data...
+                      </div>
+                    </td></tr>
                   ) : onlineShopPending.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang online shop.</td></tr>
                   ) : onlineShopPending.map((item: any) => (
@@ -510,8 +523,11 @@ export default function Pencairan() {
 
             {/* Mobile View */}
             <div className="md:hidden divide-y divide-border/20 p-2">
-              {isLoading ? (
-                <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
+              {isLoading || isFetching ? (
+                <div className="p-10 text-center text-muted-foreground animate-pulse flex flex-col items-center gap-2">
+                   <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                   Memuat data...
+                </div>
               ) : onlineShopPending.length === 0 ? (
                 <div className="p-10 text-center text-muted-foreground">Tidak ada data.</div>
               ) : onlineShopPending.map((item: any) => (
@@ -636,8 +652,13 @@ export default function Pencairan() {
                   </tr>
                 </thead>
                 <tbody>
-                  {isLoading ? (
-                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">Memuat data...</td></tr>
+                  {isLoading || isFetching ? (
+                    <tr><td colSpan={6} className="text-center py-12 text-muted-foreground italic">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                        Memuat data...
+                      </div>
+                    </td></tr>
                   ) : kreditPending.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-12 text-muted-foreground font-medium italic">Tidak ada piutang kredit.</td></tr>
                   ) : kreditPending.map((item: any) => (
@@ -705,8 +726,11 @@ export default function Pencairan() {
 
             {/* Mobile View */}
             <div className="md:hidden divide-y divide-border/20 p-2">
-              {isLoading ? (
-                <div className="p-10 text-center text-muted-foreground animate-pulse">Memuat data...</div>
+              {isLoading || isFetching ? (
+                <div className="p-10 text-center text-muted-foreground animate-pulse flex flex-col items-center gap-2">
+                   <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                   Memuat data...
+                </div>
               ) : kreditPending.length === 0 ? (
                 <div className="p-10 text-center text-muted-foreground">Tidak ada piutang kredit.</div>
               ) : kreditPending.map((item: any) => (
@@ -768,8 +792,11 @@ export default function Pencairan() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {isLoadingHistory ? (
-              <div className="p-12 text-center text-muted-foreground italic">Memuat riwayat pencairan...</div>
+            {isLoadingHistory || isFetchingHistory ? (
+              <div className="p-12 text-center text-muted-foreground italic flex flex-col items-center gap-3">
+                 <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin shadow-lg" />
+                 <span className="font-bold uppercase tracking-widest text-xs">Memperbarui riwayat pencairan...</span>
+              </div>
             ) : bankSummaries.length === 0 ? (
               <div className="p-12 text-center text-muted-foreground italic font-medium">Belum ada data pencairan periode ini.</div>
             ) : (
