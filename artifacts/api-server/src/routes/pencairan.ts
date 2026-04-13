@@ -263,7 +263,8 @@ router.get("/kode-pencairan-list", async (req, res) => {
     .from(transaksiBank)
     .where(conditions.length ? and(...conditions) : undefined)
     .groupBy(transaksiBank.kodePencairan)
-    .orderBy(desc(sql`min(${transaksiBank.tanggalCair})`));
+    .orderBy(desc(sql`min(${transaksiBank.tanggalCair})`))
+    .limit(1000);
 
     return res.json(rows.filter((r: any) => r.kodePencairan));
   } catch (err) {
