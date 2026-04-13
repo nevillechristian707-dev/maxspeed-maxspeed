@@ -349,6 +349,18 @@ export default function Pencairan() {
       .sort((a, b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime());
   }, [itemToSettle, bankTransactions]);
 
+  const handleFixKode = async () => {
+    try {
+      const resp = await fetch("/api/pencairan/fix-kode-pencairan", { method: "POST" });
+      if (!resp.ok) throw new Error("Gagal migrasi kode pencairan");
+      const r = await resp.json();
+      toast({ title: "Berhasil", description: r.message });
+      queryClient.invalidateQueries();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
   return (
     <Layout>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -359,6 +371,15 @@ export default function Pencairan() {
             <p className="text-muted-foreground mt-1 text-sm">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2">
+            {canEdit && (
+              <Button
+                variant="outline"
+                onClick={handleFixKode}
+                className="gap-2 border-orange-500/30 text-orange-600 hover:bg-orange-500/10 font-bold"
+              >
+                Fix Data Double
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setIsCetakModalOpen(true)}

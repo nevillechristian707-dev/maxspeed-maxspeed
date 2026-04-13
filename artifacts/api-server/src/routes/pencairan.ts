@@ -10,12 +10,24 @@ function toNumber(val: unknown): number {
 
 async function generateKodePencairan(db: any, tanggalCair: string): Promise<string> {
   const month = tanggalCair.substring(0, 7).replace("-", ""); // e.g. "202603"
+  // Find the highest sequence number for this month
   const result = await db.execute(sql`
-    SELECT COUNT(DISTINCT kode_pencairan) as cnt 
+    SELECT kode_pencairan 
     FROM transaksi_bank 
-    WHERE kode_pencairan LIKE ${"PC-" + month + "%"}
+    WHERE kode_pencairan LIKE ${"PC-" + month + "-%"}
+    ORDER BY kode_pencairan DESC
+    LIMIT 1
   `);
-  const nextNum = Number(result.rows[0]?.cnt || 0) + 1;
+  
+  let nextNum = 1;
+  if (result.rows.length > 0) {
+    const lastKode = String(result.rows[0].kode_pencairan);
+    const parts = lastKode.split("-");
+    if (parts.length === 3) {
+      nextNum = parseInt(parts[2]) + 1;
+    }
+  }
+  
   return `PC-${month}-${String(nextNum).padStart(3, "0")}`;
 }
 
@@ -285,6 +297,82 @@ router.post("/:id/cancel-settled", async (req, res) => {
       .returning();
     if (!updated.length) return res.status(404).json({ error: "Not found" });
     return res.json(updated[0]);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// One-time migration: fix duplicate kode pencairan
+router.post("/fix-kode-pencairan", async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
+  try {
+    // Get all transactions ordered by date and id
+    const allTxs = await db.select()
+      .from(transaksiBank)
+      .orderBy(transaksiBank.tanggalCair, transaksiBank.id);
+
+    // Group into logical batches: same (original kode, same date) = one batch
+    const monthGroups: Record<string, Array<{ originalKode: string; tanggal: string; txIds: number[] }>> = {};
+
+    for (const tx of allTxs) {
+      if (!tx.kodePencairan) continue;
+      const month = tx.tanggalCair.substring(0, 7).replace("-", "");
+      const date = tx.tanggalCair;
+      const originalKode = tx.kodePencairan;
+
+      if (!monthGroups[month]) monthGroups[month] = [];
+
+      let batch = monthGroups[month].find(
+        (b) => b.originalKode === originalKode && b.tanggal === date
+      );
+      if (!batch) {
+        batch = { originalKode, tanggal: date, txIds: [] };
+        monthGroups[month].push(batch);
+      }
+      batch.txIds.push(tx.id);
+    }
+
+    // Re-sequence each month
+    let totalUpdated = 0;
+    const changes: Array<{ old: string; new: string; date: string; count: number }> = [];
+
+    for (const month of Object.keys(monthGroups).sort()) {
+      const batches = monthGroups[month];
+      // Sort batches by date, then by original kode for stable ordering
+      batches.sort((a, b) => a.tanggal.localeCompare(b.tanggal) || a.originalKode.localeCompare(b.originalKode));
+
+      for (let i = 0; i < batches.length; i++) {
+        const newSeq = String(i + 1).padStart(3, "0");
+        const newKode = `PC-${month}-${newSeq}`;
+        const batch = batches[i];
+
+        if (batch.originalKode !== newKode) {
+          changes.push({
+            old: batch.originalKode,
+            new: newKode,
+            date: batch.tanggal,
+            count: batch.txIds.length,
+          });
+        }
+
+        for (const id of batch.txIds) {
+          await db
+            .update(transaksiBank)
+            .set({ kodePencairan: newKode })
+            .where(eq(transaksiBank.id, id));
+          totalUpdated++;
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      totalTransactionsProcessed: totalUpdated,
+      changesApplied: changes,
+      message: `Migration complete. ${changes.length} kode pencairan were renamed.`,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
