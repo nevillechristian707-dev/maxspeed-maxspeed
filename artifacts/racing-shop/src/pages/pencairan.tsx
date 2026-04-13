@@ -50,17 +50,55 @@ export default function Pencairan() {
       }
       return resp.json();
     },
-    onSuccess: async () => {
-      toast({ title: "Berhasil", description: "Pencairan berhasil dibatalkan." });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] })
-      ]);
+    onMutate: async (id) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["/api/pencairan"] });
+      await queryClient.cancelQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+
+      // Snapshot the previous value
+      const previousPencairan = queryClient.getQueryData(["/api/pencairan", dateParams]);
+      const previousBankTransactions = queryClient.getQueryData(["/api/pencairan/transaksi-bank", dateParams]);
+
+      // Optimistically update History (remove the cancelled item)
+      if (previousBankTransactions) {
+        queryClient.setQueryData(["/api/pencairan/transaksi-bank", dateParams], (old: any) => 
+          old?.filter((tx: any) => tx.penjualanId !== id)
+        );
+      }
+
+      // Optimistically update Pencairan List (mark item as pending)
+      if (previousPencairan) {
+        queryClient.setQueryData(["/api/pencairan", dateParams], (old: any) => 
+          old?.map((item: any) => {
+            if (item.id === id) {
+              return { ...item, status: 'pending', totalPaid: 0 };
+            }
+            return item;
+          })
+        );
+      }
+
+      return { previousPencairan, previousBankTransactions };
     },
-    onError: (err: any) => {
+    onSuccess: () => {
+      toast({ title: "Berhasil", description: "Pencairan berhasil dibatalkan." });
+    },
+    onError: (err: any, id, context) => {
+      // Rollback if mutation fails
+      if (context?.previousBankTransactions) {
+        queryClient.setQueryData(["/api/pencairan/transaksi-bank", dateParams], context.previousBankTransactions);
+      }
+      if (context?.previousPencairan) {
+        queryClient.setQueryData(["/api/pencairan", dateParams], context.previousPencairan);
+      }
       toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we are in sync with the server
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] });
     }
   });
   
