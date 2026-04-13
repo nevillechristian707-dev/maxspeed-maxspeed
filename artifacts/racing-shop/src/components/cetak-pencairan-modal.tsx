@@ -17,7 +17,7 @@ interface CetakPencairanModalProps {
 }
 
 export function CetakPencairanModal({ open, onOpenChange, dateParams }: CetakPencairanModalProps) {
-  const { data: kodePencairanList, isLoading } = useListKodePencairan();
+  const { data: kodePencairanList, isLoading } = useListKodePencairan(dateParams);
   const [selectedKode, setSelectedKode] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
