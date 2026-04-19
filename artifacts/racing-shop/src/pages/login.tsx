@@ -49,12 +49,16 @@ export default function Login() {
         className="w-full max-w-md z-10 p-4"
       >
         <div className="bg-card/80 backdrop-blur-2xl border border-white/10 p-8 rounded-3xl shadow-2xl shadow-primary/10">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-orange-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
-              <Zap className="w-8 h-8 text-white" />
+          <div className="flex flex-col items-center mb-10">
+            <div className="w-full h-48 flex items-center justify-center mb-6">
+              <img 
+                src={`${import.meta.env.BASE_URL}logo-maxspeed.png`} 
+                alt="Maxspeed Racing Shop" 
+                className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]"
+                style={{ imageRendering: 'auto' }}
+              />
             </div>
-            <h1 className="text-3xl font-display font-bold tracking-wider text-foreground">MAX SPEED</h1>
-            <p className="text-primary font-bold text-sm tracking-widest uppercase mt-1">Dashboard</p>
+            <p className="text-primary font-black text-[10px] tracking-[0.5em] uppercase opacity-60">Aplikasi Max Speed</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">

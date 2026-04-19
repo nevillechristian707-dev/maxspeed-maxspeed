@@ -110,6 +110,274 @@ export default function Laporan() {
       }));
   }, [bankTransactions]);
 
+  const cashSummariesByDate = useMemo(() => {
+    if (!allSales) return [];
+    const groups: Record<string, { date: string; total: number; count: number; items: any[] }> = {};
+    
+    allSales.filter(s => s.paymentMethod === 'cash').forEach(s => {
+      const dateKey = s.tanggal;
+      if (!groups[dateKey]) {
+        groups[dateKey] = { date: dateKey, total: 0, count: 0, items: [] };
+      }
+      groups[dateKey].total += (s.total || 0);
+      groups[dateKey].count += 1;
+      groups[dateKey].items.push(s);
+    });
+
+    return Object.values(groups).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [allSales]);
+
+  const handlePrintCashRecap = (day: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Rekap Setoran Kasir - ${day.date}</title>
+          <style>
+            @page { margin: 10mm; size: A4; }
+            body { font-family: sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { margin: 0; color: #ea580c; font-size: 24px; }
+            .info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background: #1e293b; color: white; padding: 10px; text-align: left; font-size: 12px; }
+            td { border: 1px solid #e2e8f0; padding: 10px; font-size: 12px; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
+            .total-row { background: #f8fafc; font-weight: bold; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>MAXSPEED RACING SHOP</h1>
+            <p>REKAP SETORAN KASIR (TUNAI)</p>
+          </div>
+          
+          <div class="info">
+            <span>Tanggal: <b>${formatDateIndo(day.date)}</b></span>
+            <span>Dicetak: ${formatDateIndo(new Date().toISOString())}</span>
+          </div>
+          
+          <div style="font-size: 18px; margin-bottom: 20px;">
+            TOTAL SETORAN: <b style="color: #16a34a;">${formatRupiah(day.total)}</b>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Faktur</th>
+                <th>TRX ID</th>
+                <th>Produk</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${day.items.map((item: any, i: number) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${item.noFaktur || '-'}</td>
+                  <td>${item.kodeTransaksi}</td>
+                  <td>${item.namaBarang}</td>
+                  <td class="text-right">${item.qty}</td>
+                  <td class="text-right">${formatRupiah(item.total)}</td>
+                </tr>
+              `).join('')}
+              <tr class="total-row">
+                <td colspan="4" class="text-right">GRAND TOTAL</td>
+                <td class="text-right">${day.items.reduce((acc: any, curr: any) => acc + curr.qty, 0)}</td>
+                <td class="text-right">${formatRupiah(day.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>Laporan ini dicetak secara otomatis untuk keperluan rekonsiliasi kas.</p>
+          </div>
+
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handlePrintBankRecap = (day: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Rekap Verifikasi Bank - ${day.date}</title>
+          <style>
+            @page { margin: 10mm; size: A4; }
+            body { font-family: sans-serif; padding: 20px; color: #1e293b; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { margin: 0; color: #2563eb; font-size: 24px; }
+            .info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
+            .bank-section { margin-top: 30px; }
+            .bank-header { background: #f1f5f9; padding: 8px 15px; border-left: 4px solid #2563eb; font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; }
+            th { background: #334155; color: white; padding: 8px; text-align: left; font-size: 11px; }
+            td { border: 1px solid #e2e8f0; padding: 8px; font-size: 11px; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
+            .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>MAXSPEED RACING SHOP</h1>
+            <p>REKAP VERIFIKASI TRANSFER BANK</p>
+          </div>
+          
+          <div class="info">
+            <span>Tanggal Cair: <b>${formatDateIndo(day.date)}</b></span>
+            <span>Dicetak: ${formatDateIndo(new Date().toISOString())}</span>
+          </div>
+
+          <div style="font-size: 18px; margin-bottom: 10px;">
+            TOTAL MUTASI MASUK: <b style="color: #2563eb;">${formatRupiah(day.total)}</b>
+          </div>
+
+          ${day.banks.map((bg: any) => `
+            <div class="bank-section">
+              <div class="bank-header">
+                <span>BANK: ${bg.bank} (${bg.account})</span>
+                <span>Subtotal: ${formatRupiah(bg.total)}</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Faktur</th>
+                    <th>Sumber</th>
+                    <th>Produk</th>
+                    <th>Customer/OS</th>
+                    <th class="text-right">Nilai (IDR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${bg.items.map((item: any) => `
+                    <tr>
+                      <td>${item.noFaktur || '-'}</td>
+                      <td>${item.sumber.toUpperCase()}</td>
+                      <td>${item.namaBarang}</td>
+                      <td>${item.namaCustomer || item.namaOnlineShop || '-'}</td>
+                      <td class="text-right">${formatRupiah(item.nilai)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `).join('')}
+
+          <div class="footer">
+            <p>Gunakan laporan ini untuk mencocokkan total transfer dengan mutasi rekening bank Anda.</p>
+          </div>
+
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleExportPDFCashRecap = (day: any) => {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.width;
+    
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("REKAP SETORAN KASIR (TUNAI)", pageWidth / 2, 15, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Tanggal: ${formatDateIndo(day.date)}`, 14, 25);
+    doc.text(`Dicetak: ${formatDateIndo(new Date().toISOString())}`, pageWidth - 14, 25, { align: "right" });
+    
+    doc.setFontSize(12);
+    doc.text(`TOTAL SETORAN: ${formatRupiah(day.total)}`, 14, 32);
+    
+    autoTable(doc, {
+      startY: 38,
+      head: [['No', 'Faktur', 'TRX', 'Produk', 'Qty', 'Total']],
+      body: day.items.map((item: any, i: number) => [
+        i + 1,
+        item.noFaktur || '-',
+        item.kodeTransaksi,
+        item.namaBarang,
+        item.qty,
+        formatRupiah(item.total)
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [16, 185, 129] },
+      columnStyles: { 5: { halign: 'right' } }
+    });
+    
+    doc.save(`Rekap_Setoran_Cash_${day.date}.pdf`);
+  };
+
+  const handleExportPDFBankRecap = (day: any) => {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.width;
+    
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("REKAP VERIFIKASI TRANSFER BANK", pageWidth / 2, 15, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Tanggal Cair: ${formatDateIndo(day.date)}`, 14, 25);
+    doc.text(`Dicetak: ${formatDateIndo(new Date().toISOString())}`, pageWidth - 14, 25, { align: "right" });
+    
+    doc.setFontSize(12);
+    doc.text(`TOTAL TRANSFER: ${formatRupiah(day.total)}`, 14, 32);
+    
+    let currentY = 38;
+    day.banks.forEach((bg: any) => {
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`BANK: ${bg.bank} (${bg.account}) - Total: ${formatRupiah(bg.total)}`, 14, currentY + 5);
+      
+      autoTable(doc, {
+        startY: currentY + 8,
+        head: [['Faktur', 'Sumber', 'Produk', 'Customer/OS', 'Nilai (Rp)']],
+        body: bg.items.map((item: any) => [
+          item.noFaktur || '-',
+          item.sumber.toUpperCase(),
+          item.namaBarang,
+          item.namaCustomer || item.namaOnlineShop || '-',
+          formatRupiah(item.nilai)
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+        columnStyles: { 4: { halign: 'right' } }
+      });
+      currentY = (doc as any).lastAutoTable.finalY + 10;
+      if (currentY > 260) {
+        doc.addPage();
+        currentY = 15;
+      }
+    });
+    
+    doc.save(`Rekap_Verifikasi_Bank_${day.date}.pdf`);
+  };
+
   const exportExcel = () => {
     if (!profit || !allStats) return;
     const wb = XLSX.utils.book_new();
@@ -665,6 +933,107 @@ export default function Laporan() {
               </table>
             </CardContent>
           </Card>
+        </div>
+
+        {/* NEW RECONCILIATION SECTION */}
+        <div className="space-y-8 mt-12 no-print">
+          <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3 border-l-4 border-indigo-500 pl-4 uppercase tracking-tighter">
+            <Monitor className="text-indigo-500 w-6 h-6" /> Rekonsiliasi Harian (Kasir & Bank)
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Cash Setoran Table */}
+            <Card className="border-emerald-500/20 shadow-lg shadow-emerald-500/5 transition-all hover:border-emerald-500/40">
+              <CardHeader className="bg-emerald-500/5 border-b border-border/50 py-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-emerald-500 text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" /> Setoran Cash Harian
+                  </CardTitle>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Uang fisik yang harus disetor kasir</p>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead className="sticky top-0 bg-secondary/80 backdrop-blur-md text-muted-foreground uppercase font-black border-b border-border/50 z-10">
+                      <tr>
+                        <th className="px-4 py-3">Tanggal</th>
+                        <th className="px-4 py-3 text-right">Total Cash</th>
+                        <th className="px-4 py-3 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10">
+                      {cashSummariesByDate.map((day, i) => (
+                        <tr key={i} className="hover:bg-emerald-500/5 transition-colors group/row">
+                          <td className="px-4 py-3 font-bold">{formatDateSimple(day.date)}</td>
+                          <td className="px-4 py-3 text-right font-black text-emerald-500">{formatRupiah(day.total)}</td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button size="sm" variant="outline" onClick={() => handlePrintCashRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold">
+                                <Printer className="w-3 h-3" /> CETAK
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleExportPDFCashRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-rose-500/20 text-rose-600 hover:bg-rose-500 hover:text-white font-bold">
+                                <FileText className="w-3 h-3" /> PDF
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {cashSummariesByDate.length === 0 && (
+                        <tr><td colSpan={3} className="px-4 py-10 text-center text-muted-foreground italic">Belum ada data setoran cash</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Bank Verification Table */}
+            <Card className="border-blue-500/20 shadow-lg shadow-blue-500/5 transition-all hover:border-blue-500/40">
+              <CardHeader className="bg-blue-500/5 border-b border-border/50 py-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-blue-500 text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                    <Landmark className="w-4 h-4" /> Verifikasi Transfer Bank
+                  </CardTitle>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Pencocokan total dengan mutasi rekening</p>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead className="sticky top-0 bg-secondary/80 backdrop-blur-md text-muted-foreground uppercase font-black border-b border-border/50 z-10">
+                      <tr>
+                        <th className="px-4 py-3">Tanggal Cair</th>
+                        <th className="px-4 py-3 text-right">Total Mutasi</th>
+                        <th className="px-4 py-3 text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10">
+                      {bankReportSummaries.map((day, i) => (
+                        <tr key={i} className="hover:bg-blue-500/5 transition-colors group/row">
+                          <td className="px-4 py-3 font-bold">{formatDateSimple(day.date)}</td>
+                          <td className="px-4 py-3 text-right font-black text-blue-500">{formatRupiah(day.total)}</td>
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Button size="sm" variant="outline" onClick={() => handlePrintBankRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-blue-500/20 text-blue-600 hover:bg-blue-500 hover:text-white font-bold">
+                                <Printer className="w-3 h-3" /> CETAK
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => handleExportPDFBankRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-rose-500/20 text-rose-600 hover:bg-rose-500 hover:text-white font-bold">
+                                <FileText className="w-3 h-3" /> PDF
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {bankReportSummaries.length === 0 && (
+                        <tr><td colSpan={3} className="px-4 py-10 text-center text-muted-foreground italic">Belum ada data verifikasi bank</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="space-y-8 mt-12 pb-20">

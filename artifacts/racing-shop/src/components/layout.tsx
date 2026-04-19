@@ -107,13 +107,19 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const SidebarContent = () => (
     <>
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-lg shadow-primary/20">
-          <Zap className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h1 className="font-display font-bold text-xl tracking-wide text-foreground">MAX SPEED</h1>
-          <p className="text-[10px] uppercase tracking-widest text-primary font-bold">Racing Shop</p>
+      <div className="p-4 mb-2">
+        <div className="flex flex-col items-center">
+          <div className="w-full h-32 flex items-center justify-center p-0 overflow-visible group">
+            <img 
+              src={`${import.meta.env.BASE_URL}logo-maxspeed.png`} 
+              alt="Maxspeed Logo" 
+              className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(234,88,12,0.45)] group-hover:scale-105 transition-transform duration-500 will-change-transform"
+              style={{ imageRendering: 'auto' }}
+            />
+          </div>
+          <div className="text-center -mt-2">
+            <h1 className="font-display font-black text-[10px] tracking-[0.4em] text-primary uppercase opacity-80">Aplikasi Max Speed</h1>
+          </div>
         </div>
       </div>
       
@@ -167,10 +173,13 @@ export function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Topbar & Sidebar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-border z-50 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-sidebar-border z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <Zap className="w-6 h-6 text-primary" />
-          <span className="font-display font-bold text-lg">MAX SPEED</span>
+          <img 
+            src={`${import.meta.env.BASE_URL}logo-maxspeed.png`} 
+            alt="Maxspeed" 
+            className="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(234,88,12,0.4)]"
+          />
         </div>
         <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-muted-foreground">
           <Menu className="w-6 h-6" />

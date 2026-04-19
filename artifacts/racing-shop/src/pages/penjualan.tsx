@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingCart, Plus, Trash2, Download, Search, FileText, Check, ChevronsUpDown, Calendar, FileDown, FileBarChart, Pencil, X } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, Download, Search, FileText, Check, ChevronsUpDown, Calendar, FileDown, FileBarChart, Pencil, X, Printer } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -56,7 +56,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const MemoizedTableRow = memo(({ item, handleEdit, handleDelete, canEdit, canDelete }: any) => {
+const MemoizedTableRow = memo(({ item, handleEdit, handleDelete, handlePrint, handlePDF, canEdit, canDelete }: any) => {
   return (
     <tr className="hover:bg-primary/[0.02] transition-colors group/row border-b border-border/20">
       <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
@@ -93,6 +93,9 @@ const MemoizedTableRow = memo(({ item, handleEdit, handleDelete, canEdit, canDel
       </td>
       <td className="px-5 py-3 text-center">
         <div className="flex items-center justify-center gap-2">
+          <button onClick={() => handlePrint(item)} className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded-lg border border-emerald-500/20 transition-all active:scale-95" title="Cetak Struk"><Printer className="w-3.5 h-3.5" /></button>
+          <button onClick={() => handlePDF(item)} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20 transition-all active:scale-95" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+          
           {canEdit && (
             <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg border border-blue-500/20 transition-all active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
           )}
@@ -118,7 +121,7 @@ MemoizedTableRow.displayName = 'MemoizedTableRow';
 
 import { useMonthYear } from "@/context/month-year-context";
 
-const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, canEdit, canDelete }: any) => {
+const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, handlePrint, handlePDF, canEdit, canDelete }: any) => {
   return (
     <div className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
       <div className="flex justify-between items-start mb-4">
@@ -157,6 +160,9 @@ const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, canEdit, canD
           <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
         </div>
         <div className="flex gap-2">
+           <button onClick={() => handlePrint(item)} className="p-2.5 text-emerald-400 bg-emerald-500/5 rounded-xl border border-emerald-500/20 active:scale-90"><Printer className="w-4 h-4" /></button>
+           <button onClick={() => handlePDF(item)} className="p-2.5 text-rose-400 bg-rose-500/5 rounded-xl border border-rose-500/20 active:scale-90"><FileDown className="w-4 h-4" /></button>
+           
            {canEdit && (
              <button onClick={() => handleEdit(item)} className="p-2.5 text-blue-400 bg-blue-500/5 rounded-xl border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
            )}
@@ -177,7 +183,7 @@ const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, canEdit, canD
       </div>
     </div>
   );
-});
+}););
 MemoizedMobileCard.displayName = 'MemoizedMobileCard';
 
 export default function Penjualan() {
@@ -461,6 +467,169 @@ export default function Penjualan() {
     
     const filename = selectedMonth === "all" ? `Penjualan_Tahun_${selectedYear}.pdf` : `Penjualan_${selectedMonth}_${selectedYear}.pdf`;
     doc.save(filename);
+  };
+
+  const handlePrintIndividual = (item: any) => {
+    // Find grouped items if noFaktur exists
+    const groupedItems = (item.noFaktur && item.noFaktur !== "-") 
+      ? filteredListData.filter(x => x.noFaktur === item.noFaktur && x.tanggal === item.tanggal)
+      : [item];
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const total = groupedItems.reduce((acc, curr) => acc + curr.total, 0);
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Struk Maxspeed - ${item.kodeTransaksi}</title>
+          <style>
+            @page { margin: 0; size: 80mm auto; }
+            body { 
+              font-family: 'Courier New', Courier, monospace; 
+              width: 72mm; 
+              margin: 0; 
+              padding: 4mm;
+              color: black;
+              font-size: 12px;
+            }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
+            .divider { border-bottom: 1px dashed black; margin: 4px 0; }
+            .header { font-size: 16px; margin-bottom: 2px; }
+            .flex { display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+            td { padding: 2px 0; vertical-align: top; }
+            .footer { margin-top: 10px; font-style: italic; font-size: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="text-center font-bold header">MAXSPEED RACING SHOP</div>
+          <div class="text-center">Jl. Raya Otista No. 123</div>
+          <div class="text-center">Telp: 0812-3456-7890</div>
+          
+          <div class="divider"></div>
+          
+          <div class="flex">
+            <span>${formatDate(item.tanggal)}</span>
+            <span>${item.kodeTransaksi}</span>
+          </div>
+          ${item.noFaktur ? `<div>Faktur: ${item.noFaktur}</div>` : ''}
+          <div>Metode: ${item.paymentMethod.toUpperCase()}</div>
+          
+          <div class="divider"></div>
+          
+          <div class="flex font-bold">
+            <span>Item</span>
+            <span>Total</span>
+          </div>
+          
+          <table>
+            ${groupedItems.map(gi => `
+              <tr>
+                <td colspan="2">${gi.namaBarang}</td>
+              </tr>
+              <tr>
+                <td>${gi.qty} x ${formatRupiah(gi.harga)}</td>
+                <td class="text-right">${formatRupiah(gi.total)}</td>
+              </tr>
+            `).join('')}
+          </table>
+          
+          <div class="divider"></div>
+          
+          <div class="flex font-bold" style="font-size: 14px; margin-top: 4px;">
+            <span>TOTAL</span>
+            <span>${formatRupiah(total)}</span>
+          </div>
+          
+          <div class="footer text-center">
+            Terima kasih atas kunjungan Anda!<br>
+            Barang yang sudah dibeli tidak dapat ditukar.
+          </div>
+          
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          <\/script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handleExportPDFIndividual = (item: any) => {
+    // Re-use logic for PDF generation
+    const groupedItems = (item.noFaktur && item.noFaktur !== "-") 
+      ? filteredListData.filter(x => x.noFaktur === item.noFaktur && x.tanggal === item.tanggal)
+      : [item];
+
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 200]
+    });
+
+    const pageWidth = doc.internal.pageSize.width;
+    let y = 10;
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("MAXSPEED RACING SHOP", pageWidth / 2, y, { align: "center" });
+    y += 6;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Jl. Raya Otista No. 123", pageWidth / 2, y, { align: "center" });
+    y += 4;
+    doc.text("Telp: 0812-3456-7890", pageWidth / 2, y, { align: "center" });
+    y += 4;
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(5, y, pageWidth - 5, y);
+    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text(formatDate(item.tanggal), 5, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(item.kodeTransaksi, pageWidth - 5, y, { align: "right" });
+    if (item.noFaktur) { y += 4; doc.text(`Faktur: ${item.noFaktur}`, 5, y); }
+    y += 4;
+    doc.text(`Metode: ${item.paymentMethod.toUpperCase()}`, 5, y);
+    y += 4;
+    doc.line(5, y, pageWidth - 5, y);
+    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.text("Item", 5, y);
+    doc.text("Total", pageWidth - 5, y, { align: "right" });
+    y += 2;
+
+    let subtotal = 0;
+    doc.setFont("helvetica", "normal");
+    groupedItems.forEach((gi: any) => {
+      y += 4;
+      doc.text(gi.namaBarang, 5, y);
+      y += 4;
+      doc.text(`${gi.qty} x ${formatRupiah(gi.harga)}`, 5, y);
+      doc.text(formatRupiah(gi.total), pageWidth - 5, y, { align: "right" });
+      subtotal += gi.total;
+    });
+
+    y += 6;
+    doc.line(5, y, pageWidth - 5, y);
+    y += 6;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL", 5, y);
+    doc.text(formatRupiah(subtotal), pageWidth - 5, y, { align: "right" });
+    
+    y += 10;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.text("Terima kasih atas kunjungan Anda!", pageWidth / 2, y, { align: "center" });
+
+    doc.save(`Struk_Maxspeed_${item.kodeTransaksi}.pdf`);
   };
 
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -792,6 +961,8 @@ export default function Penjualan() {
                       key={item.id} 
                       item={item} 
                       handleEdit={handleEdit} 
+                      handlePrint={handlePrintIndividual}
+                      handlePDF={handleExportPDFIndividual}
                       handleDelete={(id: number) => {
                         if ((item.totalPaid || 0) > 0) {
                           toast({ title: "Tindakan Ditolak", description: `Transaksi ini sudah masuk di Pencairan Perbank.`, variant: "destructive" });
@@ -823,6 +994,8 @@ export default function Penjualan() {
                   key={item.id} 
                   item={item} 
                   handleEdit={handleEdit} 
+                  handlePrint={handlePrintIndividual}
+                  handlePDF={handleExportPDFIndividual}
                   handleDelete={(id: number) => {
                     if ((item.totalPaid || 0) > 0) {
                       toast({ title: "Tindakan Ditolak", description: "Transaksi ini sudah masuk di Pencairan Perbank.", variant: "destructive" });
