@@ -183,7 +183,7 @@ const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, handlePrint, 
       </div>
     </div>
   );
-}););
+});
 MemoizedMobileCard.displayName = 'MemoizedMobileCard';
 
 export default function Penjualan() {
