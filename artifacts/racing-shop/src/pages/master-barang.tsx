@@ -317,7 +317,7 @@ export default function MasterBarang() {
     <Layout>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-          <Package className="text-primary" /> Master Barang
+          <Package className="text-primary w-8 h-8" /> Master Barang
         </h1>
         <div className="flex gap-2">
           {canDelete && (
