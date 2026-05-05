@@ -170,7 +170,7 @@ router.post("/bulk-settle", async (req, res) => {
 
     const kodePencairan = existingKode || await generateKodePencairan(db, tanggalCair);
 
-    const results = await db.transaction(async (tx) => {
+    const results = await db.transaction(async (tx: any) => {
       const updatedRows = [];
       for (const id of ids) {
         const rows = await tx.select().from(penjualanTable).where(eq(penjualanTable.id, id));

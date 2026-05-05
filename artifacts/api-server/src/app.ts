@@ -98,7 +98,7 @@ if (process.env.DATABASE_URL) {
         CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
       );
       CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "public"."session" ("expire");
-    `).catch(e => console.error("Failed to create session table:", e));
+    `).catch((e: any) => console.error("Failed to create session table:", e));
 
     sessionConfig.store = new PgStore({
       pool: sessionPool,
