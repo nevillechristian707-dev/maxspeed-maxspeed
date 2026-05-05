@@ -172,9 +172,9 @@ export function Layout({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div className="min-h-screen bg-background flex text-foreground selection:bg-primary/30">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 min-w-[288px] flex-shrink-0 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0 z-40 overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-x-hidden">
+      {/* Desktop Sidebar — fixed so horizontal overflow on any page can never push it sideways */}
+      <aside className="hidden md:flex w-72 min-w-[288px] flex-col bg-sidebar border-r border-sidebar-border h-screen fixed top-0 left-0 z-40 overflow-hidden">
         <SidebarContent
           user={user}
           location={location}
@@ -233,8 +233,8 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto scroll-stable md:pt-0 pt-16">
+      {/* Main Content — left padding reserves the space taken by the fixed sidebar (md:pl-72 = 288px) */}
+      <main className="md:pl-72 min-w-0 h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16">
         <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
           {children}
         </div>

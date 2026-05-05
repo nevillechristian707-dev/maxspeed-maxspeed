@@ -61,17 +61,17 @@ const FullPageLoader = memo(() => (
 ));
 FullPageLoader.displayName = 'FullPageLoader';
 
-// Skeleton loader ringan untuk Suspense fallback (lebih cepat dari FullPageLoader)
-// Meniru struktur Layout (sidebar 288px + content max-w-[1600px]) supaya tidak terjadi
-// flash full-width tanpa sidebar saat halaman lazy-loaded sedang dimuat.
+// Skeleton loader ringan untuk Suspense fallback. Mirror struktur Layout
+// (sidebar fixed 288px + main pl-72 + container max-w-[1600px] mx-auto) sehingga
+// saat halaman lazy-loaded sedang dimuat, tidak terjadi pergeseran posisi sidebar.
 const PageSkeleton = memo(() => (
-  <div className="min-h-screen bg-background flex">
-    {/* Sidebar placeholder — match Layout: hidden md:flex w-72 */}
-    <aside className="hidden md:flex w-72 min-w-[288px] flex-shrink-0 bg-sidebar border-r border-sidebar-border h-screen sticky top-0" />
-    {/* Mobile topbar placeholder — match Layout: md:hidden h-16 */}
+  <div className="min-h-screen bg-background overflow-x-hidden">
+    {/* Sidebar placeholder — fixed, samakan dengan Layout */}
+    <aside className="hidden md:flex w-72 min-w-[288px] bg-sidebar border-r border-sidebar-border h-screen fixed top-0 left-0 z-40" />
+    {/* Mobile topbar placeholder */}
     <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-sidebar-border z-50" />
-    {/* Main content placeholder — match Layout main padding & max-width */}
-    <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto scroll-stable md:pt-0 pt-16">
+    {/* Main content placeholder */}
+    <main className="md:pl-72 min-w-0 h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16">
       <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted/30 rounded-lg w-48" />
