@@ -235,7 +235,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content — left padding reserves the space taken by the fixed sidebar (md:pl-72 = 288px) */}
       <main className="md:pl-72 min-w-0 h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16">
-        <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+        <div className="p-4 md:p-8 max-w-[1440px] mx-auto w-full">
           {children}
         </div>
       </main>

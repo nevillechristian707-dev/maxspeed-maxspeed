@@ -72,7 +72,7 @@ const PageSkeleton = memo(() => (
     <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-sidebar-border z-50" />
     {/* Main content placeholder */}
     <main className="md:pl-72 min-w-0 h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16">
-      <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+      <div className="p-4 md:p-8 max-w-[1440px] mx-auto w-full">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted/30 rounded-lg w-48" />
           <div className="h-4 bg-muted/20 rounded w-64" />

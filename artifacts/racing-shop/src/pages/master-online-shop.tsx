@@ -43,7 +43,7 @@ export default function MasterOnlineShop() {
           <p className="text-muted-foreground mt-1 text-sm">Kelola platform online shop untuk pencairan dana.</p>
         </div>
       </div>
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
         {canAdd && (
         <Card className="h-fit"><CardHeader><CardTitle>Add OS</CardTitle></CardHeader>
           <CardContent>
@@ -55,7 +55,7 @@ export default function MasterOnlineShop() {
         </Card>
         )}
         <Card className={canAdd ? "md:col-span-2" : "md:col-span-3"}>
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
              <table className="w-full text-sm text-left"><thead className="bg-secondary/50"><tr><th className="p-3">Platform</th><th className="p-3">Act</th></tr></thead>
              <tbody>{data?.map(b => <tr key={b.id} className="border-b border-border/50"><td className="p-3 font-bold">{b.namaOnlineShop}</td><td className="p-3">{canDelete && <button onClick={()=>deleteMutation.mutate({id: b.id},{onSuccess:()=>queryClient.invalidateQueries()})}><Trash2 className="w-4 h-4 text-destructive"/></button>}</td></tr>)}</tbody>
              </table>
