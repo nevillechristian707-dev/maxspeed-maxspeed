@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useGetDashboardSummary, useGetMe, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -14,7 +14,8 @@ import { formatRupiah } from "@/lib/utils";
 export function NightlyReportPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useGetMe();
-  
+  const hasShownRef = useRef(false);
+
   // Tanggal Hari Ini (YYYY-MM-DD)
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   
@@ -29,46 +30,23 @@ export function NightlyReportPopup() {
     }
   );
 
-  // Cek Permission & Waktu
+  // Cek Permission saja — popup tampil sekali setiap aplikasi dibuka.
+  // Refresh halaman dianggap sebagai "buka aplikasi baru" → popup muncul lagi.
+  // Role/permission tetap diberlakukan (tidak berubah dari versi sebelumnya).
   useEffect(() => {
-    const handleCheck = () => {
-      if (!user) return;
+    if (!user || hasShownRef.current) return;
 
-      // 1. Cek Hak Akses (Laporan Malam - view)
-      const role = String(user.role || '').toLowerCase();
-      const isAdmin = role.includes('admin') || role.includes('superadmin');
-      const permissions = (user as any).permissions || {};
-      const perms = permissions['Laporan Malam'] || permissions['laporan malam'] || [];
-      const hasPermission = isAdmin || perms.some((p: string) => p.toLowerCase() === 'view');
+    const role = String(user.role || '').toLowerCase();
+    const isAdmin = role.includes('admin') || role.includes('superadmin');
+    const permissions = (user as any).permissions || {};
+    const perms = permissions['Laporan Malam'] || permissions['laporan malam'] || [];
+    const hasPermission = isAdmin || perms.some((p: string) => p.toLowerCase() === 'view');
 
-      if (!hasPermission) return;
-
-      // 2. Cek Waktu (Target 19:00 WIB)
-      const now = new Date();
-      // Konversi ke WIB (UTC+7)
-      const wibOffset = 7 * 60; // 7 jam
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const wibDate = new Date(utc + (3600000 * 7));
-      
-      const hours = wibDate.getHours();
-
-      // Muncul di jam 19:xx
-      if (hours === 19) {
-        // Cek apakah hari ini sudah muncul (localStorage)
-        const lastShown = localStorage.getItem('nightly_report_last_shown');
-        if (lastShown !== today) {
-          setIsOpen(true);
-          localStorage.setItem('nightly_report_last_shown', today);
-        }
-      }
-    };
-
-    // Jalankan pengecekan setiap menit
-    const interval = setInterval(handleCheck, 60000);
-    handleCheck(); // Cek langsung saat load
-
-    return () => clearInterval(interval);
-  }, [user, today]);
+    if (hasPermission) {
+      setIsOpen(true);
+      hasShownRef.current = true;
+    }
+  }, [user]);
 
   return (
     <AnimatePresence>
