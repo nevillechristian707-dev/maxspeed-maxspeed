@@ -168,7 +168,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex text-foreground selection:bg-primary/30">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0 z-40">
+      <aside className="hidden md:flex w-72 min-w-[288px] flex-shrink-0 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0 z-40">
         <SidebarContent />
       </aside>
 
