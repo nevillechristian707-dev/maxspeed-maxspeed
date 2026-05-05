@@ -33,10 +33,13 @@ export default function Customer() {
 
   return (
     <Layout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-          <Users className="text-primary w-8 h-8"/> Master Customer / Bengkel
-        </h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
+            <Users className="text-primary w-8 h-8"/> Master Customer / Bengkel
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Kelola data pelanggan dan bengkel rekanan.</p>
+        </div>
       </div>
       <div className="grid md:grid-cols-3 gap-6">
         {canAdd && (

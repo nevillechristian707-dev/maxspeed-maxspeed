@@ -315,11 +315,15 @@ export default function MasterBarang() {
 
   return (
     <Layout>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-          <Package className="text-primary w-8 h-8" /> Master Barang
-        </h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
+            <Package className="text-primary w-8 h-8" /> Master Barang
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">Kelola daftar stok barang dan harga modal/jual.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
           {canDelete && (
             <button onClick={handleDeleteAll} className="flex items-center gap-2 px-4 py-2 bg-destructive/20 border border-destructive/40 text-destructive rounded-lg text-sm hover:bg-destructive/30 transition-colors">
               <Trash2 className="w-4 h-4" /> Hapus Semua
