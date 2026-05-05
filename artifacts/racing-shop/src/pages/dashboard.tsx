@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, ShoppingCart, TrendingUp, TrendingDown, DollarSign, Wallet, Package, Store, CreditCard, Activity, Landmark, Calendar, Printer, Receipt } from "lucide-react";
+import { Search, ShoppingCart, TrendingUp, TrendingDown, DollarSign, Wallet, Package, Store, CreditCard, Activity, Landmark, Calendar, Printer, Receipt, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from 'recharts';
 import { useState } from "react";
