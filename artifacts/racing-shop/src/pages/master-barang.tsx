@@ -530,14 +530,14 @@ export default function MasterBarang() {
         <CardContent className="p-0">
           {/* Desktop View */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-sm text-muted-foreground uppercase bg-secondary/50 border-b border-border">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                 <tr>
-                  <th className="px-4 py-3 font-black tracking-widest uppercase">Kode</th>
-                  <th className="px-4 py-3 font-black tracking-widest uppercase">Nama Barang</th>
-                  <th className="px-4 py-3 font-black tracking-widest uppercase">Brand</th>
-                  <th className="px-4 py-3 font-black tracking-widest uppercase text-right">Harga Jual</th>
-                  <th className="px-4 py-3 text-center font-black tracking-widest uppercase">Aksi</th>
+                  <th className="px-6 py-4 font-black tracking-widest uppercase">Kode</th>
+                  <th className="px-4 py-4 font-black tracking-widest uppercase">Nama Barang</th>
+                  <th className="px-4 py-4 font-black tracking-widest uppercase">Brand</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest uppercase">Harga Jual</th>
+                  <th className="px-4 py-4 text-center font-black tracking-widest uppercase">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -546,12 +546,12 @@ export default function MasterBarang() {
                 ) : !filteredData?.length ? (
                   <tr><td colSpan={5} className="text-center py-10 text-muted-foreground font-black uppercase">Belum ada data barang</td></tr>
                 ) : filteredData.map(item => (
-                  <tr key={item.id} className="border-b border-border/50 hover:bg-primary/[0.02] transition-colors group">
-                    <td className="px-4 py-3 font-mono text-xs font-medium tracking-tight text-muted-foreground">{item.kodeBarang}</td>
-                    <td className="px-4 py-3 font-black text-foreground">{item.namaBarang}</td>
-                    <td className="px-4 py-3"><span className="text-xs font-medium tracking-tight bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-wider">{item.brand}</span></td>
-                    <td className="px-4 py-3 text-right font-black text-emerald-500">{formatRupiah(item.hargaJual)}</td>
-                    <td className="px-4 py-3">
+                  <tr key={item.id} className="border-b border-border/20 hover:bg-primary/[0.02] transition-colors group">
+                    <td className="px-6 py-4 font-mono text-xs font-medium tracking-tight text-muted-foreground">{item.kodeBarang}</td>
+                    <td className="px-4 py-4 font-black text-foreground">{item.namaBarang}</td>
+                    <td className="px-4 py-4"><span className="text-xs font-medium tracking-tight bg-primary/10 text-primary px-2 py-0.5 rounded font-black uppercase tracking-wider">{item.brand}</span></td>
+                    <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.hargaJual)}</td>
+                    <td className="px-4 py-4">
                       <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {canEdit && <button onClick={() => handleEdit(item)} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-500/10 border border-blue-500/20"><Edit2 className="w-4 h-4"/></button>}
                         {canDelete && <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 border border-rose-500/20"><Trash2 className="w-4 h-4"/></button>}

@@ -221,12 +221,12 @@ export default function MasterBank() {
               {/* Desktop View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
-                  <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/20 border-b border-border/30">
+                  <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                     <tr>
-                      <th className="px-6 py-4 font-bold tracking-widest uppercase">Tanggal Cair</th>
-                      <th className="px-4 py-4 font-bold tracking-widest uppercase">Bank</th>
-                      <th className="px-4 py-4 font-bold tracking-widest uppercase">Faktur / Sumber</th>
-                      <th className="px-4 py-4 text-right font-bold tracking-widest uppercase">Nilai</th>
+                      <th className="px-6 py-4 font-black tracking-widest uppercase">Tanggal Cair</th>
+                      <th className="px-4 py-4 font-black tracking-widest uppercase">Bank</th>
+                      <th className="px-4 py-4 font-black tracking-widest uppercase">Faktur / Sumber</th>
+                      <th className="px-4 py-4 text-right font-black tracking-widest uppercase">Nilai</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">

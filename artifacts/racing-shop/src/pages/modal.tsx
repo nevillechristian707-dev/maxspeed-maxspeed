@@ -111,8 +111,8 @@ export default function Modal() {
         <CardContent className="p-0">
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-xs text-left border-collapse">
-              <thead className="text-[10px] text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                 <tr>
                   <th className="px-6 py-4 font-black tracking-widest uppercase">Tgl</th>
                   <th className="px-4 py-4 font-black tracking-widest uppercase">TRX</th>
@@ -133,7 +133,7 @@ export default function Modal() {
                   return (
                     <tr key={item.id} className="hover:bg-primary/[0.03] transition-colors group/row">
                       <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{formatDate(item.tanggal)}</td>
-                      <td className="px-4 py-4 font-mono text-[10px] text-primary font-black tracking-tighter">{item.kodeTransaksi}</td>
+                      <td className="px-4 py-4 font-mono text-xs text-primary font-black tracking-tighter">{item.kodeTransaksi}</td>
                       <td className="px-4 py-4 font-bold text-foreground group-hover/row:text-primary transition-colors">{item.namaBarang}</td>
                       <td className="px-4 py-4 text-center font-black tabular-nums">{item.qty}</td>
                       <td className="px-4 py-4 text-right font-black text-orange-500/80 tabular-nums">{formatRupiah(item.totalModal)}</td>

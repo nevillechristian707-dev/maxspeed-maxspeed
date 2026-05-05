@@ -548,10 +548,10 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                   <tr>
-                    <th className="px-4 py-2.5 w-10">
-                      <Checkbox 
+                    <th className="px-4 py-3.5 w-10">
+                      <Checkbox
                         checked={onlineShopPending.length > 0 && onlineShopPending.every(i => markedIds.has(i.id))}
                         onCheckedChange={(checked) => {
                           const newMarked = new Set(markedIds);
@@ -560,11 +560,11 @@ export default function Pencairan() {
                         }}
                       />
                     </th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Platform / Produk</th>
-                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">TOTAL</th>
-                    <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Tgl TRX</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Faktur / TRX</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Platform / Produk</th>
+                    <th className="px-4 py-3.5 text-right font-black uppercase tracking-widest">TOTAL</th>
+                    <th className="px-4 py-3.5 text-center font-black uppercase tracking-widest">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -751,10 +751,10 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs text-muted-foreground uppercase bg-secondary/10 border-b border-border/30">
+                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
                   <tr>
-                    <th className="px-4 py-2.5 w-10">
-                      <Checkbox 
+                    <th className="px-4 py-3.5 w-10">
+                      <Checkbox
                         checked={kreditPending.length > 0 && kreditPending.every(i => markedIds.has(i.id))}
                         onCheckedChange={(checked) => {
                           const newMarked = new Set(markedIds);
@@ -763,11 +763,11 @@ export default function Pencairan() {
                         }}
                       />
                     </th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Tgl TRX</th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Faktur / TRX</th>
-                    <th className="px-4 py-2.5 font-bold uppercase tracking-widest">Customer / Produk</th>
-                    <th className="px-4 py-2.5 text-right font-bold uppercase tracking-widest">TOTAL</th>
-                    <th className="px-4 py-2.5 text-center font-bold uppercase tracking-widest">Aksi</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Tgl TRX</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Faktur / TRX</th>
+                    <th className="px-4 py-3.5 font-black uppercase tracking-widest">Customer / Produk</th>
+                    <th className="px-4 py-3.5 text-right font-black uppercase tracking-widest">TOTAL</th>
+                    <th className="px-4 py-3.5 text-center font-black uppercase tracking-widest">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -972,12 +972,12 @@ export default function Pencairan() {
                             <table className="w-full text-[11px] text-left">
                               <thead className="text-xs font-medium text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
                                   <tr>
-                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Tgl Faktur</th>
-                                    <th className="px-3 sm:px-6 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Faktur / TRX</th>
-                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Produk & Brand</th>
-                                    <th className="px-2 sm:px-4 py-2 font-bold uppercase tracking-widest whitespace-nowrap">Sumber Dana</th>
-                                    <th className="px-2 sm:px-4 py-2 text-right font-bold uppercase tracking-widest whitespace-nowrap">TOTAL</th>
-                                    <th className="px-2 sm:px-4 py-2 text-center font-bold uppercase tracking-widest whitespace-nowrap">Aksi</th>
+                                    <th className="px-2 sm:px-4 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Tgl Faktur</th>
+                                    <th className="px-3 sm:px-6 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Faktur / TRX</th>
+                                    <th className="px-2 sm:px-4 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Produk & Brand</th>
+                                    <th className="px-2 sm:px-4 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Sumber Dana</th>
+                                    <th className="px-2 sm:px-4 py-2.5 text-right font-black uppercase tracking-widest whitespace-nowrap">TOTAL</th>
+                                    <th className="px-2 sm:px-4 py-2.5 text-center font-black uppercase tracking-widest whitespace-nowrap">Aksi</th>
                                   </tr>
                               </thead>
                               <tbody className="divide-y divide-border/10">
