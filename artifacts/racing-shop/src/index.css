@@ -108,6 +108,14 @@
   }
 }
 
+/* Reserve scrollbar gutter so content doesn't shift when content length changes between pages */
+html, body {
+  scrollbar-gutter: stable;
+}
+.scroll-stable {
+  scrollbar-gutter: stable;
+}
+
 /* Custom Scrollbar for sleek dark mode */
 ::-webkit-scrollbar {
   width: 8px;

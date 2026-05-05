@@ -234,7 +234,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto md:pt-0 pt-16">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto scroll-stable md:pt-0 pt-16">
         <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
           {children}
         </div>

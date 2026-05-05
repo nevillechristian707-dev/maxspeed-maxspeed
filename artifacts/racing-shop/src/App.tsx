@@ -62,18 +62,29 @@ const FullPageLoader = memo(() => (
 FullPageLoader.displayName = 'FullPageLoader';
 
 // Skeleton loader ringan untuk Suspense fallback (lebih cepat dari FullPageLoader)
+// Meniru struktur Layout (sidebar 288px + content max-w-[1600px]) supaya tidak terjadi
+// flash full-width tanpa sidebar saat halaman lazy-loaded sedang dimuat.
 const PageSkeleton = memo(() => (
-  <div className="min-h-screen bg-background p-4 md:p-8">
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 bg-muted/30 rounded-lg w-48" />
-      <div className="h-4 bg-muted/20 rounded w-64" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-28 bg-muted/20 rounded-xl" />
-        ))}
+  <div className="min-h-screen bg-background flex">
+    {/* Sidebar placeholder — match Layout: hidden md:flex w-72 */}
+    <aside className="hidden md:flex w-72 min-w-[288px] flex-shrink-0 bg-sidebar border-r border-sidebar-border h-screen sticky top-0" />
+    {/* Mobile topbar placeholder — match Layout: md:hidden h-16 */}
+    <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-sidebar-border z-50" />
+    {/* Main content placeholder — match Layout main padding & max-width */}
+    <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto scroll-stable md:pt-0 pt-16">
+      <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted/30 rounded-lg w-48" />
+          <div className="h-4 bg-muted/20 rounded w-64" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-28 bg-muted/20 rounded-xl" />
+            ))}
+          </div>
+          <div className="h-64 bg-muted/20 rounded-xl mt-4" />
+        </div>
       </div>
-      <div className="h-64 bg-muted/20 rounded-xl mt-4" />
-    </div>
+    </main>
   </div>
 ));
 PageSkeleton.displayName = 'PageSkeleton';
