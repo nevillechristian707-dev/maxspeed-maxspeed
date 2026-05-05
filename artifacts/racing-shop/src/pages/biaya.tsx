@@ -47,7 +47,7 @@ export default function Biaya() {
 
   const deleteMutation = useDeleteBiaya({
     mutation: {
-      onMutate: async ({ id }) => {
+      onMutate: async ({ id }: { id: number }) => {
         await queryClient.cancelQueries({ queryKey: ["/api/biaya", dateParams] });
         const previousData = queryClient.getQueryData(["/api/biaya", dateParams]);
         
@@ -98,7 +98,7 @@ export default function Biaya() {
         }
       });
       toast({ title: "Berhasil", description: "Biaya operasional dicatat." });
-      setForm(prev => ({ ...prev, keterangan: "", nilai: "" }));
+      setForm((prev: any) => ({ ...prev, keterangan: "", nilai: "" }));
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
@@ -115,7 +115,7 @@ export default function Biaya() {
     }
   };
 
-  const totalBiaya = data?.reduce((sum, item) => sum + item.nilai, 0) || 0;
+  const totalBiaya = data?.reduce((sum: number, item: any) => sum + item.nilai, 0) || 0;
 
   return (
     <Layout>

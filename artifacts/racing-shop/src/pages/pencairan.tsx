@@ -61,7 +61,7 @@ export default function Pencairan() {
       }
       return resp.json();
     },
-    onMutate: async (id) => {
+    onMutate: async (id: number) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ["/api/pencairan"] });
       await queryClient.cancelQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
@@ -94,7 +94,7 @@ export default function Pencairan() {
     onSuccess: () => {
       toast({ title: "Berhasil", description: "Pencairan berhasil dibatalkan." });
     },
-    onError: (err: any, id, context) => {
+    onError: (err: any, id: number, context: any) => {
       // Rollback if mutation fails
       if (context?.previousBankTransactions) {
         queryClient.setQueryData(["/api/pencairan/transaksi-bank", dateParams], context.previousBankTransactions);
@@ -257,7 +257,7 @@ export default function Pencairan() {
   };
 
   const toggleMark = (id: number) => {
-    setMarkedIds(prev => {
+    setMarkedIds((prev: Set<number>) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);

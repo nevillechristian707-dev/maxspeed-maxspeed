@@ -78,12 +78,18 @@ importers:
 
   .:
     devDependencies:
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
       pg:
         specifier: ^8.20.0
         version: 8.20.0
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
       typescript:
         specifier: ~5.9.2
         version: 5.9.3

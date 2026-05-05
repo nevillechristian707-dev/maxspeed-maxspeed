@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import { getDb, penjualanTable, biayaTable } from "../../../../lib/db/src/index";
 import { gte, lte, and, sql, eq } from "drizzle-orm";
 
@@ -8,7 +8,7 @@ function n(val: unknown): number {
   return parseFloat(String(val ?? "0")) || 0;
 }
 
-router.get("/profit", async (req, res) => {
+router.get("/profit", async (req: Request, res: Response) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
@@ -54,7 +54,7 @@ router.get("/profit", async (req, res) => {
   }
 });
 
-router.get("/payment-breakdown", async (req, res) => {
+router.get("/payment-breakdown", async (req: Request, res: Response) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
@@ -86,7 +86,7 @@ router.get("/payment-breakdown", async (req, res) => {
   }
 });
 
-router.get("/top-products", async (req, res) => {
+router.get("/top-products", async (req: Request, res: Response) => {
   const db = getDb();
   if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
@@ -108,7 +108,7 @@ router.get("/top-products", async (req, res) => {
     .orderBy(sql`sum(${penjualanTable.total}) desc`)
     .limit(lim);
 
-    return res.json(topProducts.map(p => ({
+    return res.json(topProducts.map((p: any) => ({
       ...p,
       totalQty: Number(p.totalQty),
       totalPenjualan: n(p.totalPenjualan)
