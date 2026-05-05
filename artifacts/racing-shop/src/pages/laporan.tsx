@@ -1497,12 +1497,14 @@ export default function Laporan() {
                 [
                   { label: 'CASH (TUNAI)', data: salesByCategory.cash },
                   { label: 'BANK (TRANSFER)', data: salesByCategory.bank },
-                  { label: 'ONLINE SHOP', data: salesByCategory.online_shop },
-                  { label: 'KREDIT (TEMPO)', data: salesByCategory.kredit }
+                  { label: 'ONLINE SHOP (PENDING)', data: salesByCategory.online_shop_pending },
+                  { label: 'ONLINE SHOP (LUNAS)', data: salesByCategory.online_shop_lunas },
+                  { label: 'KREDIT (TEMPO) (PENDING)', data: salesByCategory.kredit_pending },
+                  { label: 'KREDIT (TEMPO) (LUNAS)', data: salesByCategory.kredit_lunas }
                 ].forEach(cat => {
                   if (cat.data.length > 0) {
                     list.push({ isHeader: true, label: cat.label });
-                    cat.data.forEach((item, idxx) => {
+                    cat.data.forEach((item: any, idxx: number) => {
                       list.push({ ...item, isHeader: false, id: `${cat.label}-${idxx}`, categoryId: cat.label });
                     });
                     const tQty = cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0);
