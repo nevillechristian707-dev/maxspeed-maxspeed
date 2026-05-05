@@ -9,9 +9,27 @@ import { Receipt, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useMonthYear } from "@/context/month-year-context";
+import { Calendar } from "lucide-react";
 
 export default function Biaya() {
-  const { dateParams } = useMonthYear();
+  const { selectedYear, selectedMonth, setSelectedYear, setSelectedMonth, dateParams } = useMonthYear();
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const months = [
+    { value: "all", label: "Setahun Penuh" },
+    { value: 1, label: "Januari" },
+    { value: 2, label: "Februari" },
+    { value: 3, label: "Maret" },
+    { value: 4, label: "April" },
+    { value: 5, label: "Mei" },
+    { value: 6, label: "Juni" },
+    { value: 7, label: "Juli" },
+    { value: 8, label: "Agustus" },
+    { value: 9, label: "September" },
+    { value: 10, label: "Oktober" },
+    { value: 11, label: "November" },
+    { value: 12, label: "Desember" }
+  ];
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -124,7 +142,28 @@ export default function Biaya() {
           <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
             <Receipt className="text-primary" /> Biaya Operasional
           </h1>
-          <p className="text-muted-foreground mt-1">Kelola pencatatan biaya pengeluaran toko.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Kelola pencatatan biaya pengeluaran toko.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 bg-secondary/30 p-2 rounded-2xl border border-border/50">
+            <Calendar className="w-4 h-4 text-primary ml-2" />
+            <select 
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+            >
+              {years.map(y => <option key={y} value={y} className="bg-card">{y}</option>)}
+            </select>
+            <div className="w-px h-4 bg-border mx-1" />
+            <select 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
+              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+            >
+              {months.map(m => <option key={m.value} value={m.value} className="bg-card">{m.label}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 

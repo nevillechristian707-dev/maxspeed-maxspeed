@@ -34,7 +34,7 @@ export default function Laporan() {
     return `${day}/${month}/${year}`;
   };
 
-  const { dateParams, selectedYear, selectedMonth } = useMonthYear();
+  const { dateParams, selectedYear, selectedMonth, setSelectedYear, setSelectedMonth } = useMonthYear();
   const printRef = useRef<HTMLDivElement>(null);
   const [isPreview, setIsPreview] = useState(false);
 
@@ -783,16 +783,49 @@ export default function Laporan() {
         .report-page th { background: #1e293b; color: white; padding: 8px; text-align: left; }
         .report-page td { border: 1px solid #e2e8f0; padding: 8px; }
       `}</style>
-      
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 no-print">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
             <ChartIcon className="text-primary" /> Laporan Laba Rugi
           </h1>
-          <p className="text-muted-foreground mt-1">Laporan finansial strategis Max Speed.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Laporan finansial strategis Max Speed.</p>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 bg-secondary/30 p-2 rounded-2xl border border-border/50">
+            <Calendar className="w-4 h-4 text-primary ml-2" />
+            <select 
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+            >
+              {[new Date().getFullYear(), new Date().getFullYear()-1, new Date().getFullYear()-2, new Date().getFullYear()-3, new Date().getFullYear()-4].map(y => <option key={y} value={y} className="bg-card">{y}</option>)}
+            </select>
+            <div className="w-px h-4 bg-border mx-1" />
+            <select 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
+              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+            >
+              {[
+                { value: "all", label: "Setahun Penuh" },
+                { value: 1, label: "Januari" },
+                { value: 2, label: "Februari" },
+                { value: 3, label: "Maret" },
+                { value: 4, label: "April" },
+                { value: 5, label: "Mei" },
+                { value: 6, label: "Juni" },
+                { value: 7, label: "Juli" },
+                { value: 8, label: "Agustus" },
+                { value: 9, label: "September" },
+                { value: 10, label: "Oktober" },
+                { value: 11, label: "November" },
+                { value: 12, label: "Desember" }
+              ].map(m => <option key={m.value} value={m.value} className="bg-card">{m.label}</option>)}
+            </select>
+          </div>
+          
+          <div className="w-px h-8 bg-border/50 mx-2 hidden md:block" />
           {canExport && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
