@@ -275,6 +275,9 @@ export default function Penjualan() {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
       }
     }
   });
@@ -284,6 +287,9 @@ export default function Penjualan() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
       }
     }
   });
@@ -306,6 +312,9 @@ export default function Penjualan() {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/penjualan"] });
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
       }
     }
   });

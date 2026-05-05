@@ -35,7 +35,18 @@ export default function Pencairan() {
   const { data, isLoading, isFetching } = useListPencairan(dateParams);
   const { data: banks } = useListMasterBank();
   const { data: bankTransactions, isLoading: isLoadingHistory, isFetching: isFetchingHistory } = useListTransaksiBank(dateParams);
-  const markSettledMutation = useMarkSettled();
+  const markSettledMutation = useMarkSettled({
+    mutation: {
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+      }
+    }
+  });
   const deleteMutation = useDeletePenjualan();
 
   // Custom cancellation mutation
@@ -93,13 +104,16 @@ export default function Pencairan() {
       }
       toast({ title: "Error", description: err.message, variant: "destructive" });
     },
-    onSettled: () => {
-      // Always refetch after error or success to ensure we are in sync with the server
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] });
-    }
+      onSettled: () => {
+        // Always refetch after error or success to ensure we are in sync with the server
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/master-bank"] });
+      }
   });
   
   const handleDeletePenjualan = async (id: number) => {
@@ -110,7 +124,9 @@ export default function Pencairan() {
         queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
-        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] })
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] })
       ]);
       setDeleteConfirmId(null);
     } catch (err: any) {
@@ -203,6 +219,9 @@ export default function Pencairan() {
           await Promise.all([
             queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
             queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] }),
+            queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] }),
             queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] })
           ]);
         } catch (err: any) {
@@ -224,6 +243,9 @@ export default function Pencairan() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/pencairan"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/pencairan/transaksi-bank"] })
       ]);
       setIsBankModalOpen(false);

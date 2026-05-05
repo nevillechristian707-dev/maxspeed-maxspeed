@@ -16,14 +16,22 @@ router.get("/profit", async (req, res) => {
     const sd = String(startDate ?? "2000-01-01");
     const ed = String(endDate ?? "2099-12-31");
 
+    if (process.env.DEBUG_REPORT === "true") {
+      console.log(`[DEBUG REPORT] /profit: startDate=${sd}, endDate=${ed}`);
+    }
+
     const pStats = await db.select({
       totalPenjualan: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.total} else '0' end)`,
       totalModal: sql<string>`sum(case when ${penjualanTable.statusCair} = 'cair' then ${penjualanTable.hargaBeli} * ${penjualanTable.qty} else 0 end)`,
     }).from(penjualanTable).where(and(gte(penjualanTable.tanggal, sd), lte(penjualanTable.tanggal, ed)));
 
     const bStats = await db.select({
-      totalBiaya: sql<string>`sum(${biayaTable.nilai})`,
+      totalBiaya: sql<string>`sum(${biayaTable.nilai}::numeric)`,
     }).from(biayaTable).where(and(gte(biayaTable.tanggal, sd), lte(biayaTable.tanggal, ed)));
+
+    if (process.env.DEBUG_REPORT === "true") {
+      console.log(`[DEBUG REPORT] /profit: bStats=${JSON.stringify(bStats)}`);
+    }
 
     const tPenjualan = n(pStats[0].totalPenjualan);
     const tModal = n(pStats[0].totalModal);

@@ -38,6 +38,9 @@ export default function Biaya() {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/chart"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
       }
     }
   });
@@ -60,6 +63,8 @@ export default function Biaya() {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["/api/biaya"] });
         queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/profit"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/laporan/top-products"] });
       }
     }
   });
