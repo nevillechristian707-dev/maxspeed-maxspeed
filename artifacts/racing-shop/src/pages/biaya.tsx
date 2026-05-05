@@ -140,7 +140,7 @@ export default function Biaya() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Receipt className="text-primary" /> Biaya Operasional
+            <Receipt className="text-primary w-8 h-8" /> Biaya Operasional
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">Kelola pencatatan biaya pengeluaran toko.</p>
         </div>

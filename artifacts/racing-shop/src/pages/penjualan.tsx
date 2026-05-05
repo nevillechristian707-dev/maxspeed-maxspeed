@@ -677,8 +677,8 @@ export default function Penjualan() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2 md:gap-3">
-            <ShoppingCart className="text-primary w-6 h-6 md:w-8 md:h-8" /> Input Penjualan
+          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
+            <ShoppingCart className="text-primary w-8 h-8" /> Input Penjualan
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">Catat transaksi penjualan baru dengan cepat.</p>
         </div>
