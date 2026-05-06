@@ -138,86 +138,98 @@ export default function MasterBank() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Left Col: Master & Form */}
-        <div className="xl:col-span-1 space-y-6">
-          {canAdd && (
-          <Card className="border-primary/20 shadow-lg shadow-primary/5">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Plus className="w-4 h-4 text-primary" /> Tambah Bank Baru
-              </CardTitle>
-              <CardDescription className="text-xs font-medium tracking-tight uppercase font-bold tracking-wider">Informasi Rekening Utama</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-neu-text ml-1">Nama Bank</label>
-                  <Input type="text" placeholder="Contoh: BCA, MANDIRI, BRI" required value={form.namaBank} onChange={e=>setForm({...form, namaBank:e.target.value.toUpperCase()})} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-neu-text ml-1">Nomor Rekening</label>
-                  <Input type="text" placeholder="Masukkan angka rekening" required value={form.nomorRekening} onChange={e=>setForm({...form, nomorRekening:e.target.value})} />
-                </div>
-                <button type="submit" disabled={createMutation.isPending} className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-all shadow-md shadow-primary/20">
-                  {createMutation.isPending ? "Menyimpan..." : "Simpan Master Bank"}
-                </button>
-              </form>
-            </CardContent>
-          </Card>
-          )}
+      <div className="space-y-6">
+        {/* Top KPI bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
+          <div className="text-xs font-black uppercase tracking-widest text-neu-text/60">
+            Periode: <span className="text-neu-text">{getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
+          </div>
+          <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20 flex items-center gap-3">
+            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-700/80">Total Dana Masuk</div>
+            <div className="text-base font-black text-emerald-600 tabular-nums">
+              {formatRupiah(transactions?.reduce((s, t) => s + Number(t.nilai), 0) || 0)}
+            </div>
+          </div>
+        </div>
 
-          <Card className="border-border/40 overflow-hidden">
-            <CardHeader className="bg-secondary/10 py-4">
-              <CardTitle className="text-base">Daftar Bank Aktif</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-border/30">
-                {loadingBanks ? (
-                  <div className="p-8 text-center text-sm text-neu-text font-black italic">Memuat data bank...</div>
-                ) : filteredBanks.length === 0 ? (
-                  <div className="p-8 text-center text-sm text-neu-text font-black italic">Tidak ada bank terdaftar.</div>
-                ) : filteredBanks.map(bank => (
-                  <div key={bank.id} className="p-4 flex justify-between items-center transition-colors">
-                    <div>
-                      <div className="font-black text-neu-text flex items-center gap-2">
-                        {bank.namaBank}
-                        <span className="text-xs font-black tracking-tighter px-1.5 py-0.5 bg-neu-bg text-neu-accent rounded border border-neu-accent/20">{bank.txCount} Trx</span>
+        {/* Form — compact, horizontal, full-width */}
+        {canAdd && (
+        <Card className="border-primary/20 shadow-sm">
+          <CardContent className="py-5">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div className="md:col-span-4 space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-neu-text tracking-widest ml-1 flex items-center gap-1.5">
+                  <Plus className="w-3 h-3 text-primary" /> Nama Bank
+                </label>
+                <Input type="text" placeholder="Contoh: BCA, MANDIRI, BRI" required value={form.namaBank} onChange={e=>setForm({...form, namaBank:e.target.value.toUpperCase()})} />
+              </div>
+              <div className="md:col-span-5 space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-neu-text tracking-widest ml-1">Nomor Rekening</label>
+                <Input type="text" placeholder="Masukkan angka rekening" required value={form.nomorRekening} onChange={e=>setForm({...form, nomorRekening:e.target.value})} />
+              </div>
+              <div className="md:col-span-3">
+                <button type="submit" disabled={createMutation.isPending} className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-primary/20 active:scale-95">
+                  {createMutation.isPending ? "Menyimpan..." : "Simpan Bank"}
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+        )}
+
+        {/* Bank list — horizontal grid of cards */}
+        <Card className="border-border/40 overflow-hidden">
+          <CardHeader className="border-b border-border/50 py-4 flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-primary" /> Daftar Bank Aktif
+            </CardTitle>
+            {filteredBanks.length > 0 && (
+              <span className="text-[10px] font-black uppercase tracking-widest text-neu-text/60 bg-neu-bg/60 px-2.5 py-1 rounded-full border border-border/30">
+                {filteredBanks.length} BANK
+              </span>
+            )}
+          </CardHeader>
+          <CardContent className="p-4">
+            {loadingBanks ? (
+              <div className="p-8 text-center text-sm text-neu-text font-black italic">Memuat data bank...</div>
+            ) : filteredBanks.length === 0 ? (
+              <div className="p-8 text-center text-sm text-neu-text font-black italic">Tidak ada bank terdaftar.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {filteredBanks.map(bank => (
+                  <div key={bank.id} className="p-4 rounded-xl bg-neu-bg/40 border border-border/20 flex items-start justify-between gap-3 hover:border-primary/30 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-black text-neu-text flex items-center gap-2 mb-1">
+                        <span className="truncate">{bank.namaBank}</span>
+                        <span className="text-[10px] font-black tracking-tighter px-1.5 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 flex-shrink-0">{bank.txCount} Trx</span>
                       </div>
-                      <div className="text-sm font-mono font-black text-neu-accent mt-0.5">{bank.nomorRekening}</div>
+                      <div className="text-xs font-mono font-black text-neu-accent truncate">{bank.nomorRekening}</div>
                     </div>
                     {canDelete && (
-                      <button onClick={()=>handleDelete(bank.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all">
-                        <Trash2 className="w-4 h-4" />
+                      <button onClick={()=>handleDelete(bank.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all flex-shrink-0" title="Hapus bank">
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Right Col: Transactions History */}
-        <div className="xl:col-span-2">
-          <Card className="border-orange-500/20 shadow-xl shadow-orange-500/5 h-full flex flex-col">
-            <CardHeader className="border-b border-border/50 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="text-orange-500 flex items-center gap-2">
-                  <History className="w-5 h-5" /> Riwayat Pencairan Dana
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2 mt-1">
-                  <Calendar className="w-3 h-3" /> {getIndonesianPeriodLabel(selectedMonth, selectedYear)}
-                </CardDescription>
-              </div>
-              <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-                <div className="text-xs font-medium tracking-tight font-bold text-emerald-600/70 uppercase leading-none mb-1">Total Dana Masuk</div>
-                <div className="text-xl font-black text-emerald-600">
-                  {formatRupiah(transactions?.reduce((s, t) => s + Number(t.nilai), 0) || 0)}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
+        {/* Riwayat Pencairan — full-width table */}
+        <Card className="border-orange-500/20 shadow-sm overflow-hidden">
+          <CardHeader className="border-b border-border/50 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-orange-500 flex items-center gap-2">
+                <History className="w-5 h-5" /> Riwayat Pencairan Dana
+              </CardTitle>
+              <CardDescription className="flex items-center gap-2 mt-1 text-xs">
+                <Calendar className="w-3 h-3" /> {getIndonesianPeriodLabel(selectedMonth, selectedYear)} • {transactions?.length || 0} transaksi
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
               {/* Desktop View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
@@ -280,7 +292,6 @@ export default function MasterBank() {
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
     </Layout>
   );
