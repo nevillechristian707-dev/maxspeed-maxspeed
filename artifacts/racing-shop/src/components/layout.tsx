@@ -45,45 +45,44 @@ interface SidebarContentProps {
 
 function SidebarContent({ user, location, visibleItems, onLogout, onNavClick }: SidebarContentProps) {
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 mb-2 flex-shrink-0">
+    <div className="flex flex-col h-full bg-white">
+      <div className="p-8 mb-4 flex-shrink-0">
         <div className="flex flex-col items-center">
-          <div className="w-full h-32 flex items-center justify-center p-0 overflow-visible group">
+          <div className="w-full h-32 flex items-center justify-center p-4 rounded-neu nm-flat bg-neu-bg/50 group transition-all duration-500">
             <img
               src={`${import.meta.env.BASE_URL}logo-maxspeed.png`}
               alt="Maxspeed Logo"
-              className="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(234,88,12,0.45)] group-hover:scale-105 transition-transform duration-500 will-change-transform"
-              style={{ imageRendering: 'auto' }}
+              className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <div className="text-center -mt-2">
-            <h1 className="font-display font-black text-[10px] tracking-[0.4em] text-primary uppercase opacity-80">Aplikasi Max Speed</h1>
+          <div className="text-center mt-4">
+            <h1 className="font-display font-black text-[10px] tracking-[0.4em] text-neu-text uppercase">Aplikasi Max Speed</h1>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-2 flex-shrink-0">
-        <div className="p-3 rounded-xl bg-card border border-border/50 mb-6">
-          <p className="text-xs text-muted-foreground">Logged in as</p>
-          <p className="text-sm font-bold truncate">{user.name}</p>
-          <p className="text-[10px] uppercase text-primary font-black mt-1 bg-primary/10 w-fit px-2 py-0.5 rounded">{user.role}</p>
+      <div className="px-6 py-2 flex-shrink-0">
+        <div className="p-4 rounded-2xl nm-inset bg-neu-bg/30 mb-8 border border-white/20">
+          <p className="text-[10px] uppercase font-black text-neu-text tracking-widest">Logged in as</p>
+          <p className="text-sm font-black text-neu-text truncate mt-0.5">{user.name}</p>
+          <p className="text-[9px] uppercase text-neu-text font-black mt-2 bg-neu-bg w-fit px-2 py-0.5 rounded-full shadow-sm border border-neu-accent/20">{user.role}</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-6 space-y-3 overflow-y-auto custom-scrollbar pb-8">
         {visibleItems.map((item) => {
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href} onClick={onNavClick}>
               <span className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer group",
+                "flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-bold transition-all duration-300 cursor-pointer group will-change-neu mx-4",
                 isActive
-                  ? "bg-primary/10 text-primary border border-primary/20"
-                  : "text-muted-foreground hover:bg-card hover:text-foreground border border-transparent"
+                  ? "nm-inset text-neu-accent bg-neu-bg/20 scale-[0.98]"
+                  : "text-neu-text hover:bg-neu-bg/30"
               )}>
                 <item.icon className={cn(
                   "w-5 h-5 flex-shrink-0 transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                  isActive ? "text-neu-accent" : "text-neu-text group-hover:text-neu-accent"
                 )} />
                 {item.label}
               </span>
@@ -92,10 +91,10 @@ function SidebarContent({ user, location, visibleItems, onLogout, onNavClick }: 
         })}
       </nav>
 
-      <div className="p-4 flex-shrink-0">
+      <div className="p-6 mt-auto flex-shrink-0 border-t border-neu-bg">
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+          className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl text-sm font-black text-rose-500 hover:nm-flat transition-all active:scale-95"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
           Logout
@@ -140,12 +139,13 @@ export function Layout({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-neu-bg flex items-center justify-center">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+          className="w-20 h-20 rounded-neu nm-flat flex items-center justify-center bg-neu-bg"
         >
-          <Zap className="w-12 h-12 text-primary" />
+          <Zap className="w-10 h-10 text-neu-accent animate-pulse" />
         </motion.div>
       </div>
     );
@@ -172,9 +172,9 @@ export function Layout({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-x-hidden">
-      {/* Desktop Sidebar — fixed so horizontal overflow on any page can never push it sideways */}
-      <aside className="hidden md:flex w-72 min-w-[288px] flex-col bg-sidebar border-r border-sidebar-border h-screen fixed top-0 left-0 z-40 overflow-hidden">
+    <div className="min-h-screen bg-neu-bg text-neu-text selection:bg-neu-accent/30 overflow-x-hidden font-sans">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-80 min-w-[320px] flex-col h-screen fixed top-0 left-0 z-40 overflow-hidden shadow-[10px_0_30px_rgba(163,177,198,0.2)] bg-white">
         <SidebarContent
           user={user}
           location={location}
@@ -185,15 +185,15 @@ export function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile Topbar & Sidebar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sidebar/80 backdrop-blur-xl border-b border-sidebar-border z-50 flex items-center justify-between px-4">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-neu-bg/80 backdrop-blur-2xl border-b border-neu-bg z-50 flex items-center justify-between px-6 shadow-sm">
         <div className="flex items-center gap-2">
           <img
             src={`${import.meta.env.BASE_URL}logo-maxspeed.png`}
             alt="Maxspeed"
-            className="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(234,88,12,0.4)]"
+            className="h-12 w-auto object-contain drop-shadow-sm"
           />
         </div>
-        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-muted-foreground">
+        <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 text-neu-text">
           <Menu className="w-6 h-6" />
         </button>
       </div>
@@ -206,18 +206,18 @@ export function Layout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 w-72 bg-sidebar border-r border-sidebar-border z-50 flex flex-col overflow-hidden"
+              className="md:hidden fixed top-0 left-0 bottom-0 w-72 bg-neu-bg z-50 flex flex-col overflow-hidden shadow-2xl shadow-black/10"
             >
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-10"
+                className="absolute top-4 right-4 p-2 text-neu-text hover:text-neu-accent z-10"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -233,9 +233,9 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Main Content — left padding reserves the space taken by the fixed sidebar (md:pl-72 = 288px) */}
-      <main className="md:pl-72 min-w-0 h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16">
-        <div className="p-4 md:p-8 max-w-[1440px] mx-auto w-full">
+      {/* Main Content */}
+      <main className="md:pl-80 min-w-0 min-h-screen overflow-y-auto overflow-x-hidden scroll-stable md:pt-0 pt-16 bg-neu-bg">
+        <div className="p-6 md:p-12 lg:p-16 max-w-[1600px] mx-auto w-full">
           {children}
         </div>
       </main>

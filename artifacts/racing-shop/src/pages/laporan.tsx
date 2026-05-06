@@ -3,9 +3,6 @@ import { Layout } from "@/components/layout";
 import { formatRupiah, getIndonesianPeriodLabel } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart as ChartIcon, Trophy, FileDown, FileText, Printer, ShoppingCart, DollarSign, Landmark, Store, CreditCard, ChevronDown, DownloadCloud, Monitor, Calendar } from "lucide-react";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useMonthYear } from "@/context/month-year-context";
@@ -297,7 +294,11 @@ export default function Laporan() {
     printWindow.document.close();
   };
 
-  const handleExportPDFCashRecap = (day: any) => {
+  const handleExportPDFCashRecap = async (day: any) => {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.width;
     
@@ -332,7 +333,11 @@ export default function Laporan() {
     doc.save(`Rekap_Setoran_Cash_${day.date}.pdf`);
   };
 
-  const handleExportPDFBankRecap = (day: any) => {
+  const handleExportPDFBankRecap = async (day: any) => {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.width;
     
@@ -378,8 +383,9 @@ export default function Laporan() {
     doc.save(`Rekap_Verifikasi_Bank_${day.date}.pdf`);
   };
 
-  const exportExcel = () => {
+  const exportExcel = async () => {
     if (!profit || !allStats) return;
+    const XLSX = await import("xlsx");
     const wb = XLSX.utils.book_new();
     
     // Sheet 1: Ringkasan Performa
@@ -439,8 +445,12 @@ export default function Laporan() {
     XLSX.writeFile(wb, filename);
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!profit || !allStats || !topProducts) return;
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const doc = new jsPDF('p', 'mm', 'a4');
     const periodStr = getIndonesianPeriodLabel(selectedMonth, selectedYear);
     
@@ -785,10 +795,10 @@ export default function Laporan() {
       `}</style>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 no-print">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <ChartIcon className="text-primary w-8 h-8" /> Laporan Laba Rugi
+          <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+            <ChartIcon className="text-neu-accent w-8 h-8" /> Laporan Laba Rugi
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Laporan finansial strategis Max Speed.</p>
+          <p className="text-neu-text mt-1 text-sm font-black">Laporan finansial strategis Max Speed.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -829,21 +839,21 @@ export default function Laporan() {
           {canExport && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
-                  <DownloadCloud className="w-5 h-5" /> EKSPOR LAPORAN <ChevronDown className="w-4 h-4 opacity-50" />
+                <Button className="bg-neu-accent hover:bg-neu-accent/90 text-white font-black px-6 shadow-lg shadow-neu-accent/20 transition-all flex items-center gap-2">
+                  <DownloadCloud className="w-5 h-5" /> EKSPOR LAPORAN <ChevronDown className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 p-2 bg-card border-primary/20 backdrop-blur-xl shadow-2xl">
-                <DropdownMenuLabel className="px-3 py-2 text-xs font-medium tracking-tight font-black uppercase text-muted-foreground tracking-widest">Pilih Format Output</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-64 p-2 bg-card border-neu-accent/20 backdrop-blur-xl shadow-2xl">
+                <DropdownMenuLabel className="px-3 py-2 text-xs font-black uppercase text-neu-text tracking-widest">Pilih Format Output</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-primary/10" />
                 
                 <DropdownMenuItem onClick={handlePrint} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-primary/5 rounded-lg group">
                   <div className="p-2 rounded-md bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
                     <Monitor className="w-4 h-4" />
                   </div>
-                  <div className="flex flex-col">
+                   <div className="flex flex-col">
                     <span className="text-sm font-black uppercase tracking-tight">Tampilan Layar</span>
-                    <span className="text-xs italic tracking-tighter text-muted-foreground">Cetak ke Printer / PDF Browser</span>
+                    <span className="text-xs font-black text-neu-text">Cetak ke Printer / PDF Browser</span>
                   </div>
                 </DropdownMenuItem>
 
@@ -853,7 +863,7 @@ export default function Laporan() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-black uppercase tracking-tight">Data Excel (.xlsx)</span>
-                    <span className="text-xs italic tracking-tighter text-muted-foreground">Rincian data untuk audit & olah data</span>
+                    <span className="text-xs font-black text-neu-text">Rincian data untuk audit & olah data</span>
                   </div>
                 </DropdownMenuItem>
 
@@ -863,7 +873,7 @@ export default function Laporan() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-black uppercase tracking-tight">Dokumen PDF (.pdf)</span>
-                    <span className="text-xs italic tracking-tighter text-muted-foreground">Arsip laporan resmi bulanan</span>
+                    <span className="text-xs font-black text-neu-text">Arsip laporan resmi bulanan</span>
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -879,23 +889,23 @@ export default function Laporan() {
           <Card className="border-primary/20 bg-background/40 backdrop-blur-md relative overflow-hidden shadow-xl card group hover:border-primary/40 transition-all">
             <div className="absolute top-0 right-0 p-12 bg-primary/5 rounded-full blur-2xl -mr-6 -mt-6 group-hover:bg-primary/10 transition-colors" />
             <CardHeader className="border-b border-border/50 pb-3 relative z-10">
-              <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-primary" /> Rekap Penjualan
+              <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2 text-neu-text">
+                <ShoppingCart className="w-5 h-5 text-neu-accent" /> Rekap Penjualan
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-tight">Perolehan Kotor (Cair + Pending)</p>
+              <p className="text-xs font-black uppercase text-neu-text">Perolehan Kotor (Cair + Pending)</p>
             </CardHeader>
             <CardContent className="space-y-4 py-6 relative z-10">
-              <div className="flex justify-between items-center bg-secondary/10 p-4 rounded-xl border border-white/5">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-black">Total Omzet</span>
-                <span className="font-black text-xl text-foreground tracking-tight">{formatRupiah(allStats.omzet)}</span>
+              <div className="flex justify-between items-center bg-neu-bg p-4 rounded-xl border border-white/5">
+                <span className="text-neu-text text-xs font-black uppercase">Total Omzet</span>
+                <span className="font-black text-xl text-neu-text tracking-tight">{formatRupiah(allStats.omzet)}</span>
               </div>
               <div className="flex justify-between items-center px-2">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Total Modal</span>
-                <span className="font-bold text-orange-400/80">{formatRupiah(allStats.modal)}</span>
+                <span className="text-neu-text text-xs font-black uppercase">Total Modal</span>
+                <span className="font-black text-neu-text">{formatRupiah(allStats.modal)}</span>
               </div>
               <div className="flex justify-between items-center bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 shadow-inner">
-                <span className="text-emerald-500 text-xs font-medium tracking-tight font-black uppercase italic">Potensi Keuntungan</span>
-                <span className="text-xl font-black text-emerald-400 tracking-tight">{formatRupiah(allStats.profit)}</span>
+                <span className="text-emerald-600 text-xs font-black uppercase">Potensi Keuntungan</span>
+                <span className="text-xl font-black text-emerald-600 tracking-tight">{formatRupiah(allStats.profit)}</span>
               </div>
             </CardContent>
           </Card>
@@ -904,31 +914,31 @@ export default function Laporan() {
           <Card className="border-primary/30 shadow-2xl shadow-primary/5 bg-gradient-to-br from-card to-background relative overflow-hidden ring-1 ring-primary/20 card group hover:shadow-primary/10 transition-all">
             <div className="absolute top-0 right-0 p-16 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-primary/20 transition-colors" />
             <CardHeader className="border-b border-border/50 pb-3 relative z-10">
-              <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2 text-primary">
+              <CardTitle className="text-lg font-display uppercase tracking-widest flex items-center gap-2 text-neu-accent">
                 <ChartIcon className="w-5 h-5" /> Laba Rugi Realitas
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-tight">Khusus Transaksi yang Sudah Lunas</p>
+              <p className="text-xs font-black uppercase text-neu-text">Khusus Transaksi yang Sudah Lunas</p>
             </CardHeader>
             <CardContent className="space-y-4 py-6 relative z-10">
-              <div className="flex justify-between items-center px-4 py-2 bg-background/50 rounded-lg border border-white/5">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Omzet Cair</span>
-                <span className="font-black text-foreground tracking-tight">{formatRupiah(profit?.totalPenjualan)}</span>
+              <div className="flex justify-between items-center px-4 py-2 bg-neu-bg rounded-lg border border-white/5">
+                <span className="text-neu-text text-xs font-black uppercase">Omzet Cair</span>
+                <span className="font-black text-neu-text tracking-tight">{formatRupiah(profit?.totalPenjualan)}</span>
               </div>
               <div className="flex justify-between items-center px-2">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Modal Cair</span>
-                <span className="font-bold text-orange-400/80">- {formatRupiah(profit?.totalModal)}</span>
+                <span className="text-neu-text text-xs font-black uppercase">Modal Cair</span>
+                <span className="font-black text-neu-text">- {formatRupiah(profit?.totalModal)}</span>
               </div>
-              <div className="flex justify-between items-center px-2 border-b border-border/50 pb-2">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-bold">Beban Operasional</span>
-                <span className="font-bold text-rose-400/80">- {formatRupiah(profit?.totalBiaya)}</span>
+              <div className="flex justify-between items-center px-2 border-b border-neu-bg pb-2">
+                <span className="text-neu-text text-xs font-black uppercase">Beban Operasional</span>
+                <span className="font-black text-neu-text">- {formatRupiah(profit?.totalBiaya)}</span>
               </div>
               <div className="flex justify-between items-center bg-primary p-4 rounded-xl shadow-lg shadow-primary/30 transform active:scale-95 transition-transform">
                 <span className="text-primary-foreground text-sm font-black uppercase tracking-wider">LABA BERSIH</span>
                 <span className="text-2xl font-black text-primary-foreground tracking-tight">{formatRupiah(profit?.laba)}</span>
               </div>
-              <div className="flex justify-between items-center px-4 py-3 bg-secondary/20 rounded-xl border border-border/50">
-                <span className="text-muted-foreground text-xs font-medium tracking-tight uppercase font-black italic">Alokasi Laba (10%)</span>
-                <span className="font-black text-foreground tracking-tight underline decoration-primary decoration-2 underline-offset-4">{formatRupiah(profit?.labaShared)}</span>
+              <div className="flex justify-between items-center px-4 py-3 bg-neu-bg rounded-xl border border-neu-bg">
+                <span className="text-neu-text text-xs font-black uppercase">Alokasi Laba (10%)</span>
+                <span className="font-black text-neu-text underline decoration-neu-accent decoration-2 underline-offset-4">{formatRupiah(profit?.labaShared)}</span>
               </div>
             </CardContent>
           </Card>
@@ -940,7 +950,7 @@ export default function Laporan() {
             </CardHeader>
             <CardContent className="p-0 flex-1">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg border-b border-neu-bg">
                   <tr>
                     <th className="px-4 py-3 font-black tracking-widest">Produk</th>
                     <th className="px-4 py-3 text-right font-black tracking-widest">Omzet</th>
@@ -948,19 +958,19 @@ export default function Laporan() {
                 </thead>
                 <tbody className="divide-y divide-border/10">
                   {topProducts?.slice(0, 10).map((p, i) => (
-                    <tr key={i} className="hover:bg-primary/[0.03] transition-colors group/row">
+                    <tr key={i} className="hover:bg-neu-accent/5 transition-colors group/row">
                       <td className="px-4 py-3.5 flex items-center gap-3">
-                        <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-xs font-medium tracking-tight font-black ${i < 3 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-secondary text-muted-foreground'}`}>{i + 1}</span>
+                        <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-xs font-black ${i < 3 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-neu-bg text-neu-text'}`}>{i + 1}</span>
                         <div>
-                          <div className="font-bold text-[11px] text-foreground mb-0.5">{p.namaBarang}</div>
-                          <div className="text-xs italic tracking-tighter text-muted-foreground font-mono uppercase tracking-tighter">{p.brand}</div>
+                          <div className="font-black text-[11px] text-neu-text mb-0.5">{p.namaBarang}</div>
+                          <div className="text-xs font-black text-neu-text uppercase tracking-tighter">{p.brand}</div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5 text-right font-black text-emerald-400 text-[11px] tabular-nums">{formatRupiah(p.totalPenjualan)}</td>
                     </tr>
                   ))}
                   {(!topProducts || topProducts.length === 0) && (
-                    <tr><td colSpan={2} className="text-center py-12 text-muted-foreground italic">Belum ada data produk terjual</td></tr>
+                    <tr><td colSpan={2} className="text-center py-12 text-neu-text font-black italic">Belum ada data produk terjual</td></tr>
                   )}
                 </tbody>
               </table>
@@ -970,25 +980,25 @@ export default function Laporan() {
 
         {/* NEW RECONCILIATION SECTION */}
         <div className="space-y-8 mt-12 no-print">
-          <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3 border-l-4 border-indigo-500 pl-4 uppercase tracking-tighter">
+          <h2 className="text-2xl font-display font-black text-neu-text flex items-center gap-3 border-l-4 border-indigo-500 pl-4 uppercase tracking-tighter">
             <Monitor className="text-indigo-500 w-6 h-6" /> Rekonsiliasi Harian (Kasir & Bank)
           </h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Cash Setoran Table */}
             <Card className="border-emerald-500/20 shadow-lg shadow-emerald-500/5 transition-all hover:border-emerald-500/40">
-              <CardHeader className="bg-emerald-500/5 border-b border-border/50 py-4 flex flex-row items-center justify-between">
+              <CardHeader className="bg-emerald-500/5 border-b border-neu-bg py-4 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-emerald-500 text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                  <CardTitle className="text-emerald-600 text-sm font-black uppercase tracking-widest flex items-center gap-2">
                     <DollarSign className="w-4 h-4" /> Setoran Cash Harian
                   </CardTitle>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Uang fisik yang harus disetor kasir</p>
+                  <p className="text-[10px] text-neu-text font-black uppercase mt-1">Uang fisik yang harus disetor kasir</p>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-xs text-left border-collapse">
-                    <thead className="sticky top-0 bg-secondary/80 backdrop-blur-md text-muted-foreground uppercase font-black border-b border-border/50 z-10">
+                    <thead className="sticky top-0 bg-neu-bg/80 backdrop-blur-md text-neu-text uppercase font-black border-b border-neu-bg z-10">
                       <tr>
                         <th className="px-4 py-3">Tanggal</th>
                         <th className="px-4 py-3 text-right">Total Cash</th>
@@ -998,8 +1008,8 @@ export default function Laporan() {
                     <tbody className="divide-y divide-border/10">
                       {cashSummariesByDate.map((day, i) => (
                         <tr key={i} className="hover:bg-emerald-500/5 transition-colors group/row">
-                          <td className="px-4 py-3 font-bold">{formatDateSimple(day.date)}</td>
-                          <td className="px-4 py-3 text-right font-black text-emerald-500">{formatRupiah(day.total)}</td>
+                          <td className="px-4 py-3 font-black text-neu-text">{formatDateSimple(day.date)}</td>
+                          <td className="px-4 py-3 text-right font-black text-emerald-600">{formatRupiah(day.total)}</td>
                           <td className="px-4 py-3 text-center">
                             <div className="flex items-center justify-center gap-1">
                               <Button size="sm" variant="outline" onClick={() => handlePrintCashRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white font-bold">
@@ -1013,7 +1023,7 @@ export default function Laporan() {
                         </tr>
                       ))}
                       {cashSummariesByDate.length === 0 && (
-                        <tr><td colSpan={3} className="px-4 py-10 text-center text-muted-foreground italic">Belum ada data setoran cash</td></tr>
+                        <tr><td colSpan={3} className="px-4 py-10 text-center text-neu-text font-black italic">Belum ada data setoran cash</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -1023,18 +1033,18 @@ export default function Laporan() {
 
             {/* Bank Verification Table */}
             <Card className="border-blue-500/20 shadow-lg shadow-blue-500/5 transition-all hover:border-blue-500/40">
-              <CardHeader className="bg-blue-500/5 border-b border-border/50 py-4 flex flex-row items-center justify-between">
+              <CardHeader className="bg-blue-500/5 border-b border-neu-bg py-4 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-blue-500 text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                  <CardTitle className="text-blue-600 text-sm font-black uppercase tracking-widest flex items-center gap-2">
                     <Landmark className="w-4 h-4" /> Verifikasi Transfer Bank
                   </CardTitle>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase mt-1">Pencocokan total dengan mutasi rekening</p>
+                  <p className="text-[10px] text-neu-text font-black uppercase mt-1">Pencocokan total dengan mutasi rekening</p>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                   <table className="w-full text-xs text-left border-collapse">
-                    <thead className="sticky top-0 bg-secondary/80 backdrop-blur-md text-muted-foreground uppercase font-black border-b border-border/50 z-10">
+                    <thead className="sticky top-0 bg-neu-bg/80 backdrop-blur-md text-neu-text uppercase font-black border-b border-neu-bg z-10">
                       <tr>
                         <th className="px-4 py-3">Tanggal Cair</th>
                         <th className="px-4 py-3 text-right">Total Mutasi</th>
@@ -1044,8 +1054,8 @@ export default function Laporan() {
                     <tbody className="divide-y divide-border/10">
                       {bankReportSummaries.map((day, i) => (
                         <tr key={i} className="hover:bg-blue-500/5 transition-colors group/row">
-                          <td className="px-4 py-3 font-bold">{formatDateSimple(day.date)}</td>
-                          <td className="px-4 py-3 text-right font-black text-blue-500">{formatRupiah(day.total)}</td>
+                          <td className="px-4 py-3 font-black text-neu-text">{formatDateSimple(day.date)}</td>
+                          <td className="px-4 py-3 text-right font-black text-blue-600">{formatRupiah(day.total)}</td>
                           <td className="px-4 py-3 text-center">
                             <div className="flex items-center justify-center gap-1">
                               <Button size="sm" variant="outline" onClick={() => handlePrintBankRecap(day)} className="h-7 px-2 text-[10px] gap-1 border-blue-500/20 text-blue-600 hover:bg-blue-500 hover:text-white font-bold">
@@ -1059,7 +1069,7 @@ export default function Laporan() {
                         </tr>
                       ))}
                       {bankReportSummaries.length === 0 && (
-                        <tr><td colSpan={3} className="px-4 py-10 text-center text-muted-foreground italic">Belum ada data verifikasi bank</td></tr>
+                        <tr><td colSpan={3} className="px-4 py-10 text-center text-neu-text font-black italic">Belum ada data verifikasi bank</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -1070,8 +1080,8 @@ export default function Laporan() {
         </div>
 
         <div className="space-y-8 mt-12 pb-20">
-          <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3 border-l-4 border-primary pl-4 uppercase tracking-tighter">
-            <ShoppingCart className="text-primary w-6 h-6" /> Rincian Penjualan per Metode Pembayaran
+          <h2 className="text-2xl font-display font-black text-neu-text flex items-center gap-3 border-l-4 border-neu-accent pl-4 uppercase tracking-tighter">
+            <ShoppingCart className="text-neu-accent w-6 h-6" /> Rincian Penjualan per Metode Pembayaran
           </h2>
 
           <div className="grid grid-cols-1 gap-10">
@@ -1087,17 +1097,17 @@ export default function Laporan() {
                 <CardHeader className="bg-secondary/10 border-b border-border/50 py-4">
                   <CardTitle className="flex items-center gap-3 text-lg uppercase tracking-tight font-black">
                     <div className={`p-2.5 rounded-xl bg-${cat.color}-500/10 border border-${cat.color}-500/20 shadow-inner`}>
-                      <cat.icon className={`w-5 h-5 text-${cat.color}-400`} />
+                      <cat.icon className={`w-5 h-5 text-${cat.color}-600`} />
                     </div>
                     {cat.label}
-                    <span className="ml-auto text-xs font-medium tracking-tight bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{cat.data.length} TRX</span>
+                    <span className="ml-auto text-xs font-black bg-neu-bg px-3 py-1 rounded-full text-neu-text tracking-widest">{cat.data.length} TRX</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   {/* Desktop View */}
                   <div className="hidden md:block overflow-x-auto custom-scrollbar">
                     <table className="w-full text-[12px] text-left border-collapse">
-                      <thead className="bg-secondary/40 text-muted-foreground uppercase text-xs italic tracking-tighter tracking-widest font-black border-b border-border/50">
+                      <thead className="bg-neu-bg text-neu-text uppercase text-xs font-black border-b border-neu-bg">
                         <tr>
                           <th className="px-6 py-4">Tanggal</th>
                           <th className="px-4 py-4">No. Faktur</th>
@@ -1123,18 +1133,18 @@ export default function Laporan() {
                           const col5 = isPending ? paid : j;
                           const col6 = isPending ? sisa : l;
                           return (
-                            <tr key={s.id} className="hover:bg-primary/[0.03] transition-colors group/row">
-                              <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{s.tanggal || s.tanggalCair}</td>
+                            <tr key={s.id} className="hover:bg-neu-accent/5 transition-colors group/row">
+                              <td className="px-6 py-4 whitespace-nowrap text-neu-text font-black">{s.tanggal || s.tanggalCair}</td>
                               <td className="px-4 py-4 font-black text-foreground tracking-tighter">{s.noFaktur || '-'}</td>
                               <td className="px-4 py-4 min-w-[200px]">
                                 {cat.id.startsWith('kredit') && <div className="text-[10px] font-black uppercase text-orange-500 mb-0.5">{s.namaCustomer || 'Umum'}</div>}
-                                {(s as any).isBankTx && <div className="text-[10px] font-black uppercase text-emerald-600 mb-0.5">{s.namaBank} - {s.rekeningBank}</div>}
-                                <div className="font-bold text-foreground leading-snug group-hover/row:text-primary transition-colors">{s.namaBarang}</div>
-                                <div className="text-xs italic tracking-tighter text-muted-foreground/60 font-mono tracking-tighter uppercase mt-0.5">{s.kodeBarang}</div>
+                                <div className="text-[10px] font-black uppercase text-emerald-600 mb-0.5">{s.namaBank} - {s.rekeningBank}</div>
+                                <div className="font-black text-neu-text leading-snug group-hover/row:text-neu-accent transition-colors">{s.namaBarang}</div>
+                                <div className="text-xs font-black text-neu-text/60 uppercase mt-0.5">{s.kodeBarang}</div>
                               </td>
-                              <td className="px-4 py-4 text-center font-black text-foreground tabular-nums">{(s as any).isBankTx ? 1 : s.qty}</td>
-                              <td className="px-4 py-4 text-right text-muted-foreground italic font-medium tabular-nums">{formatRupiah(col4)}</td>
-                              <td className="px-4 py-4 text-right font-black text-foreground tabular-nums">{formatRupiah(col5)}</td>
+                              <td className="px-4 py-4 text-center font-black text-neu-text tabular-nums">{(s as any).isBankTx ? 1 : s.qty}</td>
+                              <td className="px-4 py-4 text-right text-neu-text font-black tabular-nums">{formatRupiah(col4)}</td>
+                              <td className="px-4 py-4 text-right font-black text-neu-text tabular-nums">{formatRupiah(col5)}</td>
                               <td className={`px-4 py-4 text-right font-black text-sm tabular-nums ${isPending ? (col6 > 0 ? 'text-rose-500' : 'text-emerald-500') : (col6 >= 0 ? 'text-emerald-500' : 'text-rose-500')}`}>
                                 <span className="flex items-center justify-end gap-1">
                                   {isPending ? '' : (col6 >= 0 ? '+' : '')}{formatRupiah(col6)}
@@ -1150,10 +1160,10 @@ export default function Laporan() {
                         })}
                       </tbody>
                       {/* Footers for Grand Totals */}
-                      <tfoot className="bg-secondary/20 font-black border-t-2 border-border/50">
+                      <tfoot className="bg-neu-bg font-black border-t-2 border-neu-bg">
                         <tr>
-                          <td colSpan={3} className="px-6 py-4 text-right uppercase tracking-widest text-xs">Total {cat.label}</td>
-                          <td className="px-4 py-4 text-center tabular-nums">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</td>
+                          <td colSpan={3} className="px-6 py-4 text-right uppercase tracking-widest text-xs text-neu-text">Total {cat.label}</td>
+                          <td className="px-4 py-4 text-center tabular-nums text-neu-text">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</td>
                           <td className="px-4 py-4 text-right tabular-nums">
                             {formatRupiah(cat.id.includes('_pending')
                               ? cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0)
@@ -1205,15 +1215,15 @@ export default function Laporan() {
                            </div>
                            <div className="space-y-1">
                               {cat.id.startsWith('kredit') && <div className="text-[10px] font-black uppercase text-orange-500">{s.namaCustomer || 'Umum'}</div>}
-                              <div className="text-sm font-bold text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
+                              <div className="text-sm font-black text-foreground border-l-2 border-primary/30 pl-2">{s.namaBarang}</div>
                            </div>
                            <div className="flex justify-between items-end pt-1">
                               <div className="space-y-1">
-                                <div className="text-xs italic tracking-tighter text-muted-foreground font-bold">Qty: {s.qty} • {isPending ? 'Total' : 'Jual'}: {formatRupiah(j)}</div>
-                                <div className="text-xs italic tracking-tighter text-muted-foreground italic">{isPending ? `Bayar: ${formatRupiah(paid)}` : `Modal: ${formatRupiah(m)}`}</div>
+                                <div className="text-xs font-black text-neu-text">Qty: {s.qty} • {isPending ? 'Total' : 'Jual'}: {formatRupiah(j)}</div>
+                                <div className="text-xs font-black text-neu-text">{isPending ? `Bayar: ${formatRupiah(paid)}` : `Modal: ${formatRupiah(m)}`}</div>
                               </div>
                               <div className="text-right">
-                                <div className="text-xs italic tracking-tighter uppercase font-black text-muted-foreground tracking-tighter">{isPending ? 'Sisa' : 'Profit'}</div>
+                                <div className="text-xs font-black uppercase text-neu-text tracking-tighter">{isPending ? 'Sisa' : 'Profit'}</div>
                                 <div className={`text-sm font-black ${isPending ? (sisa > 0 ? 'text-rose-500' : 'text-emerald-500') : (l >= 0 ? 'text-emerald-500' : 'text-rose-500')}`}>
                                   {isPending ? '' : (l >= 0 ? '+' : '')}{formatRupiah(isPending ? sisa : l)}
                                 </div>
@@ -1224,19 +1234,19 @@ export default function Laporan() {
                      })}
                      
                      {/* Mobile Grand Total card */}
-                     <div className="mt-4 p-4 bg-secondary/30 rounded-2xl border-2 border-dashed border-border/50">
-                        <div className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-3">Ringkasan {cat.label}</div>
+                     <div className="mt-4 p-4 bg-neu-bg rounded-2xl border-2 border-dashed border-neu-bg">
+                        <div className="text-xs font-black uppercase tracking-widest text-neu-text mb-3">Ringkasan {cat.label}</div>
                         <div className="grid grid-cols-2 gap-4">
                            <div className="flex flex-col">
-                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Total Qty</span>
+                              <span className="text-[10px] text-neu-text uppercase font-black">Total Qty</span>
                               <span className="font-black">{cat.data.reduce((acc: number, s: any) => acc + (s.qty || 0), 0)}</span>
                            </div>
                            <div className="flex flex-col items-end">
-                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Hutang' : 'Total Jual'}</span>
+                              <span className="text-[10px] text-neu-text uppercase font-black">{cat.id.includes('_pending') ? 'Total Hutang' : 'Total Jual'}</span>
                               <span className="font-black text-primary">{formatRupiah(cat.data.reduce((acc: number, s: any) => acc + (s.total || 0), 0))}</span>
                            </div>
                            <div className="flex flex-col">
-                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Bayar' : 'Total Modal'}</span>
+                              <span className="text-[10px] text-neu-text uppercase font-black">{cat.id.includes('_pending') ? 'Total Bayar' : 'Total Modal'}</span>
                               <span className="font-black">
                                 {formatRupiah(cat.id.includes('_pending')
                                   ? cat.data.reduce((acc: number, s: any) => acc + (s.totalPaid || 0), 0)
@@ -1245,7 +1255,7 @@ export default function Laporan() {
                               </span>
                            </div>
                            <div className="flex flex-col items-end">
-                              <span className="text-[10px] text-muted-foreground uppercase font-bold">{cat.id.includes('_pending') ? 'Total Sisa' : 'Total Profit'}</span>
+                              <span className="text-[10px] text-neu-text uppercase font-black">{cat.id.includes('_pending') ? 'Total Sisa' : 'Total Profit'}</span>
                               <span className={`font-black ${cat.id.includes('_pending') ? 'text-rose-500' : 'text-emerald-500'}`}>
                                 {formatRupiah(cat.id.includes('_pending')
                                   ? cat.data.reduce((acc: number, s: any) => acc + ((s.total || 0) - (s.totalPaid || 0)), 0)
@@ -1270,7 +1280,7 @@ export default function Laporan() {
         {/* BANK DISBURSEMENT HISTORY (Same as Pencairan Page) */}
         {bankReportSummaries.length > 0 && (
           <div className="mt-12 space-y-8 pb-10">
-            <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-3 border-l-4 border-emerald-500 pl-4 uppercase tracking-tighter">
+            <h2 className="text-2xl font-display font-black text-neu-text flex items-center gap-3 border-l-4 border-emerald-500 pl-4 uppercase tracking-tighter">
               <Landmark className="text-emerald-500 w-6 h-6" /> Laporan Pencairan Bank
             </h2>
             
@@ -1291,8 +1301,8 @@ export default function Laporan() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                       <span className="text-xs font-black text-muted-foreground uppercase opacity-40 hidden sm:inline">Total Kas Masuk:</span>
-                       <span className="bg-emerald-500/20 text-emerald-400 px-6 py-2 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-xl">{formatRupiah(dayGroup.total)}</span>
+                       <span className="text-xs font-black text-neu-text uppercase hidden sm:inline">Total Kas Masuk:</span>
+                       <span className="bg-emerald-500/20 text-emerald-600 px-6 py-2 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-xl">{formatRupiah(dayGroup.total)}</span>
                     </div>
                   </div>
 
@@ -1306,8 +1316,8 @@ export default function Laporan() {
                               <Landmark className="w-6 h-6 text-emerald-500" />
                             </div>
                             <div>
-                              <h3 className="text-base font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
-                              <p className="text-xs font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
+                              <h3 className="text-base font-black text-neu-text uppercase tracking-tight">{bankGroup.bank}</h3>
+                              <p className="text-xs font-mono font-black text-neu-text tracking-tight">{bankGroup.account}</p>
                             </div>
                           </div>
                           <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end gap-2">
@@ -1319,7 +1329,7 @@ export default function Laporan() {
                         <CardContent className="p-0">
                           <div className="overflow-x-auto">
                             <table className="w-full text-[12px] text-left border-collapse">
-                              <thead className="bg-secondary/40 text-muted-foreground uppercase text-xs italic tracking-widest font-black border-b border-border/50">
+                              <thead className="bg-neu-bg text-neu-text uppercase text-xs font-black border-b border-neu-bg">
                                 <tr>
                                   <th className="px-6 py-4">Tgl TRX</th>
                                   <th className="px-4 py-4">Faktur / TRX</th>
@@ -1332,18 +1342,18 @@ export default function Laporan() {
                               <tbody className="divide-y divide-border/10">
                                 {bankGroup.items.map((tx: any) => (
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.02] transition-colors group/row">
-                                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground font-bold">{tx.tanggal}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-neu-text font-black">{tx.tanggal}</td>
                                     <td className="px-4 py-4">
-                                      <div className="font-bold text-foreground">{tx.noFaktur || '-'}</div>
-                                      <div className="text-[10px] font-bold text-muted-foreground/50 font-mono">ID: {tx.kodeTransaksi}</div>
+                                      <div className="font-black text-neu-text">{tx.noFaktur || '-'}</div>
+                                      <div className="text-[10px] font-black text-neu-text/50 font-mono">ID: {tx.kodeTransaksi}</div>
                                     </td>
                                     <td className="px-4 py-4">
                                       <div className="font-bold text-foreground truncate max-w-[200px]">{tx.namaBarang}</div>
                                       <div className="text-[10px] font-black text-primary uppercase mt-0.5">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
                                     <td className="px-4 py-4">
-                                      <span className="text-[10px] font-black uppercase text-muted-foreground block mb-1">{tx.sumber?.replace('_', ' ')}</span>
-                                      <div className="font-bold text-foreground text-xs">{tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}</div>
+                                      <span className="text-[10px] font-black uppercase text-neu-text block mb-1">{tx.sumber?.replace('_', ' ')}</span>
+                                      <div className="font-black text-neu-text text-xs">{tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}</div>
                                     </td>
                                     <td className="px-4 py-4 text-right font-black text-emerald-600">{formatRupiah(tx.nilai)}</td>
                                     <td className="px-6 py-4 text-center">
@@ -1392,7 +1402,7 @@ export default function Laporan() {
               <div className="report-page">
                 <div className="text-center border-b-2 border-slate-900 mb-6 pb-6">
                   <h1 className="text-4xl font-black text-rose-600 mb-1">MAX SPEED RACING SHOP</h1>
-                  <p className="text-slate-500 uppercase tracking-[0.2em] font-medium text-xs font-medium tracking-tight">Laporan Keuangan Strategis & Performa Perusahaan</p>
+                  <p className="text-neu-text uppercase tracking-widest font-black text-xs">Laporan Keuangan Strategis & Performa Perusahaan</p>
                   <div className="mt-4 flex justify-center gap-3">
                      <span className="px-4 py-1 bg-slate-100 rounded-full text-xs font-medium tracking-tight font-black uppercase tracking-widest text-slate-700">Periode: {getIndonesianPeriodLabel(selectedMonth, selectedYear)}</span>
                   </div>
@@ -1451,9 +1461,9 @@ export default function Laporan() {
                           <td className="font-black uppercase tracking-widest italic">Laba Bersih Akhir</td>
                           <td className="text-right font-black text-lg">{formatRupiah(profit?.laba)}</td>
                         </tr>
-                        <tr className="bg-slate-50 italic">
-                          <td className="font-bold text-slate-500">Alokasi Laba (10%)</td>
-                          <td className="text-right font-black text-slate-700">{formatRupiah(profit?.labaShared)}</td>
+                        <tr className="bg-neu-bg font-black">
+                          <td className="text-neu-text">Alokasi Laba (10%)</td>
+                          <td className="text-right text-neu-text">{formatRupiah(profit?.labaShared)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -1475,7 +1485,7 @@ export default function Laporan() {
                             <td className="text-center font-bold">{i + 1}</td>
                             <td>
                                <div className="font-bold">{p.namaBarang}</div>
-                               <div className="text-xs font-bold leading-none opacity-50 text-slate-500 uppercase">{p.brand}</div>
+                               <div className="font-black text-neu-text uppercase">{p.brand}</div>
                             </td>
                             <td className="text-right font-bold">{formatRupiah(p.totalPenjualan)}</td>
                           </tr>
@@ -1485,7 +1495,7 @@ export default function Laporan() {
                   </section>
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-slate-100 text-xs font-bold leading-none text-slate-400 flex justify-between italic">
+                <div className="mt-auto pt-8 border-t border-neu-bg text-xs font-black text-neu-text flex justify-between uppercase">
                    <p>Halaman 1/2 - Strategic Recap</p>
                    <p>Dicetak Pada: {new Date().toLocaleString('id-ID')}</p>
                 </div>

@@ -16,6 +16,7 @@ import { Layout } from "@/components/layout";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatRupiah, formatDate, generateKodeTransaksi, cn, getIndonesianPeriodLabel, formatDateToYYYYMMDD } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -24,9 +25,6 @@ import { ShoppingCart, Plus, Trash2, Download, Search, FileText, Check, Chevrons
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,63 +56,60 @@ type FormValues = z.infer<typeof formSchema>;
 
 const MemoizedTableRow = memo(({ item, handleEdit, handleDelete, handlePrint, handlePDF, canEdit, canDelete }: any) => {
   return (
-    <tr className="hover:bg-primary/[0.02] transition-colors group/row border-b border-border/20">
-      <td className="px-5 py-4 whitespace-nowrap font-medium text-muted-foreground">{formatDate(item.tanggal)}</td>
-      <td className="px-3 py-4 font-black text-primary tracking-tighter text-xs font-bold">{item.kodeBarang}</td>
-      <td className="px-4 py-4">
-        <div className="font-black text-foreground">{item.noFaktur || '-'}</div>
-        <div className="font-mono text-[10px] italic text-muted-foreground/60 mt-1 uppercase">{item.kodeTransaksi}</div>
-      </td>
-      <td className="px-4 py-4">
-        <div className="font-bold text-foreground line-clamp-1">{item.namaBarang}</div>
-        <div className="text-[10px] italic text-primary font-black uppercase mt-1 tracking-widest">{item.brand}</div>
-      </td>
-      <td className="px-4 py-4 text-right font-medium">{formatRupiah(item.harga)}</td>
-      <td className="px-4 py-4 text-center font-black">{item.qty}</td>
-      <td className="px-4 py-4 text-right font-black text-emerald-500">{formatRupiah(item.total)}</td>
-      <td className="px-4 py-4">
-        <span className={cn(
-          "inline-flex px-2 py-0.5 text-[10px] font-black uppercase rounded border",
-          item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 
-            item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' : 
-            item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-600 border-purple-500/20' : 
-            'bg-orange-500/10 text-orange-600 border-orange-500/20'
-        )}>
-          {item.paymentMethod.replace('_', ' ')}
-        </span>
-        {item.statusCair === 'pending' && <div className="text-[10px] italic text-rose-500 mt-1 font-black animate-pulse uppercase">Belum Cair</div>}
-        {item.statusCair === 'partial' && (
-          <div className="mt-1">
-            <div className="text-[10px] italic text-orange-500 font-black uppercase">Cicilan</div>
-            <div className="text-[10px] font-bold text-muted-foreground">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
-          </div>
-        )}
-        {item.statusCair === 'cair' && <div className="text-[10px] italic text-emerald-500 mt-1 font-black uppercase">Selesai</div>}
-      </td>
-      <td className="px-5 py-3 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <button onClick={() => handlePrint(item)} className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded-lg border border-emerald-500/20 transition-all active:scale-95" title="Cetak Struk"><Printer className="w-3.5 h-3.5" /></button>
-          <button onClick={() => handlePDF(item)} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20 transition-all active:scale-95" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
-          
-          {canEdit && (
-            <button onClick={() => handleEdit(item)} className="p-1.5 text-blue-500 hover:bg-blue-500/10 rounded-lg border border-blue-500/20 transition-all active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
+    <TableRow>
+      <TableCell className="text-neu-dark font-medium whitespace-nowrap">{formatDate(item.tanggal)}</TableCell>
+      <TableCell className="font-black text-neu-accent tracking-tighter text-xs">{item.kodeBarang}</TableCell>
+      <TableCell>
+        <div className="font-black text-neu-text">{item.noFaktur || '-'}</div>
+        <div className="font-mono text-[10px] italic text-neu-text font-black mt-1 uppercase tracking-widest">{item.kodeTransaksi}</div>
+      </TableCell>
+      <TableCell>
+        <div className="font-black text-neu-text line-clamp-1">{item.namaBarang}</div>
+        <div className="text-[10px] italic text-neu-accent font-black uppercase mt-1 tracking-widest">{item.brand}</div>
+      </TableCell>
+      <TableCell className="text-right font-medium">{formatRupiah(item.harga)}</TableCell>
+      <TableCell className="text-center font-black">{item.qty}</TableCell>
+      <TableCell className="text-right font-black text-emerald-600">{formatRupiah(item.total)}</TableCell>
+      <TableCell>
+        <div className="flex flex-col gap-1.5 items-start">
+          <span className={cn(
+            "px-2.5 py-0.5 text-[9px] font-black uppercase rounded-full nm-inset",
+            item.paymentMethod === 'cash' ? 'text-emerald-600' : 
+              item.paymentMethod === 'bank' ? 'text-blue-600' : 
+              item.paymentMethod === 'online_shop' ? 'text-purple-600' : 
+              'text-orange-600'
+          )}>
+            {item.paymentMethod.replace('_', ' ')}
+          </span>
+          {item.statusCair === 'pending' && <div className="text-[9px] italic text-rose-500 font-black animate-pulse uppercase ml-1">Belum Cair</div>}
+          {item.statusCair === 'partial' && (
+            <div className="ml-1">
+              <div className="text-[9px] italic text-orange-500 font-black uppercase">Cicilan</div>
+              <div className="text-[9px] font-bold text-neu-dark">Sisa: {formatRupiah(item.total - item.totalPaid)}</div>
+            </div>
           )}
+          {item.statusCair === 'cair' && <div className="text-[9px] italic text-emerald-500 font-black uppercase ml-1">Selesai</div>}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => handlePrint(item)} className="h-8 w-8 p-0 text-emerald-600"><Printer className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="sm" onClick={() => handlePDF(item)} className="h-8 w-8 p-0 text-rose-500"><FileText className="w-4 h-4" /></Button>
+          {canEdit && <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="h-8 w-8 p-0 text-blue-500"><Pencil className="w-4 h-4" /></Button>}
           {canDelete && (
-            <button 
-              onClick={() => handleDelete(item.id)} 
-              className={cn(
-                "p-1.5 rounded-lg border transition-all active:scale-95",
-                (item.totalPaid || 0) > 0
-                  ? "text-muted-foreground/30 border-muted-foreground/10 cursor-not-allowed"
-                  : "text-rose-500 hover:bg-rose-500/10 border-rose-500/20"
-              )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              disabled={(item.totalPaid || 0) > 0}
+              onClick={() => handleDelete(item.id)}
+              className="h-8 w-8 p-0 text-rose-500 disabled:opacity-20"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+              <Trash2 className="w-4 h-4" />
+            </Button>
           )}
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 });
 MemoizedTableRow.displayName = 'MemoizedTableRow';
@@ -123,61 +118,58 @@ import { useMonthYear } from "@/context/month-year-context";
 
 const MemoizedMobileCard = memo(({ item, handleEdit, handleDelete, handlePrint, handlePDF, canEdit, canDelete }: any) => {
   return (
-    <div className="p-5 bg-card/40 rounded-2xl border border-border/20 shadow-sm active:bg-secondary/20 transition-all">
-      <div className="flex justify-between items-start mb-4">
+    <div className="p-6 bg-neu-bg rounded-neu nm-flat hover:nm-sm transition-all duration-300">
+      <div className="flex justify-between items-start mb-6">
         <div className="space-y-1">
-          <div className="text-xs font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
-          <div className="text-sm font-black text-foreground tracking-tight">{item.noFaktur || '-'}</div>
-          <div className="text-[10px] italic font-mono text-muted-foreground/60 uppercase">{item.kodeTransaksi}</div>
+          <div className="text-[10px] font-black text-neu-accent uppercase tracking-[0.2em]">{formatDate(item.tanggal)}</div>
+          <div className="text-base font-black text-neu-text tracking-tight">{item.noFaktur || '-'}</div>
+          <div className="text-[9px] font-mono text-neu-text font-black uppercase tracking-widest">{item.kodeTransaksi}</div>
         </div>
         <div className="flex flex-col items-end gap-2">
           <span className={cn(
-            "px-2.5 py-1 text-[10px] font-black uppercase rounded-lg border",
-            item.paymentMethod === 'cash' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-              item.paymentMethod === 'bank' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 
-              item.paymentMethod === 'online_shop' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : 
-              'bg-orange-500/10 text-orange-500 border-orange-500/20'
+            "px-3 py-1 text-[9px] font-black uppercase rounded-full nm-inset",
+            item.paymentMethod === 'cash' ? 'text-emerald-600' : 
+              item.paymentMethod === 'bank' ? 'text-blue-600' : 
+              item.paymentMethod === 'online_shop' ? 'text-purple-600' : 
+              'text-orange-600'
           )}>
             {item.paymentMethod.replace('_', ' ')}
           </span>
-          {item.statusCair === 'pending' && <span className="text-[10px] bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase border border-rose-500/20">Pending</span>}
-          {item.statusCair === 'partial' && <span className="text-[10px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase border border-orange-500/20">Cicilan</span>}
-          {item.statusCair === 'cair' && <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase border border-emerald-500/20">Selesai</span>}
+          <div className="flex gap-1.5">
+            {item.statusCair === 'pending' && <span className="text-[8px] bg-rose-500/10 text-rose-500 px-2 py-0.5 rounded-full font-black uppercase">Pending</span>}
+            {item.statusCair === 'partial' && <span className="text-[8px] bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded-full font-black uppercase">Cicilan</span>}
+            {item.statusCair === 'cair' && <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-black uppercase">Selesai</span>}
+          </div>
         </div>
       </div>
       
-      <div className="py-3 px-4 bg-secondary/30 rounded-xl border border-border/10 mb-4">
-        <div className="text-sm font-black text-foreground mb-1">{item.namaBarang}</div>
+      <div className="py-4 px-5 bg-white/30 rounded-2xl nm-inset mb-6">
+        <div className="text-sm font-black text-neu-text mb-1">{item.namaBarang}</div>
         <div className="flex justify-between items-center">
-          <span className="text-[10px] italic font-black text-primary/80 uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
-          <span className="text-sm font-black text-muted-foreground tabular-nums">{item.qty} <span className="text-[10px]">PCS</span></span>
+          <span className="text-[9px] font-black text-neu-accent uppercase tracking-widest">{item.brand} • {item.kodeBarang}</span>
+          <span className="text-sm font-black text-neu-dark tabular-nums">{item.qty} <span className="text-[10px]">PCS</span></span>
         </div>
       </div>
 
       <div className="flex justify-between items-center">
-        <div className="space-y-0.5">
-          <div className="text-[10px] font-black text-muted-foreground uppercase">Total</div>
-          <div className="text-base font-black text-emerald-500 leading-none">{formatRupiah(item.total)}</div>
+        <div>
+          <div className="text-[9px] font-black text-neu-dark uppercase tracking-widest">Total Bayar</div>
+          <div className="text-xl font-display font-black text-emerald-600 tracking-tight">{formatRupiah(item.total)}</div>
         </div>
         <div className="flex gap-2">
-           <button onClick={() => handlePrint(item)} className="p-2.5 text-emerald-400 bg-emerald-500/5 rounded-xl border border-emerald-500/20 active:scale-90"><Printer className="w-4 h-4" /></button>
-           <button onClick={() => handlePDF(item)} className="p-2.5 text-rose-400 bg-rose-500/5 rounded-xl border border-rose-500/20 active:scale-90"><FileDown className="w-4 h-4" /></button>
-           
-           {canEdit && (
-             <button onClick={() => handleEdit(item)} className="p-2.5 text-blue-400 bg-blue-500/5 rounded-xl border border-blue-500/20 active:scale-90"><Pencil className="w-4 h-4" /></button>
-           )}
+           <Button variant="ghost" size="icon" onClick={() => handlePrint(item)} className="h-10 w-10 text-emerald-600"><Printer className="w-4 h-4" /></Button>
+           <Button variant="ghost" size="icon" onClick={() => handlePDF(item)} className="h-10 w-10 text-rose-500"><FileDown className="w-4 h-4" /></Button>
+           {canEdit && <Button variant="ghost" size="icon" onClick={() => handleEdit(item)} className="h-10 w-10 text-blue-500"><Pencil className="w-4 h-4" /></Button>}
            {canDelete && (
-             <button 
-               onClick={() => handleDelete(item.id as number)}
-               className={cn(
-                 "p-2.5 rounded-xl border active:scale-90",
-                 (item.totalPaid || 0) > 0
-                   ? "text-muted-foreground/30 border-muted-foreground/10"
-                   : "text-rose-400 bg-rose-500/5 border-rose-500/20"
-               )}
+             <Button 
+               variant="ghost" 
+               size="icon"
+               disabled={(item.totalPaid || 0) > 0}
+               onClick={() => handleDelete(item.id)}
+               className="h-10 w-10 text-rose-500 disabled:opacity-20"
              >
                <Trash2 className="w-4 h-4" />
-             </button>
+             </Button>
            )}
         </div>
       </div>
@@ -447,8 +439,9 @@ export default function Penjualan() {
     }
   };
 
-  const exportExcel = () => {
+  const exportExcel = async () => {
     if (!listData) return;
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet((listData as any[]).map((d: any) => ({
       Tanggal: d.tanggal,
       "No Faktur": d.noFaktur || "-",
@@ -467,8 +460,12 @@ export default function Penjualan() {
     XLSX.writeFile(wb, filename);
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!listData) return;
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const doc = new jsPDF();
     const periodStr = selectedMonth === "all" ? `${selectedYear}` : `${selectedMonth}-${selectedYear}`;
     doc.text(`Laporan Penjualan - ${periodStr}`, 14, 15);
@@ -586,9 +583,10 @@ export default function Penjualan() {
     printWindow.document.close();
   };
 
-  const handleExportPDFIndividual = (item: any) => {
+  const handleExportPDFIndividual = async (item: any) => {
+    const { default: jsPDF } = await import("jspdf");
     // Re-use logic for PDF generation
-    const groupedItems = (item.noFaktur && item.noFaktur !== "-") 
+    const groupedItems = (item.noFaktur && item.noFaktur !== "-")
       ? filteredListData.filter(x => x.noFaktur === item.noFaktur && x.tanggal === item.tanggal)
       : [item];
 
@@ -659,31 +657,36 @@ export default function Penjualan() {
 
   return (
     <Layout>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-12 gap-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <ShoppingCart className="text-primary w-8 h-8" /> Input Penjualan
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Catat transaksi penjualan baru dengan cepat.</p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl nm-flat bg-neu-bg">
+              <ShoppingCart className="text-neu-accent w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-display font-black text-neu-text tracking-tight">Penjualan</h1>
+              <p className="text-neu-dark mt-1 text-sm font-medium">Input & Monitoring Transaksi Penjualan</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-3 bg-secondary/30 p-2 rounded-2xl border border-border/50">
-            <Calendar className="w-4 h-4 text-primary ml-2" />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-4 bg-neu-bg p-2 px-4 rounded-neu nm-inset">
+            <Calendar className="w-4 h-4 text-neu-accent" />
             <select 
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+              className="bg-transparent text-sm font-black text-neu-text outline-none cursor-pointer py-2"
             >
-              {years.map(y => <option key={y} value={y} className="bg-card">{y}</option>)}
+              {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
-            <div className="w-px h-4 bg-border mx-1" />
+            <div className="w-px h-6 bg-neu-dark/20 mx-2" />
             <select 
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value === "all" ? "all" : Number(e.target.value))}
-              className="bg-transparent text-sm font-bold outline-none cursor-pointer p-1"
+              className="bg-transparent text-sm font-black text-neu-text outline-none cursor-pointer py-2"
             >
-              {months.map(m => <option key={m.value} value={m.value} className="bg-card">{m.label}</option>)}
+              {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>
         </div>
@@ -922,10 +925,10 @@ export default function Penjualan() {
         <Card className="border-border/50 shadow-xl shadow-muted/5 overflow-hidden">
           <CardHeader className="border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between py-4 bg-muted/20 gap-4">
             <div>
-              <CardTitle className="text-lg flex items-center gap-2 uppercase tracking-tight font-black">
-                <FileBarChart className="w-5 h-5 text-muted-foreground" /> Daftar Penjualan
+              <CardTitle className="text-lg flex items-center gap-2 uppercase tracking-tight font-black text-neu-text">
+                <FileBarChart className="w-5 h-5 text-neu-accent" /> Daftar Penjualan
               </CardTitle>
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{getIndonesianPeriodLabel(selectedMonth, selectedYear)}</p>
+              <p className="text-[11px] font-black text-neu-text uppercase tracking-[0.2em]">{getIndonesianPeriodLabel(selectedMonth, selectedYear)}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative group flex-1">
@@ -967,10 +970,10 @@ export default function Penjualan() {
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                   <tr>
                     <th className="px-6 py-4 font-black tracking-widest">Tanggal</th>
-                    <th className="px-4 py-4 font-black tracking-widest text-primary">Kode</th>
+                    <th className="px-4 py-4 font-black tracking-widest text-neu-accent">Kode</th>
                     <th className="px-4 py-4 font-black tracking-widest">Faktur / Ref</th>
                     <th className="px-4 py-4 font-black tracking-widest">Produk & Brand</th>
                     <th className="px-4 py-4 text-right font-black tracking-widest">Harga</th>

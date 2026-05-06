@@ -100,10 +100,10 @@ export default function MasterBank() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Landmark className="text-primary w-8 h-8"/> Master Bank
+          <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+            <Landmark className="text-neu-accent w-8 h-8"/> Master Bank
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm md:text-sm">Kelola data perbankan dan lihat riwayat dana masuk.</p>
+          <p className="text-neu-text mt-1 text-sm font-black">Kelola data perbankan dan lihat riwayat dana masuk.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
@@ -152,11 +152,11 @@ export default function MasterBank() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground ml-1">Nama Bank</label>
+                  <label className="text-xs font-black uppercase text-neu-text ml-1">Nama Bank</label>
                   <Input type="text" placeholder="Contoh: BCA, MANDIRI, BRI" required value={form.namaBank} onChange={e=>setForm({...form, namaBank:e.target.value.toUpperCase()})} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium tracking-tight font-black uppercase text-muted-foreground ml-1">Nomor Rekening</label>
+                  <label className="text-xs font-black uppercase text-neu-text ml-1">Nomor Rekening</label>
                   <Input type="text" placeholder="Masukkan angka rekening" required value={form.nomorRekening} onChange={e=>setForm({...form, nomorRekening:e.target.value})} />
                 </div>
                 <button type="submit" disabled={createMutation.isPending} className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-all shadow-md shadow-primary/20">
@@ -174,17 +174,17 @@ export default function MasterBank() {
             <CardContent className="p-0">
               <div className="divide-y divide-border/30">
                 {loadingBanks ? (
-                  <div className="p-8 text-center text-sm text-muted-foreground italic">Memuat data bank...</div>
+                  <div className="p-8 text-center text-sm text-neu-text font-black italic">Memuat data bank...</div>
                 ) : filteredBanks.length === 0 ? (
-                  <div className="p-8 text-center text-sm text-muted-foreground italic">Tidak ada bank terdaftar.</div>
+                  <div className="p-8 text-center text-sm text-neu-text font-black italic">Tidak ada bank terdaftar.</div>
                 ) : filteredBanks.map(bank => (
                   <div key={bank.id} className="p-4 flex justify-between items-center transition-colors">
                     <div>
-                      <div className="font-black text-foreground flex items-center gap-2">
+                      <div className="font-black text-neu-text flex items-center gap-2">
                         {bank.namaBank}
-                        <span className="text-xs italic tracking-tighter px-1.5 py-0.5 bg-secondary text-muted-foreground rounded">{bank.txCount} Trx</span>
+                        <span className="text-xs font-black tracking-tighter px-1.5 py-0.5 bg-neu-bg text-neu-accent rounded border border-neu-accent/20">{bank.txCount} Trx</span>
                       </div>
-                      <div className="text-sm font-mono text-primary mt-0.5">{bank.nomorRekening}</div>
+                      <div className="text-sm font-mono font-black text-neu-accent mt-0.5">{bank.nomorRekening}</div>
                     </div>
                     {canDelete && (
                       <button onClick={()=>handleDelete(bank.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all">
@@ -221,7 +221,7 @@ export default function MasterBank() {
               {/* Desktop View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">
-                  <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                  <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                     <tr>
                       <th className="px-6 py-4 font-black tracking-widest uppercase">Tanggal Cair</th>
                       <th className="px-4 py-4 font-black tracking-widest uppercase">Bank</th>
@@ -237,15 +237,15 @@ export default function MasterBank() {
                     ) : (transactions || []).sort((a,b) => new Date(b.tanggalCair).getTime() - new Date(a.tanggalCair).getTime()).map((tx, idx) => (
                       <tr key={idx} className="hover:bg-primary/[0.02] transition-colors group">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-bold text-sm text-muted-foreground">{formatDate(tx.tanggalCair)}</div>
+                          <div className="font-black text-sm text-neu-text">{formatDate(tx.tanggalCair)}</div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="text-sm font-black text-primary">{tx.namaBank}</div>
-                          <div className="text-xs italic tracking-tighter font-mono text-muted-foreground tracking-tighter">{tx.rekeningBank}</div>
+                          <div className="text-sm font-black text-neu-accent">{tx.namaBank}</div>
+                          <div className="text-xs font-black font-mono text-neu-text tracking-tighter">{tx.rekeningBank}</div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="text-sm font-black text-foreground">{tx.noFaktur || "-"}</div>
-                          <div className="text-xs italic tracking-tighter uppercase font-bold text-muted-foreground tracking-widest">{tx.sumber}</div>
+                          <div className="text-sm font-black text-neu-text">{tx.noFaktur || "-"}</div>
+                          <div className="text-xs font-black uppercase text-neu-text tracking-widest">{tx.sumber}</div>
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="text-sm font-black text-emerald-500">{formatRupiah(Number(tx.nilai))}</div>

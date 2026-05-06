@@ -5,9 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Printer, FileText, Download } from "lucide-react";
 import { useListKodePencairan, listTransaksiBank } from "@workspace/api-client-react";
 import { formatRupiah, formatDate } from "@/lib/utils";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
 import { useToast } from "@/hooks/use-toast";
 
 interface CetakPencairanModalProps {
@@ -26,6 +23,10 @@ export function CetakPencairanModal({ open, onOpenChange, dateParams }: CetakPen
     if (!selectedKode) return;
     setIsExporting(true);
     try {
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
       const summary = kodePencairanList?.find(k => k.kodePencairan === selectedKode);
       const data = await listTransaksiBank({ kodePencairan: selectedKode });
 
@@ -93,6 +94,7 @@ export function CetakPencairanModal({ open, onOpenChange, dateParams }: CetakPen
     if (!selectedKode) return;
     setIsExporting(true);
     try {
+      const XLSX = await import("xlsx");
       const summary = kodePencairanList?.find(k => k.kodePencairan === selectedKode);
       const data = await listTransaksiBank({ kodePencairan: selectedKode });
 
@@ -151,6 +153,10 @@ export function CetakPencairanModal({ open, onOpenChange, dateParams }: CetakPen
     if (!selectedKode) return;
     setIsExporting(true);
     try {
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
       const summary = kodePencairanList?.find(k => k.kodePencairan === selectedKode);
       const data = await listTransaksiBank({ kodePencairan: selectedKode });
 

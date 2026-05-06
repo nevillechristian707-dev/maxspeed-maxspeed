@@ -42,10 +42,10 @@ export default function Modal() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Briefcase className="text-primary w-8 h-8" /> Analisa Modal & Margin
+          <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+            <Briefcase className="text-neu-accent w-8 h-8" /> Analisa Modal & Margin
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Evaluasi perbandingan harga beli vs harga jual secara mendalam.</p>
+          <p className="text-neu-text mt-1 text-sm font-black">Evaluasi perbandingan harga beli vs harga jual secara mendalam.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -105,22 +105,22 @@ export default function Modal() {
         <CardHeader className="border-b border-border/50 bg-secondary/10 py-4">
           <CardTitle className="text-lg uppercase tracking-tight font-black flex items-center justify-between">
             Rincian Transaksi
-            <span className="text-[10px] bg-secondary/50 px-3 py-1 rounded-full text-muted-foreground font-black tracking-widest">{data?.items.length || 0} DATA</span>
+            <span className="text-[10px] bg-neu-bg px-3 py-1 rounded-full text-neu-text font-black tracking-widest">{data?.items.length || 0} DATA</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
-              <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+              <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                 <tr>
                   <th className="px-6 py-4 font-black tracking-widest uppercase">Tgl</th>
                   <th className="px-4 py-4 font-black tracking-widest uppercase">TRX</th>
                   <th className="px-4 py-4 font-black tracking-widest uppercase">Barang</th>
                   <th className="px-4 py-4 text-center font-black tracking-widest uppercase">Qty</th>
-                  <th className="px-4 py-4 text-right font-black tracking-widest text-orange-500 uppercase">Tot Modal</th>
-                  <th className="px-4 py-4 text-right font-black tracking-widest text-blue-500 uppercase">Tot Jual</th>
-                  <th className="px-4 py-4 text-right font-black tracking-widest text-emerald-500 uppercase">Laba</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-orange-600 uppercase">Tot Modal</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-blue-600 uppercase">Tot Jual</th>
+                  <th className="px-4 py-4 text-right font-black tracking-widest text-emerald-600 uppercase">Laba</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/10">
@@ -132,8 +132,8 @@ export default function Modal() {
                   const laba = item.total - item.totalModal;
                   return (
                     <tr key={item.id} className="hover:bg-primary/[0.03] transition-colors group/row">
-                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground/80 font-medium">{formatDate(item.tanggal)}</td>
-                      <td className="px-4 py-4 font-mono text-xs text-primary font-black tracking-tighter">{item.kodeTransaksi}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-neu-text font-black">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-4 font-mono text-xs text-neu-accent font-black tracking-tighter">{item.kodeTransaksi}</td>
                       <td className="px-4 py-4 font-bold text-foreground group-hover/row:text-primary transition-colors">{item.namaBarang}</td>
                       <td className="px-4 py-4 text-center font-black tabular-nums">{item.qty}</td>
                       <td className="px-4 py-4 text-right font-black text-orange-500/80 tabular-nums">{formatRupiah(item.totalModal)}</td>
@@ -151,18 +151,18 @@ export default function Modal() {
             {isLoading ? (
                <div className="text-center py-20 text-muted-foreground animate-pulse font-black uppercase tracking-widest text-xs">Sedang Menganalisa...</div>
             ) : data?.items.length === 0 ? (
-               <div className="text-center py-10 text-muted-foreground italic font-black uppercase tracking-widest text-xs opacity-50">Tidak ada rincian data.</div>
+               <div className="text-center py-10 text-neu-text italic font-black uppercase tracking-widest text-xs">Tidak ada rincian data.</div>
             ) : data?.items.map(item => {
               const laba = item.total - item.totalModal;
               return (
                 <div key={item.id} className="p-4 bg-card/60 my-2 rounded-2xl border border-border/20 space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="space-y-0.5">
-                       <div className="text-[10px] font-black text-primary uppercase tracking-widest">{formatDate(item.tanggal)}</div>
-                       <div className="text-[9px] font-mono text-muted-foreground/60 tracking-tighter uppercase">{item.kodeTransaksi}</div>
+                       <div className="text-[10px] font-black text-neu-accent uppercase tracking-widest">{formatDate(item.tanggal)}</div>
+                       <div className="text-[9px] font-mono text-neu-text font-black tracking-tighter uppercase">{item.kodeTransaksi}</div>
                     </div>
                     <div className="text-right">
-                       <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Profit</div>
+                       <div className="text-[9px] font-black text-neu-text uppercase tracking-widest mb-1">Profit</div>
                        <div className="text-xs font-black text-emerald-500 whitespace-nowrap">{formatRupiah(laba)}</div>
                     </div>
                   </div>

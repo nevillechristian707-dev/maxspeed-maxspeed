@@ -35,10 +35,10 @@ export default function Customer() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Users className="text-primary w-8 h-8"/> Master Customer / Bengkel
+          <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+            <Users className="text-neu-accent w-8 h-8"/> Master Customer / Bengkel
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Kelola data pelanggan dan bengkel rekanan.</p>
+          <p className="text-neu-text mt-1 text-sm font-black">Kelola data pelanggan dan bengkel rekanan.</p>
         </div>
       </div>
       <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
@@ -54,9 +54,28 @@ export default function Customer() {
         )}
         <Card className={canAdd ? "md:col-span-2" : "md:col-span-3"}>
           <CardContent className="p-0 overflow-x-auto">
-             <table className="w-full text-sm text-left"><thead className="bg-secondary/50"><tr><th className="p-3">Nama Customer</th><th className="p-3">Act</th></tr></thead>
-             <tbody>{data?.map(b => <tr key={b.id} className="border-b border-border/50"><td className="p-3 font-bold">{b.namaCustomer}</td><td className="p-3">{canDelete && <button onClick={()=>deleteMutation.mutate({id: b.id},{onSuccess:()=>queryClient.invalidateQueries()})}><Trash2 className="w-4 h-4 text-destructive"/></button>}</td></tr>)}</tbody>
-             </table>
+              <table className="w-full text-sm text-left">
+                <thead className="bg-neu-bg/50 border-b border-neu-bg">
+                  <tr>
+                    <th className="p-4 font-black text-neu-text uppercase tracking-widest">Nama Customer</th>
+                    <th className="p-4 font-black text-neu-text text-center uppercase tracking-widest">Act</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.map(b => (
+                    <tr key={b.id} className="border-b border-neu-dark/10">
+                      <td className="p-4 font-black text-neu-text">{b.namaCustomer}</td>
+                      <td className="p-4 text-center">
+                        {canDelete && (
+                          <button onClick={()=>deleteMutation.mutate({id: b.id},{onSuccess:()=>queryClient.invalidateQueries()})} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20">
+                            <Trash2 className="w-4 h-4"/>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
           </CardContent>
         </Card>
       </div>

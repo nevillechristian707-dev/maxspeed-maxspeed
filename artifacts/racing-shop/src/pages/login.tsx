@@ -31,56 +31,49 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Background image from requirements.yaml */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={`${import.meta.env.BASE_URL}images/login-bg.png`} 
-          alt="Racing Background" 
-          className="w-full h-full object-cover opacity-30"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+    <div className="min-h-screen bg-neu-bg flex flex-col items-center justify-center relative p-6">
+      <div className="absolute inset-0 z-0 bg-neu-bg">
+        <div className="absolute inset-0 bg-gradient-to-br from-neu-accent/5 via-transparent to-transparent opacity-50" />
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md z-10 p-4"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md z-10"
       >
-        <div className="bg-card/80 backdrop-blur-2xl border border-white/10 p-8 rounded-3xl shadow-2xl shadow-primary/10">
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-full h-48 flex items-center justify-center mb-6">
+        <div className="bg-neu-bg nm-flat p-10 rounded-neu">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-full h-32 flex items-center justify-center mb-6">
               <img 
                 src={`${import.meta.env.BASE_URL}logo-maxspeed.png`} 
-                alt="Maxspeed Racing Shop" 
-                className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(234,88,12,0.6)]"
-                style={{ imageRendering: 'auto' }}
+                alt="Maxspeed" 
+                className="w-full h-full object-contain filter drop-shadow-sm"
               />
             </div>
-            <p className="text-primary font-black text-[10px] tracking-[0.5em] uppercase opacity-60">Aplikasi Max Speed</p>
+            <h1 className="text-neu-accent font-black text-[10px] tracking-[0.4em] uppercase">Aplikasi Max Speed</h1>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground ml-1">Username</label>
+              <label className="text-[10px] font-black text-neu-text uppercase tracking-widest ml-2">Username</label>
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
-                placeholder="Enter your username"
+                className="w-full px-5 py-4 rounded-2xl nm-inset bg-white text-neu-text outline-none focus:ring-2 focus:ring-neu-accent/20 transition-all placeholder:text-neu-text font-black text-sm"
+                placeholder="Username Anda"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
+              <label className="text-[10px] font-black text-neu-text uppercase tracking-widest ml-2">Password</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                className="w-full px-5 py-4 rounded-2xl nm-inset bg-white text-neu-text outline-none focus:ring-2 focus:ring-neu-accent/20 transition-all placeholder:text-neu-text font-black text-sm"
                 placeholder="••••••••"
               />
             </div>
@@ -88,7 +81,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loginMutation.isPending}
-              className="w-full py-3.5 mt-4 bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-4 mt-6 bg-neu-accent hover:opacity-90 text-white font-black rounded-2xl nm-flat active:nm-inset transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed text-xs tracking-[0.2em]"
             >
               {loginMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "SIGN IN TO PITLANE"}
             </button>

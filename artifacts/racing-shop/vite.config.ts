@@ -64,7 +64,7 @@ export default defineConfig({
             '@radix-ui/react-dropdown-menu'
           ],
           'vendor-charts': ['recharts'],
-          'vendor-utils': ['xlsx', 'jspdf', 'date-fns']
+          'vendor-utils': ['date-fns']
         }
       }
     }

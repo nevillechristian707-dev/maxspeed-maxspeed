@@ -5,34 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0" +
-" hover-elevate active-elevate-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neu-accent disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 will-change-neu",
   {
     variants: {
       variant: {
         default:
-           // @replit: no hover, and add primary border
-           "bg-primary text-primary-foreground border border-primary-border",
+          "bg-neu-bg text-neu-accent nm-flat hover:nm-sm active:nm-inset active:scale-[0.98]",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm border-destructive-border",
+          "bg-rose-500 text-white shadow-lg active:scale-[0.98]",
         outline:
-          // @replit Shows the background color of whatever card / sidebar / accent background it is inside of.
-          // Inherits the current text color. Uses shadow-xs. no shadow on active
-          // No hover state
-          " border [border-color:var(--button-outline)] shadow-xs active:shadow-none ",
+          "border border-neu-dark/20 bg-transparent text-neu-text hover:bg-neu-bg hover:nm-sm active:nm-inset",
         secondary:
-          // @replit border, no hover, no shadow, secondary border.
-          "border bg-secondary text-secondary-foreground border border-secondary-border ",
-        // @replit no hover, transparent border
-        ghost: "border border-transparent",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-neu-bg text-neu-text nm-sm hover:nm-flat active:nm-inset",
+        ghost: "hover:bg-neu-dark/10 text-neu-text",
+        link: "text-neu-accent underline-offset-4 hover:underline",
+        neumorphic: "bg-neu-bg text-neu-accent nm-flat active:nm-inset",
       },
       size: {
-        // @replit changed sizes
-        default: "min-h-9 px-4 py-2",
-        sm: "min-h-8 rounded-md px-3 text-xs",
-        lg: "min-h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: "h-11 px-6 py-2",
+        sm: "h-9 rounded-xl px-4 text-xs",
+        lg: "h-14 rounded-neu px-10 text-base",
+        icon: "h-11 w-11 rounded-2xl nm-flat active:nm-inset flex items-center justify-center",
       },
     },
     defaultVariants: {

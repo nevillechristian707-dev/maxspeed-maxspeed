@@ -1,5 +1,6 @@
-import "dotenv/config";
-import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../../.env" });
 import app from "./app";
 
 const port = Number(process.env["API_PORT"] || process.env["PORT"] || 3001);

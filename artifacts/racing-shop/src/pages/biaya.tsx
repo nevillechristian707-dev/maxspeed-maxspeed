@@ -139,10 +139,10 @@ export default function Biaya() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-            <Receipt className="text-primary w-8 h-8" /> Biaya Operasional
+          <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+            <Receipt className="text-neu-accent w-8 h-8" /> Biaya Operasional
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Kelola pencatatan biaya pengeluaran toko.</p>
+          <p className="text-neu-text mt-1 text-sm font-black">Kelola pencatatan biaya pengeluaran toko.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -171,30 +171,30 @@ export default function Biaya() {
         {canAdd && (
         <Card className="md:col-span-1 h-fit border-primary/20">
           <CardHeader className="bg-secondary/50 border-b border-border/50">
-            <CardTitle className="text-lg">Input Biaya</CardTitle>
+            <CardTitle className="text-lg font-black text-neu-text">Input Biaya</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm text-muted-foreground">Tanggal</label>
+                <label className="text-sm font-black text-neu-text">Tanggal</label>
                 <DatePicker 
                   date={form.tanggal ? new Date(form.tanggal) : undefined}
                   onChange={(date) => setForm({...form, tanggal: formatDateToYYYYMMDD(date)})}
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm text-muted-foreground">Keterangan</label>
+                <label className="text-sm font-black text-neu-text">Keterangan</label>
                 <input 
                   type="text" 
                   required
                   placeholder="Misal: Listrik, Internet, Bensin"
                   value={form.keterangan}
                   onChange={e => setForm({...form, keterangan: e.target.value})}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" 
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary font-bold" 
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm text-muted-foreground">Nilai (Rp)</label>
+                <label className="text-sm font-black text-neu-text">Nilai (Rp)</label>
                 <input 
                   type="number" 
                   required
@@ -202,13 +202,13 @@ export default function Biaya() {
                   value={form.nilai}
                   onChange={e => setForm({...form, nilai: e.target.value})}
                   onFocus={() => { if (form.nilai === "0") setForm({...form, nilai: ""}); }}
-                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" 
+                  className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary font-bold" 
                 />
               </div>
               <Button 
                 type="submit" 
                 disabled={createMutation.isPending}
-                className="w-full font-bold py-6"
+                className="w-full font-black py-6"
               >
                 <Plus className="w-4 h-4 mr-2" /> Simpan Biaya
               </Button>
@@ -218,18 +218,18 @@ export default function Biaya() {
         )}
 
         <Card className={canAdd ? "md:col-span-2" : "md:col-span-3"}>
-          <CardHeader className="border-b border-border/50 flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Daftar Biaya Biaya</CardTitle>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Total:</span>
-              <span className="font-bold text-destructive text-lg">{formatRupiah(totalBiaya)}</span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+            <CardHeader className="border-b border-border/50 flex flex-row items-center justify-between">
+              <CardTitle className="text-lg font-black text-neu-text">Daftar Biaya Operasional</CardTitle>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-black text-neu-text">Total:</span>
+                <span className="font-black text-rose-600 text-lg">{formatRupiah(totalBiaya)}</span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {/* Desktop Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm text-left border-collapse">
+                  <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                   <tr>
                     <th className="px-6 py-4 font-black tracking-widest uppercase">Tanggal</th>
                     <th className="px-4 py-4 font-black tracking-widest uppercase">Keterangan</th>
@@ -239,17 +239,17 @@ export default function Biaya() {
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {isLoading ? (
-                     <tr><td colSpan={4} className="text-center py-8">Loading...</td></tr>
+                     <tr><td colSpan={4} className="text-center py-8 text-neu-text font-black uppercase">Memuat data...</td></tr>
                   ) : data?.length === 0 ? (
-                    <tr><td colSpan={4} className="text-center py-8 text-muted-foreground italic">Tidak ada pencatatan biaya pada periode ini.</td></tr>
+                    <tr><td colSpan={4} className="text-center py-8 text-neu-text font-black uppercase">Tidak ada pencatatan biaya pada periode ini.</td></tr>
                   ) : data?.map(item => (
                     <tr key={item.id} className="hover:bg-primary/[0.02] transition-colors border-b border-border/10">
-                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">{formatDate(item.tanggal)}</td>
-                      <td className="px-4 py-4 font-bold text-foreground">{item.keterangan}</td>
-                      <td className="px-4 py-4 text-right font-black text-rose-500">{formatRupiah(item.nilai)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-neu-text font-black">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-4 font-black text-neu-text">{item.keterangan}</td>
+                      <td className="px-4 py-4 text-right font-black text-rose-600">{formatRupiah(item.nilai)}</td>
                       <td className="px-4 py-4 text-center">
                         {canDelete && (
-                          <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-rose-500/20">
+                          <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-600 hover:bg-rose-600/10 rounded-lg transition-colors border border-rose-600/20">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
@@ -263,21 +263,21 @@ export default function Biaya() {
             {/* Mobile Card List */}
             <div className="md:hidden divide-y divide-border/20 p-2">
               {isLoading ? (
-                 <div className="text-center py-10 text-muted-foreground italic">Memuat data...</div>
-              ) : data?.length === 0 ? (
-                <div className="text-center py-10 text-muted-foreground font-bold">Tidak ada data biaya.</div>
+                  <div className="text-center py-10 text-neu-text font-black uppercase">Memuat data...</div>
+               ) : data?.length === 0 ? (
+                 <div className="text-center py-10 text-neu-text font-black uppercase">Tidak ada data biaya.</div>
               ) : data?.map(item => (
                 <div key={item.id} className="p-4 space-y-2 bg-card/60 my-2 rounded-xl border border-border/20">
                   <div className="flex justify-between items-start">
-                    <div className="text-xs font-medium tracking-tight font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
+                    <div className="text-xs font-black uppercase text-primary tracking-widest">{formatDate(item.tanggal)}</div>
                     {canDelete && (
-                      <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-500 bg-rose-500/5 rounded-lg border border-rose-500/20">
+                      <button onClick={() => handleDelete(item.id)} className="p-2 text-rose-600 bg-rose-600/5 rounded-lg border border-rose-600/20">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
-                  <div className="text-sm font-bold text-foreground">{item.keterangan}</div>
-                  <div className="text-lg font-black text-rose-500">{formatRupiah(item.nilai)}</div>
+                  <div className="text-sm font-black text-neu-text">{item.keterangan}</div>
+                  <div className="text-lg font-black text-rose-600">{formatRupiah(item.nilai)}</div>
                 </div>
               ))}
             </div>

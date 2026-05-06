@@ -442,10 +442,10 @@ export default function Pencairan() {
     <Layout>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold text-foreground flex items-center gap-3">
-              <Wallet className="text-primary w-8 h-8" /> Pencairan Dana
+            <h1 className="text-3xl font-display font-black text-neu-text flex items-center gap-3">
+              <Wallet className="text-neu-accent w-8 h-8" /> Pencairan Dana
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
+            <p className="text-neu-text mt-1 text-sm font-black">Kelola pelunasan dari Online Shop dan Penjualan Kredit.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -486,9 +486,9 @@ export default function Pencairan() {
               <Printer className="w-4 h-4" />
               Cetak Laporan
             </Button>
-            <div className="flex items-center gap-2 px-4 py-2 bg-secondary/30 rounded-2xl border border-border/50">
-               <span className="text-xs font-black text-muted-foreground uppercase tracking-widest px-2">Periode Aktif:</span>
-               <span className="text-sm font-black text-primary uppercase">{periodLabel}</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-neu-bg/50 rounded-2xl border border-neu-dark/10">
+               <span className="text-xs font-black text-neu-text uppercase tracking-widest px-2">Periode Aktif:</span>
+               <span className="text-sm font-black text-neu-accent uppercase">{periodLabel}</span>
             </div>
           </div>
         </div>
@@ -513,7 +513,7 @@ export default function Pencairan() {
                   </span>
                 )}
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-8">Dana marketplace belum cair</p>
+              <p className="text-xs font-black text-neu-text uppercase tracking-widest pl-8">Dana marketplace belum cair</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
               <div className="relative w-full sm:w-64">
@@ -548,7 +548,7 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                   <tr>
                     <th className="px-4 py-3.5 w-10">
                       <Checkbox
@@ -585,14 +585,14 @@ export default function Pencairan() {
                       <td className="px-4 py-3">
                         <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-neu-text font-black">{formatDate(item.tanggal)}</td>
                       <td className="px-4 py-3">
-                        <div className="font-bold text-foreground text-sm">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-xs font-medium text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                        <div className="font-black text-neu-text text-sm">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-xs font-black text-neu-text leading-none">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-black text-purple-400 text-xs uppercase block mb-1">{item.namaOnlineShop}</span>
-                        <div className="text-sm leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <span className="font-black text-purple-600 text-xs uppercase block mb-1">{item.namaOnlineShop}</span>
+                        <div className="text-sm leading-tight text-neu-text font-bold">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
@@ -656,19 +656,19 @@ export default function Pencairan() {
                       <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
                       <div>
                         <div className="text-xs font-black text-purple-500 uppercase tracking-widest">{item.namaOnlineShop}</div>
-                        <div className="text-sm font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                        <div className="text-sm font-black text-neu-text mt-0.5">{item.noFaktur || '-'}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-xs font-medium font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
-                       <div className="text-xs font-medium font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                       <div className="text-xs font-black text-neu-text uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-xs font-black font-mono text-neu-text">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
+                  <div className="text-sm text-neu-text font-bold pl-2 border-l-2 border-purple-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-emerald-500">{formatRupiah(item.totalAmount)}</div>
-                      {item.status === 'partial' && <div className="text-xs font-bold text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
+                      {item.status === 'partial' && <div className="text-xs font-black text-orange-400 uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
                       {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-xs font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Cairkan</button>}
@@ -716,7 +716,7 @@ export default function Pencairan() {
                   </span>
                 )}
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-8">Tagihan jatuh tempo customer</p>
+              <p className="text-xs font-black text-neu-text uppercase tracking-widest pl-8">Tagihan jatuh tempo customer</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
               <div className="relative w-full sm:w-64">
@@ -751,7 +751,7 @@ export default function Pencairan() {
             {/* Desktop View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
-                <thead className="text-xs font-medium tracking-tight text-muted-foreground uppercase bg-secondary/40 border-b border-border/50">
+                <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                   <tr>
                     <th className="px-4 py-3.5 w-10">
                       <Checkbox
@@ -788,14 +788,14 @@ export default function Pencairan() {
                       <td className="px-4 py-3">
                         <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">{formatDate(item.tanggal)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-neu-text font-black">{formatDate(item.tanggal)}</td>
                       <td className="px-4 py-3">
-                        <div className="font-bold text-foreground text-sm">{item.noFaktur || '-'}</div>
-                        <div className="font-mono text-xs font-medium text-muted-foreground leading-none">{item.kodeTransaksi}</div>
+                        <div className="font-black text-neu-text text-sm">{item.noFaktur || '-'}</div>
+                        <div className="font-mono text-xs font-black text-neu-text leading-none">{item.kodeTransaksi}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="font-black text-orange-400 text-xs uppercase block mb-1">{item.namaCustomer}</span>
-                        <div className="text-sm leading-tight text-muted-foreground">{item.namaBarang}</div>
+                        <span className="font-black text-orange-600 text-xs uppercase block mb-1">{item.namaCustomer}</span>
+                        <div className="text-sm leading-tight text-neu-text font-bold">{item.namaBarang}</div>
                       </td>
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <div className="font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
@@ -803,7 +803,7 @@ export default function Pencairan() {
                           {item.status === 'partial' && (
                             <>
                               <span className="text-xs font-medium bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border border-orange-500/20 mb-1">Terbayar Sebagian</span>
-                              <span className="text-xs font-bold text-orange-400 font-bold italic">Sisa: {formatRupiah(item.nilai)}</span>
+                              <span className="text-xs font-black text-orange-400 uppercase tracking-tighter">Sisa: {formatRupiah(item.nilai)}</span>
                             </>
                           )}
                         </div>
@@ -846,12 +846,12 @@ export default function Pencairan() {
             {/* Mobile View */}
             <div className="md:hidden divide-y divide-border/20 p-2">
               {isLoading || isFetching ? (
-                <div className="p-10 text-center text-muted-foreground animate-pulse flex flex-col items-center gap-2">
+                <div className="p-10 text-center text-neu-text font-black uppercase flex flex-col items-center gap-2">
                    <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                    Memuat data...
                 </div>
               ) : kreditPending.length === 0 ? (
-                <div className="p-10 text-center text-muted-foreground">Tidak ada piutang kredit.</div>
+                <div className="p-10 text-center text-neu-text font-black uppercase">Tidak ada piutang kredit.</div>
               ) : kreditPending.map((item: any) => (
                 <div key={item.id} className={cn("p-4 mb-3 rounded-xl border transition-all space-y-3", markedIds.has(item.id) ? "bg-primary/10 border-primary/40" : "bg-card/60 border-border/40")}>
                   <div className="flex justify-between items-start">
@@ -859,19 +859,19 @@ export default function Pencairan() {
                       <Checkbox checked={markedIds.has(item.id)} onCheckedChange={() => toggleMark(item.id)} className="mt-1" />
                       <div>
                         <div className="text-xs font-black text-orange-500 uppercase tracking-widest">{item.namaCustomer}</div>
-                        <div className="text-sm font-bold text-foreground mt-0.5">{item.noFaktur || '-'}</div>
+                        <div className="text-sm font-black text-foreground mt-0.5">{item.noFaktur || '-'}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-xs font-medium font-black text-muted-foreground uppercase">{formatDate(item.tanggal)}</div>
-                       <div className="text-xs font-medium font-mono text-muted-foreground/60">{item.kodeTransaksi}</div>
+                       <div className="text-xs font-black text-neu-text uppercase">{formatDate(item.tanggal)}</div>
+                       <div className="text-xs font-black font-mono text-neu-text">{item.kodeTransaksi}</div>
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
+                  <div className="text-sm text-neu-text font-black pl-2 border-l-2 border-orange-500/30">{item.namaBarang}</div>
                   <div className="flex justify-between items-center pt-1">
                     <div>
                       <div className="text-sm font-black text-orange-500">{formatRupiah(item.totalAmount)}</div>
-                      {item.status === 'partial' && <div className="text-xs font-bold text-orange-400 font-bold uppercase tracking-tighter italic">Sisa: {formatRupiah(item.nilai)}</div>}
+                      {item.status === 'partial' && <div className="text-xs font-black text-orange-400 uppercase tracking-tighter">Sisa: {formatRupiah(item.nilai)}</div>}
                     </div>
                     <div className="flex gap-2">
                       {canEdit && <button onClick={() => handleOpenBankModal(item)} className="px-4 py-2 bg-emerald-500 text-white text-xs font-black rounded-lg uppercase shadow-lg shadow-emerald-500/20">Lunasi</button>}
@@ -891,11 +891,11 @@ export default function Pencairan() {
               <CardTitle className="text-emerald-500 flex items-center gap-2 uppercase tracking-tighter decoration-emerald-500/30 underline-offset-4 underline">
                 <Building2 className="w-5 h-5 text-emerald-500" /> Data Pencairan per Bank
               </CardTitle>
-              <p className="text-xs font-medium tracking-tight text-muted-foreground font-black uppercase tracking-widest pl-7">Rekapitulasi kas masuk periode ini</p>
+              <p className="text-xs font-black text-neu-text uppercase tracking-widest pl-7">Rekapitulasi kas masuk periode ini</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
               <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neu-text" />
                 <Input 
                   placeholder="Cari Tgl, Faktur, TRX, Produk, Bank..." 
                   value={searchHistory}
@@ -912,12 +912,12 @@ export default function Pencairan() {
           </CardHeader>
           <CardContent className="p-0">
             {isLoadingHistory || isFetchingHistory ? (
-              <div className="p-12 text-center text-muted-foreground italic flex flex-col items-center gap-3">
+              <div className="p-12 text-center text-neu-text font-black uppercase flex flex-col items-center gap-3">
                  <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin shadow-lg" />
-                 <span className="font-bold uppercase tracking-widest text-xs">Memperbarui riwayat pencairan...</span>
+                 <span className="font-black uppercase tracking-widest text-xs">Memperbarui riwayat pencairan...</span>
               </div>
             ) : bankSummaries.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground italic font-medium">Belum ada data pencairan periode ini.</div>
+              <div className="p-12 text-center text-neu-text font-black uppercase">Belum ada data pencairan periode ini.</div>
             ) : (
               <div className="p-4 space-y-8 bg-secondary/5">
                 {bankSummaries.map((dayGroup, i) => (
@@ -938,12 +938,12 @@ export default function Pencairan() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-[10px] sm:text-xs font-bold text-indigo-400 font-bold uppercase mt-0.5 tracking-tighter truncate">Riwayat Pencairan Harian</div>
+                            <div className="text-[10px] sm:text-xs font-black text-indigo-400 uppercase mt-0.5 tracking-tighter truncate">Riwayat Pencairan Harian</div>
                           </div>
                        </div>
-                        <div className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase flex items-center gap-2 sm:gap-3 shrink-0">
-                          <span className="opacity-40 tracking-[0.1em] sm:tracking-[0.2em] hidden xs:inline">Total:</span>
-                          <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-[11px] sm:text-sm whitespace-nowrap">{formatRupiah(dayGroup.total)}</span>
+                        <div className="text-[10px] sm:text-xs font-black text-neu-text uppercase flex items-center gap-2 sm:gap-3 shrink-0">
+                          <span className="tracking-[0.1em] sm:tracking-[0.2em] hidden xs:inline">Total:</span>
+                          <span className="bg-emerald-500/20 text-emerald-600 px-2 py-1 sm:px-4 sm:py-1.5 rounded-full border border-emerald-500/30 shadow-lg shadow-emerald-500/10 font-black text-[11px] sm:text-sm whitespace-nowrap">{formatRupiah(dayGroup.total)}</span>
                         </div>
                     </div>
 
@@ -957,8 +957,8 @@ export default function Pencairan() {
                                 <Landmark className="w-6 h-6 text-emerald-500" />
                               </div>
                               <div>
-                                <h3 className="text-sm font-black text-foreground uppercase tracking-tight">{bankGroup.bank}</h3>
-                                <p className="text-xs font-mono text-muted-foreground tracking-tight">{bankGroup.account}</p>
+                                <h3 className="text-sm font-black text-neu-text uppercase tracking-tight">{bankGroup.bank}</h3>
+                                <p className="text-xs font-mono font-black text-neu-text tracking-tight">{bankGroup.account}</p>
                               </div>
                             </div>
                             <div className="text-left sm:text-right flex flex-row sm:flex-col justify-between items-center sm:items-end gap-2">
@@ -970,7 +970,7 @@ export default function Pencairan() {
                           {/* Transaction Detail Table for this Bank */}
                           <div className="overflow-x-auto">
                             <table className="w-full text-[11px] text-left">
-                              <thead className="text-xs font-medium text-muted-foreground/60 uppercase bg-secondary/5 border-b border-border/10">
+                              <thead className="text-xs font-black text-neu-text uppercase bg-neu-bg/50 border-b border-neu-bg">
                                   <tr>
                                     <th className="px-2 sm:px-4 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Tgl Faktur</th>
                                     <th className="px-3 sm:px-6 py-2.5 font-black uppercase tracking-widest whitespace-nowrap">Faktur / TRX</th>
@@ -983,22 +983,22 @@ export default function Pencairan() {
                               <tbody className="divide-y divide-border/10">
                                 {bankGroup.items.map((tx: any) => (
                                   <tr key={tx.id} className="hover:bg-emerald-500/[0.01] transition-colors group/row">
-                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-[10px] sm:text-xs text-muted-foreground font-bold">
+                                    <td className="px-2 sm:px-4 py-3 whitespace-nowrap text-[10px] sm:text-xs text-neu-text font-black">
                                       {formatDate(tx.tanggal)}
                                     </td>
                                       <td className="px-3 sm:px-6 py-3">
-                                      <span className="font-bold text-foreground text-[10px] sm:text-xs">{tx.noFaktur || "-"}</span>
-                                      <div className="text-[9px] sm:text-xs font-bold text-muted-foreground/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
+                                      <span className="font-black text-neu-text text-[10px] sm:text-xs">{tx.noFaktur || "-"}</span>
+                                      <div className="text-[9px] sm:text-xs font-black text-neu-text/50 font-mono tracking-tighter uppercase">ID: {tx.kodeTransaksi}</div>
                                     </td>
                                     <td className="px-2 sm:px-4 py-3">
                                       <div className="font-bold text-foreground text-[10px] sm:text-xs line-clamp-2">{tx.namaBarang}</div>
                                       <div className="text-[9px] sm:text-xs font-bold text-primary font-black uppercase mt-1 tracking-widest truncate">{tx.brand || '-'} • {tx.kodeBarang}</div>
                                     </td>
                                     <td className="px-2 sm:px-4 py-3">
-                                      <span className="px-1.5 py-0.5 bg-secondary/50 rounded text-[8px] sm:text-xs font-black text-muted-foreground/60 uppercase tracking-tighter border border-border/10 font-medium block mb-1 w-fit">
+                                      <span className="px-1.5 py-0.5 bg-neu-bg rounded text-[8px] sm:text-xs font-black text-neu-text uppercase tracking-tighter border border-neu-bg block mb-1 w-fit">
                                         {tx.sumber.replace('_', ' ')}
                                       </span>
-                                      <div className="text-[9px] sm:text-xs font-bold text-foreground truncate">
+                                      <div className="text-[9px] sm:text-xs font-black text-neu-text truncate">
                                         {tx.sumber === 'online_shop' ? tx.namaOnlineShop : tx.namaCustomer}
                                       </div>
                                     </td>
