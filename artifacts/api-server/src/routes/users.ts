@@ -1,14 +1,17 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, rolesTable } from "../../../../lib/db/src/index";
-import { eq, not } from "drizzle-orm";
+import { getDb, usersTable, rolesTable } from "../../../../lib/db/src/index";
+import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
 // Middleware to check if user is admin (optional safety net)
 const requireAdmin = async (req: any, res: any, next: any) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
+
   const userId = req.session?.userId;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
-  
+
   const user = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   const userRole = (user[0]?.role || "").toLowerCase();
   if (!user.length || (!userRole.includes("admin") && !userRole.includes("superadmin"))) {
@@ -18,6 +21,8 @@ const requireAdmin = async (req: any, res: any, next: any) => {
 };
 
 router.get("/", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const users = await db.select({
       id: usersTable.id,
@@ -33,9 +38,11 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { username, password, name, role } = req.body;
-    
+
     // Validate role exists
     const roleExists = await db.select().from(rolesTable).where(eq(rolesTable.name, role)).limit(1);
     if (!roleExists.length) return res.status(400).json({ error: "Invalid role selected" });
@@ -50,10 +57,12 @@ router.post("/", requireAdmin, async (req, res) => {
 });
 
 router.put("/:id", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { username, password, name, role } = req.body;
     const id = parseInt(req.params.id);
-    
+
     const currentUser = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
     if (!currentUser.length) return res.status(404).json({ error: "User not found" });
 
@@ -75,7 +84,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
       .set(updateData)
       .where(eq(usersTable.id, id))
       .returning();
-      
+
     return res.json({ success: true, user: updatedUser });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to update user", message: err.message });
@@ -83,6 +92,8 @@ router.put("/:id", requireAdmin, async (req, res) => {
 });
 
 router.delete("/:id", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const id = parseInt(req.params.id);
     if ((req.session as any).userId === id) {

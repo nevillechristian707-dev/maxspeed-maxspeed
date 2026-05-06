@@ -1,14 +1,17 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, rolesTable } from "../../../../lib/db/src/index";
+import { getDb, usersTable, rolesTable } from "../../../../lib/db/src/index";
 import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
 // Middleware to check if user is admin
 const requireAdmin = async (req: any, res: any, next: any) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
+
   const userId = req.session?.userId;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
-  
+
   const user = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   const userRole = (user[0]?.role || "").toLowerCase();
   if (!user.length || (!userRole.includes("admin") && !userRole.includes("superadmin"))) {
@@ -18,6 +21,8 @@ const requireAdmin = async (req: any, res: any, next: any) => {
 };
 
 router.get("/", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const roles = await db.select().from(rolesTable);
     return res.json(roles);
@@ -27,13 +32,15 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const { name, permissions } = req.body;
-    
+
     if (!name || !name.trim()) {
       return res.status(400).json({ error: "Role name is required" });
     }
-    
+
     // Prevent creating duplicate roles
     const existing = await db.select().from(rolesTable).where(eq(rolesTable.name, name));
     if (existing.length) return res.status(400).json({ error: "Role already exists" });
@@ -41,7 +48,7 @@ router.post("/", requireAdmin, async (req, res) => {
     const [newRole] = await db.insert(rolesTable).values({
       name, permissions: permissions || {}
     }).returning();
-    
+
     return res.json({ success: true, role: newRole });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to create role", message: err.message });
@@ -49,6 +56,8 @@ router.post("/", requireAdmin, async (req, res) => {
 });
 
 router.put("/:id", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const id = parseInt(req.params.id);
     const { name, permissions } = req.body;
@@ -61,14 +70,14 @@ router.put("/:id", requireAdmin, async (req, res) => {
       .set({ name, permissions })
       .where(eq(rolesTable.id, id))
       .returning();
-      
+
     // SYNC: if a role name changes, update all users using this role.
     if (name !== oldRole[0].name) {
       await db.update(usersTable)
         .set({ role: name })
         .where(eq(usersTable.role, oldRole[0].name));
     }
-    
+
     return res.json({ success: true, role: updatedRole });
   } catch (err: any) {
     return res.status(500).json({ error: "Failed to update role", message: err.message });
@@ -76,6 +85,8 @@ router.put("/:id", requireAdmin, async (req, res) => {
 });
 
 router.delete("/:id", requireAdmin, async (req, res) => {
+  const db = getDb();
+  if (!db) return res.status(500).json({ error: "Database not initialized" });
   try {
     const id = parseInt(req.params.id);
     const role = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
